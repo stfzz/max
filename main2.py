@@ -6,6 +6,8 @@ import streamlit as st
 
 class make_gui():
     
+    status = st.empty()
+
     def upload_files(self):
         
         uploaded_files=st.file_uploader('Bitte Dateien auswählen',accept_multiple_files=True)
@@ -19,33 +21,33 @@ class make_gui():
         # we assign these values to avoid the *TypeError: cannot unpack non-iterable NoneType object' error
         # not sure it is a good idea :-/
         anno_riferimento = 2020
-        dfout = None
+        uploaded_files = None
         with st.form('Auswahl'):
             anno_riferimento = self.which_year()
             uploaded_files = self.upload_files()
             submit = st.form_submit_button('Starten')
             if submit:
-                self.show_status('Daten werden geladen')
-                #dfout = get_data(uploaded_files)
-                #st.dataframe(dfout)
-                return (dfout, anno_riferimento)
-        return (dfout, anno_riferimento)
+                return (uploaded_files, anno_riferimento)
+        return (uploaded_files, anno_riferimento)
 
     def dwnld(self,dfout):
         f = dfout.to_csv().encode('utf-8')
         st.download_button(label="Download", data=f, file_name='export.csv', mime='text/csv', key='download')
 
     def show_status(self,t):
-        status = st.empty()
-        status.warning(t)
+        #status = st.empty()
+        self.status.warning(t)
 
 
 
-def get_data(uploaded_files):
+def get_data(uploaded_files, mg):
     dfout = None
+    
     for uploaded_file in uploaded_files:
         #st.write(uploaded_file.name)
+        mg.show_status(uploaded_file.name + ' wird geladen')
         df = pd.read_excel(uploaded_file)
+        mg.show_status(uploaded_file.name + ' wird bearbeitet')
         df = prepare_data(df,uploaded_file)
         if dfout is None:       # se dfout non esiste lo creiamo
             dfout = pd.DataFrame(columns = df.columns)
@@ -96,8 +98,9 @@ def app():
     mg = make_gui()
     dfout = None
     anno_riferimento = 2020
-    dfout, anno_riferimento = mg.cntnr()
+    uploaded_files, anno_riferimento = mg.cntnr()
     
+    dfout = get_data(uploaded_files, mg)
     if dfout is not None:
         dfout = compute_hours(dfout, anno_riferimento)
         check_data(dfout)
