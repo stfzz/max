@@ -1,4 +1,4 @@
-from distutils.command import check
+#from distutils.command import check
 import pandas as pd
 import streamlit as st
 
@@ -6,7 +6,7 @@ import streamlit as st
 
 class make_gui():
     
-    status = st.empty()
+    
 
     def upload_files(self):
         
@@ -26,6 +26,7 @@ class make_gui():
             anno_riferimento = self.which_year()
             uploaded_files = self.upload_files()
             submit = st.form_submit_button('Starten')
+            self.status = st.empty()
             if submit:
                 return (uploaded_files, anno_riferimento)
         return (uploaded_files, anno_riferimento)
