@@ -95,6 +95,7 @@ def compute_hours(df,ar):
     df = df.drop(['inizio','fine'], axis=1)
     return df
 
+
 def app():
     mg = make_gui()
     dfout = None
@@ -113,6 +114,3 @@ def app():
 
 
 app()
-
-
-## ([A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z]\d\d[A-Z|a-z]\d\d[A-Z|a-z]\d\d\d[A-Z|a-z])/
