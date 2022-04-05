@@ -1,3 +1,4 @@
+from distutils.command import check
 import pandas as pd
 import streamlit as st
 
@@ -68,7 +69,8 @@ def prepare_data(df, uploaded_file):
         return df        
 
 def check_data(dfout):
-    pass
+    st.warning('Steuerkodex falsch')
+    st.table(dfout[dfout['Codice fiscale'].str.match('[A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z]\d\d[A-Z|a-z]\d\d[A-Z|a-z]\d\d\d[A-Z|a-z]') == False])
 
 def compute_hours(df,ar):
     ar = int(ar)
@@ -91,6 +93,7 @@ def app():
     
     if dfout is not None:
         dfout = compute_hours(dfout, anno_riferimento)
+        check_data(dfout)
         st.write(dfout)
         mg.dwnld(dfout)
         
@@ -99,3 +102,6 @@ def app():
 
 
 app()
+
+
+## ([A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z]\d\d[A-Z|a-z]\d\d[A-Z|a-z]\d\d\d[A-Z|a-z])/
