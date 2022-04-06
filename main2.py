@@ -8,45 +8,69 @@ class make_gui():
 
     def upload_files(self):
         
-        uploaded_files=st.file_uploader('Bitte Dateien auswählen',accept_multiple_files=True)
+        uploaded_files=self.upldr.file_uploader('Bitte Dateien auswählen',accept_multiple_files=True)
         return uploaded_files
 
     def which_year(self):
-        anno_riferimento = st.selectbox('Referenz Jahr',('2020','2021','2022'))
+        anno_riferimento = self.year.selectbox('Referenz Jahr',('2020','2021','2022'))
         return anno_riferimento
 
     def cntnr(self):
         # we assign these values to avoid the *TypeError: cannot unpack non-iterable NoneType object' error
         # not sure it is a good idea :-/
-        anno_riferimento = 2020
+        #anno_riferimento = 2020
         uploaded_files = None
-        with st.form('Auswahl'):
-            anno_riferimento = self.which_year()
+        f = st.form('Auswahl', clear_on_submit=True)
+        with f:
+            self.upldr = st.empty()
+            self.year = st.empty()
+            self.bttn = st.empty()
             uploaded_files = self.upload_files()
-            submit = st.form_submit_button('Starten')
+            anno_riferimento = self.which_year()          
+            submit = self.bttn.form_submit_button('Zusammenfügen und Fehlerkontrolle starten')
             self.status = st.empty()
+            self.status.empty()
             if submit:
+                self.upldr.empty()
+                self.year.empty()
+                submit = self.bttn.form_submit_button('Neustarten')
                 return (uploaded_files, anno_riferimento)
+
         return (uploaded_files, anno_riferimento)
 
-    def dwnld(self,dfout):
+    def dwnld(self,dfout, k):
         f = dfout.to_csv().encode('utf-8')
-        st.download_button(label="Download", data=f, file_name='export.csv', mime='text/csv', key='download')
+        st.download_button(label=k + " downloaden", data=f, file_name='export.csv', mime='text/csv', key=k)
 
     def show_status(self,t):
         #status = st.empty()
-        self.status.warning(t)
+        self.status.write(t)
 
-
+    def error_cntnr(self,l,df):
+        self.error_cntnr = st.empty()
+        with self.error_cntnr.expander("Steuerkodex falsch: " + str(l)):
+            a = 0
+            c1,c2,c3,c4 = st.columns([1,1,1,1])
+            c1.info('Nome')
+            c2.info('Ente')
+            c3.info('Comune')
+            c4.info('Codice fiscale')
+            while a < l:
+                c1.write(df['Cognome e nome bambino'].values[a])
+                c2.write(df['Ente'].values[a])
+                c3.write(df['Comune'].values[a])
+                c4.write(df['Codice fiscale'].values[a])
+                a = a +1
+            self.dwnld(df,'Fehlerhafte Steuerkodexe')
 
 def get_data(uploaded_files, mg):
     dfout = None
     
     for uploaded_file in uploaded_files:
         #st.write(uploaded_file.name)
-        mg.show_status(uploaded_file.name + ' wird geladen')
+        mg.show_status('[*] ' + uploaded_file.name + ' wird geladen')
         df = pd.read_excel(uploaded_file)
-        mg.show_status(uploaded_file.name + ' wird bearbeitet')
+        mg.show_status('[*] ' + uploaded_file.name + ' wird bearbeitet')
 
         # meglio lasciare prepare_data qui
         # altrimenti diventa difficile estrarre comune ed ente
@@ -59,7 +83,10 @@ def get_data(uploaded_files, mg):
         else:
             dfout = pd.concat([dfout,df])
     
+    
     # ora sono tutti concatenati e possiamo restituire il dataframe
+    if dfout is not None:
+        mg.show_status('[*] Alle Daten verarbeitet')
     return dfout
 
 
@@ -95,36 +122,49 @@ def prepare_data(df, uploaded_file):
 
         return df        
 
-def check_data(dfout):
-    st.warning('Steuerkodex falsch')
-    st.table(dfout[dfout['Codice fiscale'].str.match('[A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z]\d\d[A-Z|a-z]\d\d[A-Z|a-z]\d\d\d[A-Z|a-z]') == False])
+def check_data(df,mg):
+    df_codfisc = check_codfisc(df,mg)
+
+
+def check_codfisc(df,mg):
+    # definiamo condizione logica per codice fiscale invalido
+    codinvalido = df['Codice fiscale'].str.match('[A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z]\d\d[A-Z|a-z]\d\d[A-Z|a-z]\d\d\d[A-Z|a-z]') == False
+    # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
+    l = len(df[codinvalido])
+    if l > 0:
+        df_codfisc = df[codinvalido]
+        mg.error_cntnr(l,df_codfisc)
+        return df_codfisc
+
 
 def compute_hours(df,ar):
-    ar = int(ar)
-    df['inizio'] = df['Data inizio contratto (o data inizio assistenza se diversa)']
+    ar = int(ar) # convertiamo anno riferimento in *int*
+    df['inizio'] = df['Data inizio contratto (o data inizio assistenza se diversa)'] # intanto inseriamo i valori che ci sono
     df['fine'] = df['Data fine contratto\n(o data fine assistenza se diversa) *']
-    iniz = df['inizio'].dt.year < ar
-    df.loc[iniz,'inizio'] = "2020-01-01"
-    fin = df['fine'].dt.year > ar
-    df.loc[fin,'fine'] = "2020-12-31"
-    df.insert(9,'GiorniAssistenzaAnnoRiferimento ('+str(ar)+')',0)
-    df["GiorniAssistenzaAnnoRiferimento ("+str(ar)+")"] = (df['fine'] - df['inizio']).dt.days
-    df = df.drop(['inizio','fine'], axis=1)
+    # se data inizio minore di anno riferimento allora mettiamo il 1. gennaio dell'anno riferimento
+    iniz = df['inizio'].dt.year < ar # condizione logica
+    df.loc[iniz,'inizio'] = str(ar) + "-01-01" # cerchiamo i valori < anno riferimento e sostituiamo con 01/01
+    fin = df['fine'].dt.year > ar # condizione logica
+    df.loc[fin,'fine'] = str(ar) + "-12-31" # sostituzione
+    df.insert(9,'GiorniAssistenzaAnnoRiferimento ('+str(ar)+')',0) # aggiungiamo colonna e mettiamo anno riferimento
+    df["GiorniAssistenzaAnnoRiferimento ("+str(ar)+")"] = (df['fine'] - df['inizio']).dt.days # calcolo giorni anno riferimento
+    #df = df.drop(['inizio','fine'], axis=1) # le colonne non servono più
     return df
 
 
 def app():
     mg = make_gui()
     dfout = None
-    anno_riferimento = 2020
+    #anno_riferimento = 2020
     uploaded_files, anno_riferimento = mg.cntnr()
     
     dfout = get_data(uploaded_files, mg)
     if dfout is not None:
         dfout = compute_hours(dfout, anno_riferimento)
-        check_data(dfout)
-        st.write(dfout)
-        mg.dwnld(dfout)
+        check_data(dfout, mg)
+        #st.write(dfout)
+        mg.dwnld(dfout,'Zusammengefügte Daten')
+
         
         
 
