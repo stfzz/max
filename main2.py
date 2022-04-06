@@ -5,8 +5,6 @@ import streamlit as st
 
 
 class make_gui():
-    
-    
 
     def upload_files(self):
         
@@ -49,31 +47,50 @@ def get_data(uploaded_files, mg):
         mg.show_status(uploaded_file.name + ' wird geladen')
         df = pd.read_excel(uploaded_file)
         mg.show_status(uploaded_file.name + ' wird bearbeitet')
+
+        # meglio lasciare prepare_data qui
+        # altrimenti diventa difficile estrarre comune ed ente
         df = prepare_data(df,uploaded_file)
-        if dfout is None:       # se dfout non esiste lo creiamo
+
+        # se dfout non esiste lo creiamo
+        if dfout is None:       
             dfout = pd.DataFrame(columns = df.columns)
             dfout = df
         else:
             dfout = pd.concat([dfout,df])
-    #st.dataframe(dfout)
+    
+    # ora sono tutti concatenati e possiamo restituire il dataframe
     return dfout
 
 
 def prepare_data(df, uploaded_file):
+
+        # estraiamo conune e nome ente da dove ci aspettiamo che siano
+        # nel dataframe creato dal singolo file Excel
         traeger = df.iloc[2]
         traeger = traeger[3].title()
         gemeinde = df.iloc[3]
         gemeinde = gemeinde[3]
         df = pd.read_excel(uploaded_file,parse_dates = ['Data di nascita','Data fine contratto\n(o data fine assistenza se diversa) *','Data inizio contratto (o data inizio assistenza se diversa)'], header=8)
+        
         #prima convertiamo la colonna in numerica, forzando NaN sui non numerici
         df['Numero \nprogressivo'] = pd.to_numeric(df['Numero \nprogressivo'],errors='coerce')       
         #selezioniamo solo le righe che hanno un valore numerico in *Numero progressivo*
+        # in questo modo eliminiamo le righe inutili dopo l'ultimo *numero progressivo*
         validi = df['Numero \nprogressivo'].notna()
+        
+        # teniamo solo record validi
         df = df[validi]
+
+        #elimiamo colonne che sono servono più
         df = df.drop(['Numero \nprogressivo'], axis=1)
+
+        # creiamo due nuove colonne e le riempiamo con comune ed ente 
+        # estratti prima
         df.insert(1,'Comune',gemeinde)
         df.insert(1,'Ente',traeger)
 
+        # sostituiamo tutti i NaN con *0*
         df = df.fillna(0)
 
         return df        
