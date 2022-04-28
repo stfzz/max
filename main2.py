@@ -124,7 +124,7 @@ def prepare_data(df, uploaded_file):
 
 def check_data(df,mg):
     df_codfisc = check_codfisc(df,mg)
-
+    check_age_child(df,mg)
 
 def check_codfisc(df,mg):
     # definiamo condizione logica per codice fiscale invalido
@@ -135,6 +135,15 @@ def check_codfisc(df,mg):
         df_codfisc = df[codinvalido]
         mg.error_cntnr(l,df_codfisc)
         return df_codfisc
+        # da aggiungere: controllo anno, mese e gg in riferimento al codifisc
+
+def check_age_child(df,mg):
+    giorni = (df['Data inizio contratto (o data inizio assistenza se diversa)'] - df['Data di nascita']).dt.days
+    #st.dataframe(giorni.values)
+    if giorni <= 90:
+        st.write('Fehler Alter Kind ' + df['Cognome e nome bambino'])
+
+
 
 
 def compute_hours(df,ar):
