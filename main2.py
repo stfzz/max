@@ -217,8 +217,4 @@ def app():
         mg.dwnld(dfout,'Zusammengefügte Daten')
 
         
-        
-
-
-
 app()
