@@ -7,13 +7,13 @@ ORE2020 = 1920
 KONTROLLEKINDERGARTEN_DATANASCITA_1 = '28.02.2017'
 KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1 = '15.09.2019'
 KONTROLLEKINDERGARTEN_DATANASCITA_2 = '01.03.2017'
-KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1 = '15.09.2019'
+KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_2 = '15.09.2019'
 
 class make_gui():
 
     def upload_files(self):
         
-        uploaded_files=self.upldr.file_uploader('Scegliere file Escel da caricare',accept_multiple_files=True)
+        uploaded_files=self.upldr.file_uploader('Scegliere file Excel da caricare',accept_multiple_files=True)
         return uploaded_files
 
     def which_year(self):
@@ -135,6 +135,9 @@ def check_data(df,mg):
     check_ErrorePresenza(df,mg)
     check_ErroreDati543(df,mg)
     check_FineAssistenzaMax4Anni(df,mg)
+    check_Kindergarten_1(df,mg)
+    check_ErroreFinanziamentoCompensativo(df,mg)
+
 
 def check_InizioMinoreFine(df,mg):
     inizio_minore_fine = df['Data inizio contratto (o data inizio assistenza se diversa)'] > df['Data fine contratto\n(o data fine assistenza se diversa) *']
@@ -184,9 +187,24 @@ def check_FineAssistenzaMax4Anni(df,mg):
     giorni = (df['Data fine contratto\n(o data fine assistenza se diversa) *'] - df['Data di nascita']).dt.days > 1464
     l = len(df[giorni])
     if l > 0:
-        st.warning('Errore fine contratto assistenza')
+        st.warning('Errore fine contratto assistenza') 
         st.table(df[giorni])
 
+def check_Kindergarten_1(df,mg):
+    data_nascita = df['Data di nascita'] <= KONTROLLEKINDERGARTEN_DATANASCITA_1
+    data_fine_assistenza = df['Data fine contratto\n(o data fine assistenza se diversa) *'] > KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1
+    l = len(df[data_nascita & data_fine_assistenza])
+    if l > 0:
+        st.warning('Controllo Kindergarten')
+        st.table(df[data_nascita & data_fine_assistenza])
+
+def check_ErroreFinanziamentoCompensativo(df,mg):
+    data_inizio = df['Data inizio contratto (o data inizio assistenza se diversa)'] >= DATAINIZIOMINIMA
+    ore_compensative = df['Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)'] > 0
+    l = len(df[data_inizio & ore_compensative])
+    if l > 0:
+        st.warning('Errore finanziamento compensativo')
+        st.table(df[data_inizio & ore_compensative])
 
 def compute_hours(df,ar):
     ar = int(ar) # convertiamo anno riferimento in *int*
