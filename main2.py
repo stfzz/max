@@ -2,6 +2,8 @@
 import pandas as pd
 import streamlit as st
 
+DATAINIZIOMINIMA = '05.03.2020'
+ORE2020 = 1920
 
 
 class make_gui():
@@ -125,10 +127,10 @@ def prepare_data(df, uploaded_file):
 
 def check_data(df,mg):
     df_codfisc = check_codfisc(df,mg)
-    check_age_child(df,mg)
+    check_AgeChild(df,mg)
     check_InizioMinoreFine(df,mg)
     check_ErrorePresenza(df,mg)
-
+    check_ErroreDati543(df,mg)
 
 def check_InizioMinoreFine(df,mg):
     inizio_minore_fine = df['Data inizio contratto (o data inizio assistenza se diversa)'] > df['Data fine contratto\n(o data fine assistenza se diversa) *']
@@ -149,7 +151,7 @@ def check_codfisc(df,mg):
         #mg.error_cntnr(l,df_codfisc)
         return df_codfisc
         # da aggiungere: controllo anno, mese e gg in riferimento al codifisc
-    
+
 def check_ErrorePresenza(df,mg):
      
     ore_rendicontate_uguale_zero = df['Ore totali rendicontate per il 2020'] == 0        
@@ -158,7 +160,7 @@ def check_ErrorePresenza(df,mg):
         st.warning('Errore presenza (Ore totali rendicontate = 0)')
         st.table(df[ore_rendicontate_uguale_zero])
 
-def check_age_child(df,mg):
+def check_AgeChild(df,mg):
     giorni = (df['Data inizio contratto (o data inizio assistenza se diversa)'] - df['Data di nascita']).dt.days < 90
     #st.dataframe(giorni.values)
     l = len(df[giorni])
@@ -166,6 +168,13 @@ def check_age_child(df,mg):
         st.warning('Errore età bamino (< 90 giorni')
         st.table(df[giorni])
 
+def check_ErroreDati543(df,mg):
+    errore_dati_543p1 = (df['Data inizio contratto (o data inizio assistenza se diversa)'] <= DATAINIZIOMINIMA)
+    errore_dati_543p2 = (df['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020'] == 0)
+    l = len(df[errore_dati_543p1 & errore_dati_543p2])
+    if l > 0:
+        st.warning('Errore dati 543')
+        st.table(df[errore_dati_543p1 & errore_dati_543p2])
 
 
 
