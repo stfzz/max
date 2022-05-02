@@ -81,6 +81,7 @@ def get_data(uploaded_files, mg):
             dfout = pd.DataFrame(columns = df.columns)
             dfout = df
         else:
+            # inserire qui il controllo del nome ente, che deve essere lo stesso per i file caricati?
             dfout = pd.concat([dfout,df])
     
     
@@ -125,6 +126,16 @@ def prepare_data(df, uploaded_file):
 def check_data(df,mg):
     df_codfisc = check_codfisc(df,mg)
     check_age_child(df,mg)
+    check_InizioMinoreFine(df,mg)
+    check_ErrorePresenza(df,mg)
+
+
+def check_InizioMinoreFine(df,mg):
+    inizio_minore_fine = df['Data inizio contratto (o data inizio assistenza se diversa)'] > df['Data fine contratto\n(o data fine assistenza se diversa) *']
+    l = len(df[inizio_minore_fine])
+    if l > 0:
+        st.warning('Errore date contrattuali')
+        st.table(df[inizio_minore_fine])
 
 def check_codfisc(df,mg):
     # definiamo condizione logica per codice fiscale invalido
@@ -133,15 +144,27 @@ def check_codfisc(df,mg):
     l = len(df[codinvalido])
     if l > 0:
         df_codfisc = df[codinvalido]
-        mg.error_cntnr(l,df_codfisc)
+        st.warning('Codice Fiscale errore formato')
+        st.table(df_codfisc)
+        #mg.error_cntnr(l,df_codfisc)
         return df_codfisc
         # da aggiungere: controllo anno, mese e gg in riferimento al codifisc
+    
+def check_ErrorePresenza(df,mg):
+     
+    ore_rendicontate_uguale_zero = df['Ore totali rendicontate per il 2020'] == 0        
+    l = len(df[ore_rendicontate_uguale_zero])
+    if l > 0:
+        st.warning('Errore presenza (Ore totali rendicontate = 0)')
+        st.table(df[ore_rendicontate_uguale_zero])
 
 def check_age_child(df,mg):
-    giorni = (df['Data inizio contratto (o data inizio assistenza se diversa)'] - df['Data di nascita']).dt.days
+    giorni = (df['Data inizio contratto (o data inizio assistenza se diversa)'] - df['Data di nascita']).dt.days < 90
     #st.dataframe(giorni.values)
-    if giorni <= 90:
-        st.write('Fehler Alter Kind ' + df['Cognome e nome bambino'])
+    l = len(df[giorni])
+    if l > 0:
+        st.warning('Errore età bamino (< 90 giorni')
+        st.table(df[giorni])
 
 
 
