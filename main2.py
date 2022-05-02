@@ -4,7 +4,10 @@ import streamlit as st
 
 DATAINIZIOMINIMA = '05.03.2020'
 ORE2020 = 1920
-
+KONTROLLEKINDERGARTEN_DATANASCITA_1 = '28.02.2017'
+KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1 = '15.09.2019'
+KONTROLLEKINDERGARTEN_DATANASCITA_2 = '01.03.2017'
+KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1 = '15.09.2019'
 
 class make_gui():
 
@@ -131,6 +134,7 @@ def check_data(df,mg):
     check_InizioMinoreFine(df,mg)
     check_ErrorePresenza(df,mg)
     check_ErroreDati543(df,mg)
+    check_FineAssistenzaMax4Anni(df,mg)
 
 def check_InizioMinoreFine(df,mg):
     inizio_minore_fine = df['Data inizio contratto (o data inizio assistenza se diversa)'] > df['Data fine contratto\n(o data fine assistenza se diversa) *']
@@ -176,6 +180,12 @@ def check_ErroreDati543(df,mg):
         st.warning('Errore dati 543')
         st.table(df[errore_dati_543p1 & errore_dati_543p2])
 
+def check_FineAssistenzaMax4Anni(df,mg):
+    giorni = (df['Data fine contratto\n(o data fine assistenza se diversa) *'] - df['Data di nascita']).dt.days > 1464
+    l = len(df[giorni])
+    if l > 0:
+        st.warning('Errore fine contratto assistenza')
+        st.table(df[giorni])
 
 
 def compute_hours(df,ar):
