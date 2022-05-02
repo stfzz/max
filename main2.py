@@ -13,11 +13,11 @@ class make_gui():
 
     def upload_files(self):
         
-        uploaded_files=self.upldr.file_uploader('Bitte Dateien auswählen',accept_multiple_files=True)
+        uploaded_files=self.upldr.file_uploader('Scegliere file Escel da caricare',accept_multiple_files=True)
         return uploaded_files
 
     def which_year(self):
-        anno_riferimento = self.year.selectbox('Referenz Jahr',('2020','2021','2022'))
+        anno_riferimento = self.year.selectbox('Anno riferimento',('2020','2021','2022'))
         return anno_riferimento
 
     def cntnr(self):
@@ -32,13 +32,13 @@ class make_gui():
             self.bttn = st.empty()
             uploaded_files = self.upload_files()
             anno_riferimento = self.which_year()          
-            submit = self.bttn.form_submit_button('Zusammenfügen und Fehlerkontrolle starten')
+            submit = self.bttn.form_submit_button('Iniziare elaborazione e controllo errori')
             self.status = st.empty()
             self.status.empty()
             if submit:
                 self.upldr.empty()
                 self.year.empty()
-                submit = self.bttn.form_submit_button('Neustarten')
+                submit = self.bttn.form_submit_button('Da capo')
                 return (uploaded_files, anno_riferimento)
 
         return (uploaded_files, anno_riferimento)
@@ -73,9 +73,9 @@ def get_data(uploaded_files, mg):
     
     for uploaded_file in uploaded_files:
         #st.write(uploaded_file.name)
-        mg.show_status('[*] ' + uploaded_file.name + ' wird geladen')
+        mg.show_status('[*] ' + uploaded_file.name + ' caricato')
         df = pd.read_excel(uploaded_file)
-        mg.show_status('[*] ' + uploaded_file.name + ' wird bearbeitet')
+        mg.show_status('[*] ' + uploaded_file.name + ' elaborato')
 
         # meglio lasciare prepare_data qui
         # altrimenti diventa difficile estrarre comune ed ente
@@ -92,7 +92,7 @@ def get_data(uploaded_files, mg):
     
     # ora sono tutti concatenati e possiamo restituire il dataframe
     if dfout is not None:
-        mg.show_status('[*] Alle Daten verarbeitet')
+        mg.show_status('[*] Tutti i dati sono stati elaborati')
     return dfout
 
 
