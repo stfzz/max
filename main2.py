@@ -128,6 +128,7 @@ def prepare_data(df, uploaded_file):
 
         return df        
 
+# inizio checks
 def check_data(df,mg):
     df_codfisc = check_codfisc(df,mg)
     check_AgeChild(df,mg)
@@ -137,7 +138,6 @@ def check_data(df,mg):
     check_FineAssistenzaMax4Anni(df,mg)
     check_Kindergarten_1(df,mg)
     check_ErroreFinanziamentoCompensativo(df,mg)
-
 
 def check_InizioMinoreFine(df,mg):
     inizio_minore_fine = df['Data inizio contratto (o data inizio assistenza se diversa)'] > df['Data fine contratto\n(o data fine assistenza se diversa) *']
@@ -205,6 +205,8 @@ def check_ErroreFinanziamentoCompensativo(df,mg):
     if l > 0:
         st.warning('Errore finanziamento compensativo')
         st.table(df[data_inizio & ore_compensative])
+
+# fine checks
 
 def compute_hours(df,ar):
     ar = int(ar) # convertiamo anno riferimento in *int*
