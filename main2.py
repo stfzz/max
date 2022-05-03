@@ -23,9 +23,6 @@ st.set_page_config(page_title='Dashboard - Familienagentur - Controllo KITAS',la
 
 class make_gui():
 
-
-
-
     def upload_files(self):
         
         uploaded_files=self.upldr.file_uploader('Scegliere file Excel da caricare',accept_multiple_files=True)
