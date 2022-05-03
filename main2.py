@@ -37,25 +37,44 @@ class make_gui():
 
     def choose_checks(self):
         checks={}
-        #attivatutti = st.checkbox('Selezionatre tutti i controlli')
+        attivatutti = st.checkbox('Selezionare/deselezionarte tutti i controlli')
+        st.write('')
 
-        c1,c2,c3,c4,c5 = st.columns(5)
-        checkcodfisc = c1.checkbox('Controllo formato codice fiscale', value = False, key='checkcodfiscale')
-        checkage = c2.checkbox('Controllo età bambino', value = False, key='checkage')
-        checkInizioMinoreFine = c3.checkbox('Controllo date contrattuali', value = False, key='checkInizioMinoreFine')
-        checkErrorePresenza = c4.checkbox('Controllo errore presenza', value = False, key='checkErrorePresenza')
-        checkErroreDati543 = c5.checkbox('Controllo errore dati 543', value = False, key='checkErroreDati543')
-        checkFineAssistenzaMax4Anni = c1.checkbox('Controllo fine contratto assistenza', value = False, key='checkFineAssistenzaMax4Anni')
-        checkKindergarten1 = c2.checkbox('Controllo Kindergarten #1', value = False, key='checkKindergarten1')
-        checkKindergarten2 = c3.checkbox('Controllo Kindergarten #2', value = False, key='checkKindergarten2')
-        checkErroreFinanziamentoCompensativo = c4.checkbox('Controllo finanziamento compensativo', value = False, key ='checkErroreFinanziamentoCompensativo')
-        checkFehlerEingewöhnung = c5.checkbox('Controllo Fehler Eingewöhnung', value = False, key='checkFehlerEingewöhnung')
-        checkErroreCovid = c1.checkbox('Controllo Covid #1', value = False, key='checkErroreCovid')
-        checkErroreCovid2 = c2.checkbox('Controllo Covid #2', value = False, key='checkErroreCovid2')
+        c1,c2,c3,c4 = st.columns(4)
 
-        #if attivatutti:
 
-        
+        if attivatutti:
+            checkcodfisc = c1.checkbox('Controllo formato codice fiscale', value = True, key='checkcodfiscale')
+            checkage = c2.checkbox('Controllo età bambino', value = True, key='checkage')
+            checkInizioMinoreFine = c3.checkbox('Controllo date contrattuali', value = True, key='checkInizioMinoreFine')
+            checkErrorePresenza = c4.checkbox('Controllo errore presenza', value = True, key='checkErrorePresenza')
+            checkErroreDati543 = c1.checkbox('Controllo errore dati 543', value = True, key='checkErroreDati543')
+            checkFineAssistenzaMax4Anni = c2.checkbox('Controllo fine contratto assistenza', value = True, key='checkFineAssistenzaMax4Anni')
+            checkKindergarten1 = c3.checkbox('Controllo Kindergarten #1', value = True, key='checkKindergarten1')
+            checkKindergarten2 = c4.checkbox('Controllo Kindergarten #2', value = True, key='checkKindergarten2')
+            checkErroreFinanziamentoCompensativo = c1.checkbox('Controllo finanziamento compensativo', value = True, key ='checkErroreFinanziamentoCompensativo')
+            checkFehlerEingewöhnung = c2.checkbox('Controllo Fehler Eingewöhnung', value = True, key='checkFehlerEingewöhnung')
+            checkErroreCovid = c3.checkbox('Controllo Covid #1', value = True, key='checkErroreCovid')
+            checkErroreCovid2 = c4.checkbox('Controllo Covid #2', value = True, key='checkErroreCovid2')#
+            checkcodfisc2 = c1.checkbox('Controllo data nascita per codice fiscale', value=True, key='checkcodfisc2')
+        else:
+            checkcodfisc = c1.checkbox('Controllo formato codice fiscale', value = False, key='checkcodfiscale')
+            checkage = c2.checkbox('Controllo età bambino', value = False, key='checkage')
+            checkInizioMinoreFine = c3.checkbox('Controllo date contrattuali', value = False, key='checkInizioMinoreFine')
+            checkErrorePresenza = c4.checkbox('Controllo errore presenza', value = False, key='checkErrorePresenza')
+            checkErroreDati543 = c1.checkbox('Controllo errore dati 543', value = False, key='checkErroreDati543')
+            checkFineAssistenzaMax4Anni = c2.checkbox('Controllo fine contratto assistenza', value = False, key='checkFineAssistenzaMax4Anni')
+            checkKindergarten1 = c3.checkbox('Controllo Kindergarten #1', value = False, key='checkKindergarten1')
+            checkKindergarten2 = c4.checkbox('Controllo Kindergarten #2', value = False, key='checkKindergarten2')
+            checkErroreFinanziamentoCompensativo = c1.checkbox('Controllo finanziamento compensativo', value = False, key ='checkErroreFinanziamentoCompensativo')
+            checkFehlerEingewöhnung = c2.checkbox('Controllo Fehler Eingewöhnung', value = False, key='checkFehlerEingewöhnung')
+            checkErroreCovid = c3.checkbox('Controllo Covid #1', value = False, key='checkErroreCovid')
+            checkErroreCovid2 = c4.checkbox('Controllo Covid #2', value = False, key='checkErroreCovid2')
+            checkcodfisc2 = c1.checkbox('Controllo data nascita per codice fiscale', value=False, key='checkcodfisc2')
+
+
+
+
 
         if checkcodfisc:
             checks['check_codfisc'] = True
@@ -81,6 +100,9 @@ class make_gui():
             checks['check_ErroreCovid'] = True
         if checkErroreCovid2:
             checks['check_ErroreCovid2'] = True
+        if checkcodfisc2:
+            checks['check_codfisc2'] = True
+        
         return checks
 
     def cntnr(self):
@@ -88,23 +110,25 @@ class make_gui():
         # not sure it is a good idea :-/
         #anno_riferimento = 2020
         uploaded_files = None
+        checks = self.choose_checks()
         f = st.form('Auswahl', clear_on_submit=True)
         with f:
             self.upldr = st.empty()
             self.year = st.empty()
             self.bttn = st.empty()
+            
             uploaded_files = self.upload_files()
             anno_riferimento = self.which_year()
-            checks = self.choose_checks()     
             #st.write(checks)
             submit = self.bttn.form_submit_button('Iniziare elaborazione e controllo errori')
             self.status = st.empty()
             self.status.empty()
             if submit:
+                
                 self.upldr.empty()
                 self.year.empty()
                 return (uploaded_files, anno_riferimento, checks)
-
+        
         return (uploaded_files, anno_riferimento, checks)
 
     def dwnld(self,dfout, k):
@@ -131,6 +155,9 @@ class make_gui():
                 c4.write(df['Codice fiscale'].values[a])
                 a = a +1
             self.dwnld(df,'Fehlerhafte Steuerkodexe')
+
+ #   def check_all(self):
+
 
 def get_data(uploaded_files, mg):
     dfout = None
@@ -214,6 +241,7 @@ def check_data(df,mg, checks):
     check_FehlerEingewöhnung(df,mg, checks)
     check_ErroreCovid(df,mg, checks)
     check_ErroreCovid2(df,mg, checks)
+    check_codfisc2(df,mg, checks)
 
 def check_InizioMinoreFine(df,mg,checks):
     if 'check_InizioMinoreFine' in checks:
@@ -234,12 +262,38 @@ def check_codfisc(df,mg, checks):
         if l > 0:
             df_codfisc = df[codinvalido]
             st.error('Codice Fiscale errore formato')
-            #st.table(df_codfisc)
             gridOptions = buildGrid(df_codfisc)
             AgGrid(df_codfisc, gridOptions=gridOptions, enable_enterprise_modules=True)
-            #mg.error_cntnr(l,df_codfisc)
             return df_codfisc
-            # da aggiungere: controllo anno, mese e gg in riferimento al codifisc
+
+def check_codfisc2(df,mg,checks):
+    # definiamo condizione logica per codice fiscale valido
+    if 'check_codfisc2' in checks:
+        #st.write('OK')
+        codvalido = df['Codice fiscale'].str.match('[A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z][A-Z|a-z]\d\d[A-Z|a-z]\d\d[A-Z|a-z]\d\d\d[A-Z|a-z]') == True
+        dfcod = df[codvalido]
+        ggnot40 = dfcod['Codice fiscale'].str[9:11].astype(int) < 40
+        g40 = dfcod['Codice fiscale'].str[9:11].astype(int) > 40
+        df40 = dfcod[g40]
+        dfnot40 = dfcod[ggnot40]
+        gg40 = pd.to_datetime(df40['Data di nascita']).dt.day == df40['Codice fiscale'].str[9:11].astype(int) - 40
+        gg = pd.to_datetime(dfnot40['Data di nascita']).dt.day == dfnot40['Codice fiscale'].str[9:11].astype(int)
+        l = len(dfnot40[~gg])
+        l40 = len(df40[~gg40])
+        if l > 0 or l40 > 0:
+            frames = [dfnot40[~gg], df40[~gg40]]
+            result = pd.concat(frames)
+            st.error('Errore data nascita (giorno) per codice fiscale')
+            gridOptions = buildGrid(result)
+            AgGrid(result, gridOptions=gridOptions, enable_enterprise_modules=True)
+           # gridOptions = buildGrid(df40[~gg40])
+            #AgGrid(df40[~gg40], gridOptions=gridOptions, enable_enterprise_modules=True)
+        anno = dfcod['Data di nascita'].dt.year == 2000 + dfcod['Codice fiscale'].str[6:8].astype(int)
+        l = len(dfcod[~anno])
+        if l > 0:
+            st.error('Errore data nascita (anno) per codice fiscale')
+            gridOptions = buildGrid(dfcod[~anno])
+            AgGrid(dfcod[~anno], gridOptions=gridOptions, enable_enterprise_modules=True)
 
 def check_ErrorePresenza(df,mg, checks):
     if 'check_ErrorePresenza' in checks:
@@ -262,7 +316,6 @@ def check_AgeChild(df,mg, checks):
             gridOptions = buildGrid(df[giorni])
             AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
 
-
 def check_ErroreDati543(df,mg, checks):
     if 'check_ErroreDati543' in checks:
         errore_dati_543p1 = (df['Data inizio contratto (o data inizio assistenza se diversa)'] <= DATAINIZIOMINIMA)
@@ -283,7 +336,6 @@ def check_FineAssistenzaMax4Anni(df,mg, checks):
             #st.table(df[giorni])
             gridOptions = buildGrid(df[giorni])
             AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
-
 
 def check_Kindergarten_1(df,mg, checks):
     if  'check_Kindergarten_1' in checks:
@@ -317,7 +369,6 @@ def check_ErroreFinanziamentoCompensativo(df,mg, checks):
             gridOptions = buildGrid(df[data_inizio & ore_compensative])
             AgGrid(df[data_inizio & ore_compensative], gridOptions=gridOptions, enable_enterprise_modules=True)
 
-
 def check_FehlerEingewöhnung(df,mg, checks):
     if 'check_FehlerEingewöhnung' in checks :
         data_inizio_minima = df['Data inizio contratto (o data inizio assistenza se diversa)'] >= EINGEWÖHNUNG_DATAINIZIO_MIN
@@ -329,7 +380,6 @@ def check_FehlerEingewöhnung(df,mg, checks):
             #st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
             gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
             AgGrid(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate], gridOptions=gridOptions, enable_enterprise_modules=True)
-
 
 def check_ErroreCovid(df,mg, checks):
     if 'check_ErroreCovid' in checks:
