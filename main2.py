@@ -1,6 +1,12 @@
 #from distutils.command import check
+from typing_extensions import dataclass_transform
 import pandas as pd
 import streamlit as st
+
+from st_aggrid import AgGrid
+from st_aggrid.grid_options_builder import GridOptionsBuilder
+
+
 
 DATAINIZIOMINIMA = '05.03.2020'
 ORE2020 = 1920
@@ -8,8 +14,17 @@ KONTROLLEKINDERGARTEN_DATANASCITA_1 = '28.02.2017'
 KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1 = '15.09.2019'
 KONTROLLEKINDERGARTEN_DATANASCITA_2 = '01.03.2017'
 KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_2 = '15.09.2019'
+EINGEWÖHNUNG_DATAINIZIO_MIN = '13.02.2020'
+EINGEWÖHNUNG_DATAINIZIO_MAX = '03.05.2020'
+KONTROLLECOVID_DATAFINEASSISTENZA = '03.05.2020'
+KONTROLLECOVID2_DATAINIZIOASSISTENZA = '24.11.2020'
+
+st.set_page_config(page_title='Dashboard - Familienagentur - Controllo KITAS',layout='wide',page_icon='👽')
 
 class make_gui():
+
+
+
 
     def upload_files(self):
         
@@ -35,11 +50,11 @@ class make_gui():
             submit = self.bttn.form_submit_button('Iniziare elaborazione e controllo errori')
             self.status = st.empty()
             self.status.empty()
-            if submit:
-                self.upldr.empty()
-                self.year.empty()
-                submit = self.bttn.form_submit_button('Da capo')
-                return (uploaded_files, anno_riferimento)
+            #if submit:
+            #    self.upldr.empty()
+            #    self.year.empty()
+            #    submit = self.bttn.form_submit_button('Da capo')
+            #    return (uploaded_files, anno_riferimento)
 
         return (uploaded_files, anno_riferimento)
 
@@ -49,7 +64,7 @@ class make_gui():
 
     def show_status(self,t):
         #status = st.empty()
-        self.status.write(t)
+        self.status.warning(t)
 
     def error_cntnr(self,l,df):
         self.error_cntnr = st.empty()
@@ -92,9 +107,17 @@ def get_data(uploaded_files, mg):
     
     # ora sono tutti concatenati e possiamo restituire il dataframe
     if dfout is not None:
-        mg.show_status('[*] Tutti i dati sono stati elaborati')
+        mg.show_status('[*] Tutti i dati sono stati elaborati -  PER INIZIARE DA CAPO: RICARICARE LA PAGINA')
     return dfout
 
+def buildGrid(data):
+    gb = GridOptionsBuilder.from_dataframe(data)
+    # gb.configure_pagination()
+    gb.configure_side_bar()
+    gb.configure_selection(selection_mode="multiple", use_checkbox=True)
+    gb.configure_default_column(groupable=True, value=True, enableRowGroup=True, aggFunc="count", editable=True)
+    gridOptions = gb.build()
+    return gridOptions
 
 def prepare_data(df, uploaded_file):
 
@@ -138,13 +161,18 @@ def check_data(df,mg):
     check_FineAssistenzaMax4Anni(df,mg)
     check_Kindergarten_1(df,mg)
     check_ErroreFinanziamentoCompensativo(df,mg)
+    check_FehlerEingewöhnung(df,mg)
+    check_ErroreCovid(df,mg)
+    check_ErroreCovid2(df,mg)
 
 def check_InizioMinoreFine(df,mg):
     inizio_minore_fine = df['Data inizio contratto (o data inizio assistenza se diversa)'] > df['Data fine contratto\n(o data fine assistenza se diversa) *']
     l = len(df[inizio_minore_fine])
     if l > 0:
-        st.warning('Errore date contrattuali')
-        st.table(df[inizio_minore_fine])
+        st.error('Errore date contrattuali')
+        #st.table(df[inizio_minore_fine])
+        gridOptions = buildGrid(df[inizio_minore_fine])
+        AgGrid(df[inizio_minore_fine], gridOptions=gridOptions, enable_enterprise_modules=True)
 
 def check_codfisc(df,mg):
     # definiamo condizione logica per codice fiscale invalido
@@ -153,8 +181,10 @@ def check_codfisc(df,mg):
     l = len(df[codinvalido])
     if l > 0:
         df_codfisc = df[codinvalido]
-        st.warning('Codice Fiscale errore formato')
-        st.table(df_codfisc)
+        st.error('Codice Fiscale errore formato')
+        #st.table(df_codfisc)
+        gridOptions = buildGrid(df_codfisc)
+        AgGrid(df_codfisc, gridOptions=gridOptions, enable_enterprise_modules=True)
         #mg.error_cntnr(l,df_codfisc)
         return df_codfisc
         # da aggiungere: controllo anno, mese e gg in riferimento al codifisc
@@ -164,47 +194,97 @@ def check_ErrorePresenza(df,mg):
     ore_rendicontate_uguale_zero = df['Ore totali rendicontate per il 2020'] == 0        
     l = len(df[ore_rendicontate_uguale_zero])
     if l > 0:
-        st.warning('Errore presenza (Ore totali rendicontate = 0)')
-        st.table(df[ore_rendicontate_uguale_zero])
+        st.error('Errore presenza (Ore totali rendicontate = 0)')
+        #st.table(df[ore_rendicontate_uguale_zero])
+        gridOptions = buildGrid(df[ore_rendicontate_uguale_zero])
+        AgGrid(df[ore_rendicontate_uguale_zero], gridOptions=gridOptions, enable_enterprise_modules=True)
 
 def check_AgeChild(df,mg):
     giorni = (df['Data inizio contratto (o data inizio assistenza se diversa)'] - df['Data di nascita']).dt.days < 90
     #st.dataframe(giorni.values)
     l = len(df[giorni])
     if l > 0:
-        st.warning('Errore età bamino (< 90 giorni')
-        st.table(df[giorni])
+        st.error('Errore età bambino (< 90 giorni')
+        #st.table(df[giorni])
+        gridOptions = buildGrid(df[giorni])
+        AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
+
 
 def check_ErroreDati543(df,mg):
     errore_dati_543p1 = (df['Data inizio contratto (o data inizio assistenza se diversa)'] <= DATAINIZIOMINIMA)
     errore_dati_543p2 = (df['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020'] == 0)
     l = len(df[errore_dati_543p1 & errore_dati_543p2])
     if l > 0:
-        st.warning('Errore dati 543')
-        st.table(df[errore_dati_543p1 & errore_dati_543p2])
+        st.error('Errore dati 543')
+        #st.table(df[errore_dati_543p1 & errore_dati_543p2])
+        gridOptions = buildGrid(df[errore_dati_543p1 & errore_dati_543p2])
+        AgGrid(df[errore_dati_543p1 & errore_dati_543p2], gridOptions=gridOptions, enable_enterprise_modules=True)
 
 def check_FineAssistenzaMax4Anni(df,mg):
     giorni = (df['Data fine contratto\n(o data fine assistenza se diversa) *'] - df['Data di nascita']).dt.days > 1464
     l = len(df[giorni])
     if l > 0:
-        st.warning('Errore fine contratto assistenza') 
-        st.table(df[giorni])
+        st.error('Errore fine contratto assistenza') 
+        #st.table(df[giorni])
+        gridOptions = buildGrid(df[giorni])
+        AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
+
 
 def check_Kindergarten_1(df,mg):
     data_nascita = df['Data di nascita'] <= KONTROLLEKINDERGARTEN_DATANASCITA_1
     data_fine_assistenza = df['Data fine contratto\n(o data fine assistenza se diversa) *'] > KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1
     l = len(df[data_nascita & data_fine_assistenza])
     if l > 0:
-        st.warning('Controllo Kindergarten')
-        st.table(df[data_nascita & data_fine_assistenza])
+        st.error('Controllo Kindergarten')
+        #st.table(df[data_nascita & data_fine_assistenza])
+        gridOptions = buildGrid(df[data_nascita & data_fine_assistenza])
+        AgGrid(df[data_nascita & data_fine_assistenza], gridOptions=gridOptions, enable_enterprise_modules=True)
 
 def check_ErroreFinanziamentoCompensativo(df,mg):
     data_inizio = df['Data inizio contratto (o data inizio assistenza se diversa)'] >= DATAINIZIOMINIMA
     ore_compensative = df['Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)'] > 0
     l = len(df[data_inizio & ore_compensative])
     if l > 0:
-        st.warning('Errore finanziamento compensativo')
-        st.table(df[data_inizio & ore_compensative])
+        st.error('Errore finanziamento compensativo')
+        #st.table(df[data_inizio & ore_compensative])
+        gridOptions = buildGrid(df[data_inizio & ore_compensative])
+        AgGrid(df[data_inizio & ore_compensative], gridOptions=gridOptions, enable_enterprise_modules=True)
+
+
+def check_FehlerEingewöhnung(df,mg):
+    data_inizio_minima = df['Data inizio contratto (o data inizio assistenza se diversa)'] >= EINGEWÖHNUNG_DATAINIZIO_MIN
+    data_inizio_massima = df['Data inizio contratto (o data inizio assistenza se diversa)'] <= EINGEWÖHNUNG_DATAINIZIO_MAX
+    ore_contrattualizzate = df['Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)'] > 0
+    l = len(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
+    if l > 0:
+        st.error('Fehler Eingewöhnung')
+        #st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
+        gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
+        AgGrid(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate], gridOptions=gridOptions, enable_enterprise_modules=True)
+
+
+def check_ErroreCovid(df,mg):
+    data_fine_assistenza = df['Data fine contratto\n(o data fine assistenza se diversa) *'] < KONTROLLECOVID_DATAFINEASSISTENZA
+    ore_543 = df['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020'] > 0
+    ore_733 = df['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 733/2020'] > 0
+    ore_contrattualizzate = df['Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)'] > 0
+    l = len(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)])
+    if l > 0:
+        st.error('Errore Covid #1')
+        #st.table(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)])
+        gridOptions = buildGrid(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)])
+        AgGrid(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)], gridOptions=gridOptions, enable_enterprise_modules=True)
+
+def check_ErroreCovid2(df,mg):
+    data_inizio_ass = df['Data fine contratto\n(o data fine assistenza se diversa) *'] >= KONTROLLECOVID2_DATAINIZIOASSISTENZA
+    ore_543 = df['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020'] > 0
+    ore_contrattualizzate = df['Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)'] > 0
+    l = len(df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)])
+    if l > 0:
+        st.error('Errore Covid #2')
+        gridOptions = buildGrid(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)])
+        AgGrid(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)], gridOptions=gridOptions, enable_enterprise_modules=True)
+
 
 # fine checks
 

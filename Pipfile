@@ -8,6 +8,7 @@ pandas = "*"
 numpy = "*"
 streamlit = "*"
 openpyxl = "*"
+streamlit-aggrid = "*"
 
 [dev-packages]
 
