@@ -131,6 +131,7 @@ def check_data(df, checks):
     if "check_FehlerEingewöhnung543Notbetreuung" in checks:
         df = check_FehlerEingewöhnung543Notbetreuung(df)
     st.dataframe(df)
+    return df
 
 
 def check_FehlerEingewöhnung543Notbetreuung(df):
@@ -150,7 +151,7 @@ def check_FehlerEingewöhnung543Notbetreuung(df):
     )
     l = len(df[data_inizio_minima & data_inizio_massima & ore_543])
     if l > 0:
-        st.error("Fehler Eingewöhnung 543 Notbetreuung")
+        st.warning("Fehler Eingewöhnung 543 Notbetreuung")
         # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
         gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_543])
         AgGrid(
@@ -177,7 +178,7 @@ def check_InizioMinoreFine(df):
     )
     l = len(df[inizio_minore_fine])
     if l > 0:
-        st.error("Errore date contrattuali")
+        st.warning("Errore date contrattuali")
         # st.table(df[inizio_minore_fine])
         gridOptions = buildGrid(df[inizio_minore_fine])
         AgGrid(
@@ -205,7 +206,7 @@ def check_codfisc(df):
     l = len(df[codinvalido])
     if l > 0:
         # df_codfisc = df[codinvalido]
-        st.error("Codice Fiscale errore formato")
+        st.warning("Codice Fiscale errore formato")
         gridOptions = buildGrid(df[codinvalido])
         AgGrid(df[codinvalido], gridOptions=gridOptions, enable_enterprise_modules=True)
         df.loc[codinvalido, "errCodFisc1"] = True
@@ -241,7 +242,7 @@ def check_codfisc2(df):  # da finire
     if l > 0 or l40 > 0:
         frames = [dfnot40[~gg], df40[~gg40]]
         result = pd.concat(frames)
-        st.error("Errore data nascita (giorno) per codice fiscale")
+        st.warning("Errore data nascita (giorno) per codice fiscale")
         gridOptions = buildGrid(result)
         AgGrid(result, gridOptions=gridOptions, enable_enterprise_modules=True)
     # gridOptions = buildGrid(df40[~gg40])
@@ -251,7 +252,7 @@ def check_codfisc2(df):  # da finire
     ].astype(int)
     l = len(dfcod[~anno])
     if l > 0:
-        st.error("Errore data nascita (anno) per codice fiscale")
+        st.warning("Errore data nascita (anno) per codice fiscale")
         gridOptions = buildGrid(dfcod[~anno])
         AgGrid(dfcod[~anno], gridOptions=gridOptions, enable_enterprise_modules=True)
         return df
@@ -264,7 +265,7 @@ def check_ErrorePresenza(df):
     ore_rendicontate_uguale_zero = df["Ore totali rendicontate per il 2020"] == 0
     l = len(df[ore_rendicontate_uguale_zero])
     if l > 0:
-        st.error("Errore presenza (Ore totali rendicontate = 0)")
+        st.warning("Errore presenza (Ore totali rendicontate = 0)")
         # st.table(df[ore_rendicontate_uguale_zero])
         gridOptions = buildGrid(df[ore_rendicontate_uguale_zero])
         AgGrid(
@@ -287,7 +288,7 @@ def check_AgeChild(df):
     # st.dataframe(giorni.values)
     l = len(df[giorni])
     if l > 0:
-        st.error("Errore età bambino (< 90 giorni)")
+        st.warning("Errore età bambino (< 90 giorni)")
         # st.table(df[giorni])
         gridOptions = buildGrid(df[giorni])
         AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
@@ -320,7 +321,7 @@ def check_ErroreDati543(df):
 
     l = len(df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3])
     if l > 0:
-        st.error("Errore dati 543")
+        st.warning("Errore dati 543")
         # st.table(df[errore_dati_543p1 & errore_dati_543p2])
         gridOptions = buildGrid(df[errore_dati_543p1 & errore_dati_543p2])
         AgGrid(
@@ -345,7 +346,7 @@ def check_FineAssistenzaMax4Anni(df):
     ).dt.days > 1464
     l = len(df[giorni])
     if l > 0:
-        st.error("Errore fine contratto assistenza")
+        st.warning("Errore fine contratto assistenza")
         # st.table(df[giorni])
         gridOptions = buildGrid(df[giorni])
         AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
@@ -367,7 +368,7 @@ def check_Kindergarten_1(df):
     )
     l = len(df[data_nascita & data_fine_assistenza])
     if l > 0:
-        st.error("Errore controllo Kindergarten #1")
+        st.warning("Errore controllo Kindergarten #1")
         # st.table(df[data_nascita & data_fine_assistenza])
         gridOptions = buildGrid(df[data_nascita & data_fine_assistenza])
         AgGrid(
@@ -396,7 +397,7 @@ def check_Kindergarten_2(df):
     )
     l = len(df[data_nascita & data_fine_ass])
     if l > 0:
-        st.error("Errore controllo Kindergarten #2")
+        st.warning("Errore controllo Kindergarten #2")
         gridOptions = buildGrid(df[data_nascita & data_fine_ass])
         AgGrid(
             df[data_nascita & data_fine_ass],
@@ -428,7 +429,7 @@ def check_ErroreFinanziamentoCompensativo(df):
     )
     l = len(df[data_inizio & ore_compensative])
     if l > 0:
-        st.error("Errore finanziamento compensativo")
+        st.warning("Errore finanziamento compensativo")
         # st.table(df[data_inizio & ore_compensative])
         gridOptions = buildGrid(df[data_inizio & ore_compensative])
         AgGrid(
@@ -465,7 +466,7 @@ def check_FehlerEingewöhnung(df):
     )
     l = len(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
     if l > 0:
-        st.error("Fehler Eingewöhnung")
+        st.warning("Fehler Eingewöhnung")
         # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
         gridOptions = buildGrid(
             df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate]
@@ -504,7 +505,7 @@ def check_FehlerEingewöhnung543Lockdown(df):
     )
     l = len(df[data_inizio_minima & data_inizio_massima & ore_543])
     if l > 0:
-        st.error("Fehler Eingewöhnung 543 Lockdown")
+        st.warning("Fehler Eingewöhnung 543 Lockdown")
         # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
         gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_543])
         AgGrid(
@@ -548,7 +549,7 @@ def check_ErroreCovid(df):
 
     l = len(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)])
     if l > 0:
-        st.error("Errore Covid #1")
+        st.warning("Errore Covid #1")
         # st.table(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)])
         gridOptions = buildGrid(
             df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)]
@@ -589,7 +590,7 @@ def check_ErroreCovid2(df):
     )
     l = len(df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)])
     if l > 0:
-        st.error("Errore Covid #2")
+        st.warning("Errore Covid #2")
         gridOptions = buildGrid(
             df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)]
         )
@@ -898,17 +899,19 @@ def app():
     checks = choose_checks()
 
     f = st.form("Auswahl", clear_on_submit=True)
-
+    flag = 0
     with f:
         submit = f.form_submit_button("Iniziare elaborazione e controllo errori")
         if submit:
             dfout = get_data(uploaded_files)
             if dfout is not None:
                 dfout = compute_hours(dfout, anno_riferimento)
-
                 dffinal = check_data(dfout, checks)
+                flag = 1
+                
 
-                # dwnld(dffinal, "Zusammengefügte Daten")
+    if flag == 1:
+        dwnld(dffinal, "Zusammengefügte Daten")
 
 
 app()
