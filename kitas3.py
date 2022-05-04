@@ -773,7 +773,7 @@ def dwnld(df, k):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori KITAS (v. 0.3 wacky guacamole)")
+    st.subheader("Controllo errori KITAS (v. 0.4 sloppy summertime)")
     dfout = None
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
