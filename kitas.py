@@ -130,6 +130,7 @@ def check_codfisc(df, checks):
             st.error("Codice Fiscale errore formato")
             gridOptions = buildGrid(df_codfisc)
             AgGrid(df_codfisc, gridOptions=gridOptions, enable_enterprise_modules=True)
+            
             return df_codfisc
 
 
