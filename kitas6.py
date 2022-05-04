@@ -99,7 +99,7 @@ def make_bool_columns(df):
 
 
 # lancia i singoli controlli in base alla selezione fatta in GUI
-# siccome l'output GUI avviene nelle subroutine, l'expander usato 
+# siccome l'output GUI avviene nelle subroutine, l'expander usato
 # è creato nella form che attiva l'elaborazione
 def check_data(df, checks):
     if "check_codfisc" in checks:
@@ -133,8 +133,8 @@ def check_data(df, checks):
 
     if "check_FehlerEingewöhnung543Notbetreuung" in checks:
         df = check_FehlerEingewöhnung543Notbetreuung(df)
-    
-    # la tabella finale che vorrei non fosse outputata qui 
+
+    # la tabella finale che vorrei non fosse outputata qui
     expndr = st.expander("TABELLA FINALE ELABORATA")
     with expndr:
         gridOptions = buildGrid(df)
@@ -163,7 +163,9 @@ def check_FehlerEingewöhnung543Notbetreuung(df):
         expndr = st.expander("Trovato errore Eingewöhnung 543 Notbetreuung")
         with expndr:
             # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
-            gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_543])
+            gridOptions = buildGrid(
+                df[data_inizio_minima & data_inizio_massima & ore_543]
+            )
             AgGrid(
                 df[data_inizio_minima & data_inizio_massima & ore_543],
                 gridOptions=gridOptions,
@@ -224,7 +226,9 @@ def check_codfisc(df):
         expndr = st.expander("Trovato errore formato del codice Fiscale")
         with expndr:
             gridOptions = buildGrid(df[codinvalido])
-            AgGrid(df[codinvalido], gridOptions=gridOptions, enable_enterprise_modules=True)
+            AgGrid(
+                df[codinvalido], gridOptions=gridOptions, enable_enterprise_modules=True
+            )
             # settiamo il flag bool per la tabella finale
             df.loc[codinvalido, "errCodFisc1"] = True
         return df
@@ -257,13 +261,15 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
         == df40["Codice fiscale"].str[9:11].astype(int) - 40
     )
     # condizione logica verifica giorno nascita maschietti
-    gg = pd.to_datetime(dfnot40["Data di nascita"]).dt.day == dfnot40["Codice fiscale"].str[9:11].astype(int)
+    gg = pd.to_datetime(dfnot40["Data di nascita"]).dt.day == dfnot40[
+        "Codice fiscale"
+    ].str[9:11].astype(int)
 
-    # invertiamo la condizione logica per trovare errori 
+    # invertiamo la condizione logica per trovare errori
     l = len(dfnot40[~gg])
     l40 = len(df40[~gg40])
 
-    # se trovato errore maschhietti o femmine 
+    # se trovato errore maschhietti o femmine
     if l > 0 or l40 > 0:
         expndr = st.expander("Trovato errore data nascita (giorno) per codice fiscale")
         with expndr:
@@ -285,7 +291,9 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
         expndr = st.expander("Trovato errore data nascita (anno) per codice fiscale")
         with expndr:
             gridOptions = buildGrid(dfcod[~anno])
-            AgGrid(dfcod[~anno], gridOptions=gridOptions, enable_enterprise_modules=True)
+            AgGrid(
+                dfcod[~anno], gridOptions=gridOptions, enable_enterprise_modules=True
+            )
             # non stiamo settando la colonna bool
 
         return df
@@ -295,7 +303,7 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
 
 
 def check_ErrorePresenza(df):
-    #condizione logica
+    # condizione logica
     ore_rendicontate_uguale_zero = df["Ore totali rendicontate per il 2020"] == 0
     l = len(df[ore_rendicontate_uguale_zero])
     if l > 0:
@@ -543,7 +551,9 @@ def check_FehlerEingewöhnung543Lockdown(df):
     if l > 0:
         expndr = st.expander("Trovato errore Eingewöhnung 543 Lockdown")
         with expndr:
-            gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_543])
+            gridOptions = buildGrid(
+                df[data_inizio_minima & data_inizio_massima & ore_543]
+            )
             AgGrid(
                 df[data_inizio_minima & data_inizio_massima & ore_543],
                 gridOptions=gridOptions,
@@ -629,16 +639,25 @@ def check_ErroreCovid2(df):
         expndr = st.expander("Trovatp errore Covid #2")
         with expndr:
             gridOptions = buildGrid(
-                df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)]
+                df[
+                    (data_inizio_ass & ore_543)
+                    | (data_inizio_ass & ore_contrattualizzate)
+                ]
             )
             AgGrid(
-                df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)],
+                df[
+                    (data_inizio_ass & ore_543)
+                    | (data_inizio_ass & ore_contrattualizzate)
+                ],
                 gridOptions=gridOptions,
                 enable_enterprise_modules=True,
             )
 
             df.loc[
-                ((data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)),
+                (
+                    (data_inizio_ass & ore_543)
+                    | (data_inizio_ass & ore_contrattualizzate)
+                ),
                 "errErroreCovid2",
             ] = True
 
@@ -673,7 +692,7 @@ def get_data(uploaded_files):
         else:
             # inserire qui il controllo del nome ente, che deve essere lo stesso per i file caricati?
             dfout = pd.concat([dfout, df])
-        
+
     # ora sono tutti concatenati e possiamo restituire il dataframe
     if dfout is not None:
         status.success(
