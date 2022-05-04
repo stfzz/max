@@ -26,8 +26,8 @@ EINGEWÖHNUNG_DATAINIZIO_MIN = "13.02.2020"
 EINGEWÖHNUNG_DATAINIZIO_MAX = "03.05.2020"
 KONTROLLECOVID_DATAFINEASSISTENZA = "03.05.2020"
 KONTROLLECOVID2_DATAINIZIOASSISTENZA = "24.11.2020"
-KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMIN = '26.10.2020'
-KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMAX = '16.11.2020'
+KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMIN = "26.10.2020"
+KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMAX = "16.11.2020"
 
 
 def buildGrid(data):
@@ -85,11 +85,14 @@ def make_bool_columns(df):
     df["errErroreCovid2"] = df["errErroreCovid2"].astype("boolean")
 
     df["errFehlerEingewöhnung543Lockdown"] = np.nan
-    df["errFehlerEingewöhnung543Lockdown"] = df["errFehlerEingewöhnung543Lockdown"].astype("boolean")
+    df["errFehlerEingewöhnung543Lockdown"] = df[
+        "errFehlerEingewöhnung543Lockdown"
+    ].astype("boolean")
 
     df["errFehlerEingewöhnung543Notbetreuung"] = np.nan
-    df["errFehlerEingewöhnung543Notbetreuung"] = df["errFehlerEingewöhnung543Notbetreuung"].astype("boolean")
-
+    df["errFehlerEingewöhnung543Notbetreuung"] = df[
+        "errFehlerEingewöhnung543Notbetreuung"
+    ].astype("boolean")
 
     return df
 
@@ -124,9 +127,9 @@ def check_data(df, checks):
         df = check_codfisc2(df)
     if "check_FehlerEingewöhnung543Lockdown" in checks:
         df = check_FehlerEingewöhnung543Lockdown(df)
-   
+
     if "check_FehlerEingewöhnung543Notbetreuung" in checks:
-        df = check_FehlerEingewöhnung543Notbetreuung(df)   
+        df = check_FehlerEingewöhnung543Notbetreuung(df)
     st.dataframe(df)
 
 
@@ -149,9 +152,7 @@ def check_FehlerEingewöhnung543Notbetreuung(df):
     if l > 0:
         st.error("Fehler Eingewöhnung 543 Notbetreuung")
         # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
-        gridOptions = buildGrid(
-            df[data_inizio_minima & data_inizio_massima & ore_543]
-        )
+        gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_543])
         AgGrid(
             df[data_inizio_minima & data_inizio_massima & ore_543],
             gridOptions=gridOptions,
@@ -160,7 +161,7 @@ def check_FehlerEingewöhnung543Notbetreuung(df):
 
         df.loc[
             (data_inizio_minima & data_inizio_massima & ore_543),
-            "errFehlerEingewöhnung543Notbetreuung"
+            "errFehlerEingewöhnung543Notbetreuung",
         ] = True
 
         return df
@@ -477,12 +478,13 @@ def check_FehlerEingewöhnung(df):
 
         df.loc[
             (data_inizio_minima & data_inizio_massima & ore_contrattualizzate),
-            "errFehlerEingewöhnung"
+            "errFehlerEingewöhnung",
         ] = True
 
         return df
     else:
         return df
+
 
 def check_FehlerEingewöhnung543Lockdown(df):
 
@@ -504,9 +506,7 @@ def check_FehlerEingewöhnung543Lockdown(df):
     if l > 0:
         st.error("Fehler Eingewöhnung 543 Lockdown")
         # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
-        gridOptions = buildGrid(
-            df[data_inizio_minima & data_inizio_massima & ore_543]
-        )
+        gridOptions = buildGrid(df[data_inizio_minima & data_inizio_massima & ore_543])
         AgGrid(
             df[data_inizio_minima & data_inizio_massima & ore_543],
             gridOptions=gridOptions,
@@ -515,12 +515,13 @@ def check_FehlerEingewöhnung543Lockdown(df):
 
         df.loc[
             (data_inizio_minima & data_inizio_massima & ore_543),
-            "errFehlerEingewöhnung543Lockdown"
+            "errFehlerEingewöhnung543Lockdown",
         ] = True
 
         return df
     else:
         return df
+
 
 def check_ErroreCovid(df):
 
@@ -700,12 +701,12 @@ def choose_checks():
         checkFehlerEingewöhnung543Lockdown = c2.checkbox(
             "Controllo Fehler Eingewöhnung 543 Lockdown",
             value=True,
-            key="check_FehlerEingewöhnung543Lockdown"
+            key="check_FehlerEingewöhnung543Lockdown",
         )
         checkFehlerEingewöhnung543Notbetreuung = c3.checkbox(
             "Controllo Fehler Eingewöhnung 543 Notbetreuung",
             value=True,
-            key="check_FehlerEingewöhnung543Notbetreuung"
+            key="check_FehlerEingewöhnung543Notbetreuung",
         )
     else:
         checkcodfisc = c1.checkbox(
@@ -753,15 +754,15 @@ def choose_checks():
             value=False,
             key="checkcodfisc2",
         )
-        checkFehlerEingewöhnung543lockdown = c2.checkbox(
+        checkFehlerEingewöhnung543Lockdown = c2.checkbox(
             "Controllo Fehler Eingewöhnung 543 Lockdown",
             value=False,
-            key="check_FehlerEingewöhnung543Lockdown"
+            key="check_FehlerEingewöhnung543Lockdown",
         )
         checkFehlerEingewöhnung543Notbetreuung = c3.checkbox(
             "Controllo Fehler Eingewöhnung 543 Notbetreuung",
             value=False,
-            key="check_FehlerEingewöhnung543Notbetreuung"
+            key="check_FehlerEingewöhnung543Notbetreuung",
         )
 
     if checkcodfisc:
@@ -790,7 +791,7 @@ def choose_checks():
         checks["check_ErroreCovid2"] = True
     if checkcodfisc2:
         checks["check_codfisc2"] = True
-    if checkFehlerEingewöhnung543lockdown:
+    if checkFehlerEingewöhnung543Lockdown:
         checks["check_FehlerEingewöhnung543Lockdown"] = True
     if checkFehlerEingewöhnung543Notbetreuung:
         checks["check_FehlerEingewöhnung543Notbetreuung"] = True
@@ -885,7 +886,7 @@ def dwnld(df, k):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori KITAS (v. 0.4 sloppy summertime)")
+    st.subheader("Controllo errori KITAS (v. 0.5 misty morning)")
     dfout = None
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(

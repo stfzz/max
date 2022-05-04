@@ -753,7 +753,7 @@ def choose_checks():
             value=False,
             key="checkcodfisc2",
         )
-        checkFehlerEingewöhnung543lockdown = c2.checkbox(
+        checkFehlerEingewöhnung543Lockdown = c2.checkbox(
             "Controllo Fehler Eingewöhnung 543 Lockdown",
             value=False,
             key="check_FehlerEingewöhnung543Lockdown"
@@ -790,7 +790,7 @@ def choose_checks():
         checks["check_ErroreCovid2"] = True
     if checkcodfisc2:
         checks["check_codfisc2"] = True
-    if checkFehlerEingewöhnung543lockdown:
+    if checkFehlerEingewöhnung543Lockdown:
         checks["check_FehlerEingewöhnung543Lockdown"] = True
     if checkFehlerEingewöhnung543Notbetreuung:
         checks["check_FehlerEingewöhnung543Notbetreuung"] = True
