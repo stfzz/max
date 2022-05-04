@@ -671,6 +671,7 @@ def check_ErroreCovid2(df):
 
 def get_data(uploaded_files):
     dfout = None
+    st.info("Sono stati caricati " + str(len(uploaded_files)) + " files")
     status = st.empty()
     for uploaded_file in uploaded_files:
         # st.write(uploaded_file.name)
