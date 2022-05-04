@@ -443,19 +443,27 @@ def check_AgeChild(df, mg, checks):
             AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
 
 
-def check_ErroreDati543(df, mg, checks):
+def check_ErroreDati543(df, checks):
     if "check_ErroreDati543" in checks:
         errore_dati_543p1 = (
             df["Data inizio contratto (o data inizio assistenza se diversa)"]
-            <= DATAINIZIOMINIMA
+            > DATAINIZIOMINIMA
         )
-        errore_dati_543p2 = (
+        errore_dati_543p2 = 
             df[
                 "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020"
             ]
             == 0
         )
-        l = len(df[errore_dati_543p1 & errore_dati_543p2])
+        
+        errore_dati_543p3 = (
+            df[
+                "Data fine contratto\n(o data fine assistenza se diversa) *"
+            ] 
+            < DATAFINEMASSIMA
+        )
+
+        l = len(df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3])
         if l > 0:
             st.error("Errore dati 543")
             # st.table(df[errore_dati_543p1 & errore_dati_543p2])
