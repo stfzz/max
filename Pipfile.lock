@@ -874,11 +874,11 @@
         },
         "streamlit": {
             "hashes": [
-                "sha256:12abff0046d009329cc86c8a562d0ee7b73ff5b911d37d0854d4f2472d77a38c",
-                "sha256:5233bd54b29f3c9516135691e54969fed4f2c4d1685c5ba5059525e3378f84b2"
+                "sha256:543c809843b0561f5aa3850af2e90f7a6df17c80906b09ab76bab498846e6797",
+                "sha256:dd7718147cfc8eb4c5a18b36b67a36de37454e7fe49ac72470ad2a43771aef13"
             ],
             "index": "pypi",
-            "version": "==1.9.0rc1"
+            "version": "==1.9.0"
         },
         "streamlit-aggrid": {
             "hashes": [
@@ -985,11 +985,10 @@
         },
         "validators": {
             "hashes": [
-                "sha256:0143dcca8a386498edaf5780cbd5960da1a4c85e0719f3ee5c9b41249c4fefbd",
-                "sha256:37cd9a9213278538ad09b5b9f9134266e7c226ab1fede1d500e29e0a8fbb9ea6"
+                "sha256:dec45f4381f042f1e705cfa74949505b77f1e27e8b05409096fee8152c839cbe"
             ],
             "markers": "python_version >= '3.4'",
-            "version": "==0.18.2"
+            "version": "==0.19.0"
         },
         "watchdog": {
             "hashes": [
