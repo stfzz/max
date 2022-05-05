@@ -143,6 +143,8 @@ def check_data(df, checks):
         df = check_GesamtstundenVertragszeitraum(df)
 
     # la tabella finale che vorrei non fosse outputata qui
+    # inoltre vogliamo che contenga solo record che hanno almeno 1 errore
+    # ma come fare?
     expndr = st.expander("TABELLA FINALE ELABORATA")
     with expndr:
         gridOptions = buildGrid(df)
@@ -1022,7 +1024,8 @@ def app():
         if dfout is not None:
             dfout = compute_hours(dfout, anno_riferimento)
             dffinal = check_data(dfout, checks)
-
+            
+            # la tabella finale deve contenere soltanto record con almeno un errore
             dwnld(dffinal, "Scaricare la tabella finale")
 
 
