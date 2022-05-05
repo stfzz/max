@@ -666,6 +666,9 @@ def check_ErroreCovid2(df):
         return df
 
 
+
+
+
 # fine checks
 
 
@@ -912,13 +915,15 @@ def compute_hours(df, ar):
         "Data inizio contratto (o data inizio assistenza se diversa)"
     ]  # intanto inseriamo i valori che ci sono
     df["fine"] = df["Data fine contratto\n(o data fine assistenza se diversa) *"]
+    
     # se data inizio minore di anno riferimento allora mettiamo il 1. gennaio dell'anno riferimento
     iniz = df["inizio"].dt.year < ar  # condizione logica
     df.loc[iniz, "inizio"] = (
-        str(ar) + "-01-01"
+        "01-01-" + str(ar)
     )  # cerchiamo i valori < anno riferimento e sostituiamo con 01/01
+
     fin = df["fine"].dt.year > ar  # condizione logica
-    df.loc[fin, "fine"] = str(ar) + "-12-31"  # sostituzione
+    df.loc[fin, "fine"] = ("12-31-" + str(ar))  # sostituzione
     df.insert(
         9, "GiorniAssistenzaAnnoRiferimento (" + str(ar) + ")", 0
     )  # aggiungiamo colonna e mettiamo anno riferimento
