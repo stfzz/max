@@ -1042,8 +1042,10 @@ def make_df_solo_errori(dffinal):
 
 def app():
 
+    # carichiamo qui la tabella dello storico??
+
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori KITAS (v. 0.9)")
+    st.subheader("Controllo errori KITAS (v. 0.9.10)")
     dfout = None
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
@@ -1079,13 +1081,17 @@ def app():
                 dwnld(dffinal, "SCARICARE TABELLA CON TUTTI I DATI")
 
             # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
-            dffinal = make_df_solo_errori(dffinal)
+            dffinalerr = make_df_solo_errori(dffinal)
             expndr = st.expander("TABELLA FINALE ELABORATA - SOLO ERRORI")
             with expndr:
-                gridOptions = buildGrid(dffinal)
-                AgGrid(dffinal, gridOptions=gridOptions, enable_enterprise_modules=True)
-                dwnld(dffinal, "SCARICARE TABELLA CON SOLO ERRORI")
+                gridOptions = buildGrid(dffinalerr)
+                AgGrid(dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True)
+                dwnld(dffinalerr, "SCARICARE TABELLA CON SOLO ERRORI")
 
         # salviamo qui la tabella finale??
-
+        try:
+            dffinalerr.to_excel("storico.xlsx")
+            st.success("Salvato file storico")
+        except:
+            st.error("Errore salvataggio file storico")
 app()
