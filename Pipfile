@@ -9,6 +9,7 @@ numpy = "*"
 streamlit = "*"
 openpyxl = "*"
 streamlit-aggrid = "*"
+xlsxwriter = "*"
 
 [dev-packages]
 black = "*"

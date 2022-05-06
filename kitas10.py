@@ -993,7 +993,7 @@ def dwnld(df, k):
     )
 
 
-def make_condizione_solo_errori(dffinal):
+def make_df_solo_errori(dffinal):
     errCodFisc1 = dffinal["errCodFisc1"] == True
     errCodFisc2 = dffinal["errCodFisc2"] == True
     errAgeChild = dffinal["errAgeChild"] == True
@@ -1059,38 +1059,33 @@ def app():
     with f:
         submit = f.form_submit_button("Iniziare elaborazione e controllo errori")
         if submit:
-            # dfout = get_data(uploaded_files)
-            # if dfout is not None:
-            #    dfout = compute_hours(dfout, anno_riferimento)
-            #    dffinal = check_data(dfout, checks)
+            # soluzione un po' assurda, ma vogliamo spostare gli expander fuori dalla form
             flag = 1
 
+    # se button pigiato, allora esegui...
     if flag == 1:
         dfout = get_data(uploaded_files)
         if dfout is not None:
             dfout = compute_hours(dfout, anno_riferimento)
             dffinal = check_data(dfout, checks)
             st.write("")
+            st.info("Tabelle elaborate")
+
             # la tabella finale, contiene TUTTI i record
             expndr = st.expander("TABELLA FINALE ELABORATA - TUTTI I DATI")
             with expndr:
                 gridOptions = buildGrid(dffinal)
                 AgGrid(dffinal, gridOptions=gridOptions, enable_enterprise_modules=True)
+                dwnld(dffinal, "SCARICARE TABELLA CON TUTTI I DATI")
 
-                dwnld(dffinal, "Scaricare la tabella con tutti i dati")
-
-            # la tabella finale deve contenere soltanto record con almeno un errore
-            dffinal = make_condizione_solo_errori(dffinal)
+            # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
+            dffinal = make_df_solo_errori(dffinal)
             expndr = st.expander("TABELLA FINALE ELABORATA - SOLO ERRORI")
             with expndr:
                 gridOptions = buildGrid(dffinal)
-                AgGrid(
-                    dffinal,
-                    gridOptions=gridOptions,
-                    enable_enterprise_modules=True,
-                )
+                AgGrid(dffinal, gridOptions=gridOptions, enable_enterprise_modules=True)
+                dwnld(dffinal, "SCARICARE TABELLA CON SOLO ERRORI")
 
-                dwnld(dffinal, "Scaricare la tabella con SOLO ERRORI")
-
+        # salviamo qui la tabella finale??
 
 app()
