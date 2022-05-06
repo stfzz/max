@@ -9,9 +9,9 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
-    page_title="Dashboard - Familienagentur - Controllo KITAS",
+    page_title="Controllo TAGESMÜTTER",
     layout="wide",
-    page_icon="👽",
+    page_icon="🙃" # 👽
 )
 
 DATAINIZIOMINIMA = "18.05.2020"
@@ -1085,7 +1085,9 @@ def app():
             expndr = st.expander("TABELLA FINALE ELABORATA - SOLO ERRORI")
             with expndr:
                 gridOptions = buildGrid(dffinalerr)
-                AgGrid(dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True)
+                AgGrid(
+                    dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True
+                )
                 dwnld(dffinalerr, "SCARICARE TABELLA CON SOLO ERRORI")
 
         # salviamo qui la tabella finale??
@@ -1094,4 +1096,6 @@ def app():
             st.success("Salvato file storico")
         except:
             st.error("Errore salvataggio file storico")
+
+
 app()
