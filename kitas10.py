@@ -167,8 +167,7 @@ def check_FehlerEingewöhnung543Notbetreuung(df):
         ]
         > 0
     )
-    l = len(df[data_inizio_minima & data_inizio_massima & ore_543])
-    if l > 0:
+    if not df[data_inizio_minima & data_inizio_massima & ore_543].empty:
         expndr = st.expander("Trovato errore Eingewöhnung 543 Notbetreuung")
         with expndr:
             # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
@@ -198,8 +197,8 @@ def check_InizioMinoreFine(df):
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
         > df["Data fine contratto\n(o data fine assistenza se diversa) *"]
     )
-    l = len(df[inizio_minore_fine])
-    if l > 0:
+
+    if not df[inizio_minore_fine].empty:
         expndr = st.expander("Trovato errore date contrattuali")
         with expndr:
             # st.table(df[inizio_minore_fine])
@@ -229,9 +228,10 @@ def check_codfisc(df):
 
     # usiamo lunghezza del dataframe > 0 per vedere se è stato trovato l'errore
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
-    l = len(df[codinvalido])
+    #l = len(df[codinvalido])
 
-    if l > 0:
+    #if l > 0:
+    if not df[codinvalido].empty:
         expndr = st.expander("Trovato errore formato del codice Fiscale")
         with expndr:
             gridOptions = buildGrid(df[codinvalido])
@@ -275,11 +275,11 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
     ].str[9:11].astype(int)
 
     # invertiamo la condizione logica per trovare errori
-    l = len(dfnot40[~gg])
-    l40 = len(df40[~gg40])
+                #l = len(dfnot40[~gg])
+                #l40 = len(df40[~gg40])
 
     # se trovato errore maschhietti o femmine
-    if l > 0 or l40 > 0:
+    if not dfnot40[~gg].empty or not df40[~gg40].empty > 0:
         expndr = st.expander("Trovato errore data nascita (giorno) per codice fiscale")
         with expndr:
             # lista dei due df con errori che concateniamo per fare un df
@@ -294,9 +294,8 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
         6:8
     ].astype(int)
     # invertiamo condizione logica per trovare errore
-    l = len(dfcod[~anno])
-    # trovato almeno un errore
-    if l > 0:
+        # trovato almeno un errore
+    if not dfcod[~anno].empty:
         expndr = st.expander("Trovato errore data nascita (anno) per codice fiscale")
         with expndr:
             gridOptions = buildGrid(dfcod[~anno])
@@ -314,8 +313,7 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
 def check_ErrorePresenza(df):
     # condizione logica
     ore_rendicontate_uguale_zero = df["Ore totali rendicontate per il 2020"] == 0
-    l = len(df[ore_rendicontate_uguale_zero])
-    if l > 0:
+    if not df[ore_rendicontate_uguale_zero].empty:
         expndr = st.expander("Trovato errore presenza (Ore totali rendicontate = 0)")
         with expndr:
             gridOptions = buildGrid(df[ore_rendicontate_uguale_zero])
@@ -338,8 +336,7 @@ def check_AgeChild(df):
         - df["Data di nascita"]
     ).dt.days < 90
     # st.dataframe(giorni.values)
-    l = len(df[giorni])
-    if l > 0:
+    if not df[giorni].empty:
         expndr = st.expander("Trovato errore età bambino (< 90 giorni)")
         with expndr:
             gridOptions = buildGrid(df[giorni])
@@ -371,8 +368,7 @@ def check_ErroreDati543(df):
         < DATAFINEMASSIMA
     )
 
-    l = len(df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3])
-    if l > 0:
+    if not df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3].empty:
         expndr = st.expander("Trovato errore dati 543")
         with expndr:
             gridOptions = buildGrid(df[errore_dati_543p1 & errore_dati_543p2])
@@ -397,7 +393,7 @@ def check_FineAssistenzaMax4Anni(df):
         - df["Data di nascita"]
     ).dt.days > 1464
     l = len(df[giorni])
-    if l > 0:
+    if not df[giorni].empty:
         expndr = st.expander("Trovato errore fine contratto assistenza")
         with expndr:
             gridOptions = buildGrid(df[giorni])
@@ -418,8 +414,7 @@ def check_Kindergarten_1(df):
         df["Data fine contratto\n(o data fine assistenza se diversa) *"]
         > KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1
     )
-    l = len(df[data_nascita & data_fine_assistenza])
-    if l > 0:
+    if not df[data_nascita & data_fine_assistenza].empty:
         expndr = st.expander("Trovato errore Kindergarten #1")
         with expndr:
             gridOptions = buildGrid(df[data_nascita & data_fine_assistenza])
@@ -447,8 +442,7 @@ def check_Kindergarten_2(df):
         "15.09." + (pd.to_datetime(df["Data di nascita"]).dt.year + 3).astype("str"),
         infer_datetime_format=True,
     )
-    l = len(df[data_nascita & data_fine_ass])
-    if l > 0:
+    if not df[data_nascita & data_fine_ass].empty:
         expndr = st.expander("Trovato errore controllo Kindergarten #2")
         with expndr:
             gridOptions = buildGrid(df[data_nascita & data_fine_ass])
@@ -480,8 +474,8 @@ def check_ErroreFinanziamentoCompensativo(df):
         ]
         > 0
     )
-    l = len(df[data_inizio & ore_compensative])
-    if l > 0:
+
+    if not df[data_inizio & ore_compensative].empty:
         expndr = st.expander("Trovato errore finanziamento compensativo")
         with expndr:
             gridOptions = buildGrid(df[data_inizio & ore_compensative])
@@ -517,8 +511,7 @@ def check_FehlerEingewöhnung(df):
         ]
         > 0
     )
-    l = len(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
-    if l > 0:
+    if not df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate].empty:
         expndr = st.expander("Trovato errore Eingewöhnung")
         with expndr:
             gridOptions = buildGrid(
@@ -556,8 +549,8 @@ def check_FehlerEingewöhnung543Lockdown(df):
         ]
         > 0
     )
-    l = len(df[data_inizio_minima & data_inizio_massima & ore_543])
-    if l > 0:
+
+    if not df[data_inizio_minima & data_inizio_massima & ore_543].empty:
         expndr = st.expander("Trovato errore Eingewöhnung 543 Lockdown")
         with expndr:
             gridOptions = buildGrid(
@@ -602,8 +595,7 @@ def check_ErroreCovid(df):
         > 0
     )
 
-    l = len(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)])
-    if l > 0:
+    if not df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)].empty:
         expndr = st.expander("Trovato errore Covid #1")
         with expndr:
             gridOptions = buildGrid(
@@ -643,8 +635,7 @@ def check_ErroreCovid2(df):
         ]
         > 0
     )
-    l = len(df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)])
-    if l > 0:
+    if not df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)].empty:
         expndr = st.expander("Trovatp errore Covid #2")
         with expndr:
             gridOptions = buildGrid(
@@ -685,8 +676,7 @@ def check_GesamtstundenVertragszeitraum(
 
     # usiamo lunghezza del dataframe > 0 per vedere se è stato trovato l'errore
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
-    l = len(df[condizioneerrore])
-    if l > 0:
+    if not df[condizioneerrore].empty:
         expndr = st.expander(
             "Trovato errore ore complessive per durata contrattuale (2020)"
         )
@@ -1093,9 +1083,9 @@ def app():
         # salviamo qui la tabella finale??
         try:
             dffinalerr.to_excel("storico.xlsx")
-            st.success("Salvato file storico")
+            st.success("Salvato file storico: OK")
         except:
-            st.error("Errore salvataggio file storico")
+            st.error("ERRORE salvataggio file storico")
 
 
 app()
