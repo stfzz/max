@@ -680,7 +680,7 @@ def get_data(uploaded_files, anno_riferimento):
             status.info("[*] " + uploaded_file.name + " elaborato")
             df = prepare_data(df, uploaded_file, anno_riferimento)
         except:
-            st.error(uploaded_file.name + " --> ERRORE CONTROLLO GENERALE")
+            st.error(uploaded_file.name + " --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione")
             continue
         # meglio lasciare prepare_data qui
         # altrimenti diventa difficile estrarre comune ed ente
