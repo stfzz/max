@@ -9,9 +9,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
-    page_title="Controllo TAGESMÜTTER",
-    layout="wide",
-    page_icon="🙃" # 👽
+    page_title="Controllo TAGESMÜTTER", layout="wide", page_icon="🙃"  # 👽
 )
 
 DATAINIZIOMINIMA = "18.05.2020"
@@ -228,9 +226,9 @@ def check_codfisc(df):
 
     # usiamo lunghezza del dataframe > 0 per vedere se è stato trovato l'errore
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
-    #l = len(df[codinvalido])
+    # l = len(df[codinvalido])
 
-    #if l > 0:
+    # if l > 0:
     if not df[codinvalido].empty:
         expndr = st.expander("Trovato errore formato del codice Fiscale")
         with expndr:
@@ -275,8 +273,8 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
     ].str[9:11].astype(int)
 
     # invertiamo la condizione logica per trovare errori
-                #l = len(dfnot40[~gg])
-                #l40 = len(df40[~gg40])
+    # l = len(dfnot40[~gg])
+    # l40 = len(df40[~gg40])
 
     # se trovato errore maschhietti o femmine
     if not dfnot40[~gg].empty or not df40[~gg40].empty > 0:
@@ -294,7 +292,7 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
         6:8
     ].astype(int)
     # invertiamo condizione logica per trovare errore
-        # trovato almeno un errore
+    # trovato almeno un errore
     if not dfcod[~anno].empty:
         expndr = st.expander("Trovato errore data nascita (anno) per codice fiscale")
         with expndr:
@@ -405,6 +403,7 @@ def check_FineAssistenzaMax4Anni(df):
         return df
     else:
         return df
+
 
 
 def check_Kindergarten_1(df):
@@ -635,7 +634,9 @@ def check_ErroreCovid2(df):
         ]
         > 0
     )
-    if not df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)].empty:
+    if not df[
+        (data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)
+    ].empty:
         expndr = st.expander("Trovatp errore Covid #2")
         with expndr:
             gridOptions = buildGrid(
