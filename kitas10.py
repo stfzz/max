@@ -405,7 +405,6 @@ def check_FineAssistenzaMax4Anni(df):
         return df
 
 
-
 def check_Kindergarten_1(df):
 
     data_nascita = df["Data di nascita"] <= KONTROLLEKINDERGARTEN_DATANASCITA_1
