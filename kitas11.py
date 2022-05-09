@@ -9,9 +9,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
-    page_title="Controllo TAGESMÜTTER",
-    layout="wide",
-    page_icon="🙃" # 👽
+    page_title="Controllo TAGESMÜTTER", layout="wide", page_icon="🙂"  # 👽
 )
 
 DATAINIZIOMINIMA = "18.05.2020"
@@ -29,6 +27,7 @@ KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMIN = "26.10.2020"
 KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMAX = "16.11.2020"
 
 
+
 def buildGrid(data):
     gb = GridOptionsBuilder.from_dataframe(data)
     # gb.configure_pagination()
@@ -41,64 +40,35 @@ def buildGrid(data):
     return gridOptions
 
 
+def errorChecksList():
+    error_dict = {
+        "errCodFisc1": "Controllo formato codice fiscale",
+        "errCodFisc2": "Controllo data nascita per codice fiscale",
+        "errAgeChild": "Controllo età bambino",
+        "errInizioMinoreFine": "Controllo date contrattuali",
+        "errErrorePresenza": "Controllo errore presenza",
+        "errErroreDati543": "Controllo errore dati 543",
+        "errFineAssistenzaMax4Anni": "Controllo fine contratto assistenza",
+        "errKindergarten_1": "Controllo Kindergarten #1",
+        "errKindergarten_2": "Controllo Kindergarten #2",
+        "errErroreFinanziamentoCompensativo": "Controllo finanziamento compensativo",
+        "errFehlerEingewöhnung": "Controllo Fehler Eingewöhnung",
+        "errErroreCovid": "Controllo Covid #1",
+        "errErroreCovid2": "Controllo Covid #2",
+        "errFehlerEingewöhnung543Lockdown": "Controllo Fehler Eingewöhnung 543 Lockdown",
+        "errFehlerEingewöhnung543Notbetreuung": "Controllo Fehler Eingewöhnung 543 Notbetreuung",
+        "errGesamtstundenVertragszeitraum": "Controllo ore complessive per periodo contrattuale"
+    }
+    return error_dict
+
+ERRORDICT = errorChecksList()
+
 # aggiungiamo le colonne bool per ogni errore che intercettiamo
 # ci serve per creare la tabella finale e per avere uno storico
 def make_bool_columns(df):
-    df["errCodFisc1"] = np.nan
-    df["errCodFisc1"] = df["errCodFisc1"].astype("boolean")
-
-    df["errCodFisc2"] = np.nan
-    df["errCodFisc2"] = df["errCodFisc1"].astype("boolean")
-
-    df["errAgeChild"] = np.nan
-    df["errAgeChild"] = df["errAgeChild"].astype("boolean")
-
-    df["errInizioMinoreFine"] = np.nan
-    df["errInizioMinoreFine"] = df["errInizioMinoreFine"].astype("boolean")
-
-    df["errErrorePresenza"] = np.nan
-    df["errErrorePresenza"] = df["errErrorePresenza"].astype("boolean")
-
-    df["errErroreDati543"] = np.nan
-    df["errErroreDati543"] = df["errErroreDati543"].astype("boolean")
-
-    df["errFineAssistenzaMax4Anni"] = np.nan
-    df["errFineAssistenzaMax4Anni"] = df["errFineAssistenzaMax4Anni"].astype("boolean")
-
-    df["errKindergarten_1"] = np.nan
-    df["errKindergarten_1"] = df["errKindergarten_1"].astype("boolean")
-
-    df["errKindergarten_2"] = np.nan
-    df["errKindergarten_2"] = df["errKindergarten_2"].astype("boolean")
-
-    df["errErroreFinanziamentoCompensativo"] = np.nan
-    df["errErroreFinanziamentoCompensativo"] = df[
-        "errErroreFinanziamentoCompensativo"
-    ].astype("boolean")
-
-    df["errFehlerEingewöhnung"] = np.nan
-    df["errFehlerEingewöhnung"] = df["errFehlerEingewöhnung"].astype("boolean")
-
-    df["errErroreCovid"] = np.nan
-    df["errErroreCovid"] = df["errErroreCovid"].astype("boolean")
-
-    df["errErroreCovid2"] = np.nan
-    df["errErroreCovid2"] = df["errErroreCovid2"].astype("boolean")
-
-    df["errFehlerEingewöhnung543Lockdown"] = np.nan
-    df["errFehlerEingewöhnung543Lockdown"] = df[
-        "errFehlerEingewöhnung543Lockdown"
-    ].astype("boolean")
-
-    df["errFehlerEingewöhnung543Notbetreuung"] = np.nan
-    df["errFehlerEingewöhnung543Notbetreuung"] = df[
-        "errFehlerEingewöhnung543Notbetreuung"
-    ].astype("boolean")
-
-    df["errGesamtstundenVertragszeitraum"] = np.nan
-    df["errGesamtstundenVertragszeitraum"] = df[
-        "errGesamtstundenVertragszeitraum"
-    ].astype("boolean")
+    for e in ERRORDICT.keys():
+        df[e] = np.nan
+        df[e] = df[e].astype("boolean")
 
     return df
 
@@ -141,13 +111,6 @@ def check_data(df, checks):
 
     if "check_GesamtstundenVertragszeitraum" in checks:
         df = check_GesamtstundenVertragszeitraum(df)
-
-    # la tabella finale vorrei non fosse outputata qui
-    # inoltre vogliamo che contenga solo record che hanno almeno 1 errore
-    # expndr = st.expander("TABELLA FINALE ELABORATA")
-    # with expndr:
-    #    gridOptions = buildGrid(df)
-    #    AgGrid(df, gridOptions=gridOptions, enable_enterprise_modules=True)
 
     return df
 
@@ -228,9 +191,9 @@ def check_codfisc(df):
 
     # usiamo lunghezza del dataframe > 0 per vedere se è stato trovato l'errore
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
-    #l = len(df[codinvalido])
+    # l = len(df[codinvalido])
 
-    #if l > 0:
+    # if l > 0:
     if not df[codinvalido].empty:
         expndr = st.expander("Trovato errore formato del codice Fiscale")
         with expndr:
@@ -275,8 +238,8 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
     ].str[9:11].astype(int)
 
     # invertiamo la condizione logica per trovare errori
-                #l = len(dfnot40[~gg])
-                #l40 = len(df40[~gg40])
+    # l = len(dfnot40[~gg])
+    # l40 = len(df40[~gg40])
 
     # se trovato errore maschhietti o femmine
     if not dfnot40[~gg].empty or not df40[~gg40].empty > 0:
@@ -294,7 +257,7 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
         6:8
     ].astype(int)
     # invertiamo condizione logica per trovare errore
-        # trovato almeno un errore
+    # trovato almeno un errore
     if not dfcod[~anno].empty:
         expndr = st.expander("Trovato errore data nascita (anno) per codice fiscale")
         with expndr:
@@ -635,7 +598,9 @@ def check_ErroreCovid2(df):
         ]
         > 0
     )
-    if not df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)].empty:
+    if not df[
+        (data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)
+    ].empty:
         expndr = st.expander("Trovatp errore Covid #2")
         with expndr:
             gridOptions = buildGrid(
@@ -698,7 +663,7 @@ def check_GesamtstundenVertragszeitraum(
 # fine checks
 
 
-def get_data(uploaded_files):
+def get_data(uploaded_files, anno_riferimento):
     dfout = None
     st.info("Sono stati caricati " + str(len(uploaded_files)) + " files")
     status = st.empty()
@@ -707,10 +672,15 @@ def get_data(uploaded_files):
         try:
             status.info("[*] " + uploaded_file.name + " caricato")
             df = pd.read_excel(uploaded_file)
-            status.info("[*] " + uploaded_file.name + " elaborato")
-            df = prepare_data(df, uploaded_file)
         except:
             st.error(uploaded_file.name + " non è un file Excel")
+            continue
+
+        try:
+            status.info("[*] " + uploaded_file.name + " elaborato")
+            df = prepare_data(df, uploaded_file, anno_riferimento)
+        except:
+            st.error(uploaded_file.name + " --> ERRORE CONTROLLO GENERALE")
             continue
         # meglio lasciare prepare_data qui
         # altrimenti diventa difficile estrarre comune ed ente
@@ -731,12 +701,32 @@ def get_data(uploaded_files):
     return dfout
 
 
+
+#def choose_checks2():
+#    checks = {}
+#    attivatutti = st.checkbox("Selezionare/deselezionare tutti i controlli")
+#    st.write("")
+#    c1, c2, c3, c4 = st.columns(4)
+
+#    if attivatutti:
+#        for e in ERRORDICT.keys():
+#            for a in range(4):
+#                e = c+a.checkbox(ERRORDICT[e], value=True, key = e)
+#    else:
+#        for e in ERRORDICT.keys():
+#            for a in range(4):
+#                e = c+a.checkbox(ERRORDICT[e], value=False, key = e)        
+
+
+
 def choose_checks():
     checks = {}
     attivatutti = st.checkbox("Selezionare/deselezionare tutti i controlli")
     st.write("")
 
     c1, c2, c3, c4 = st.columns(4)
+
+
 
     if attivatutti:
         checkcodfisc = c1.checkbox(
@@ -795,7 +785,7 @@ def choose_checks():
             key="check_FehlerEingewöhnung543Notbetreuung",
         )
         checkGesamtstundenVertragszeitraum = c4.checkbox(
-            "Controllo ore complessive per perriodo contrattuale",
+            "Controllo ore complessive per periodo contrattuale",
             value=True,
             key="check_GesamtstundenVertragszeitraum",
         )
@@ -896,7 +886,26 @@ def choose_checks():
     return checks
 
 
-def prepare_data(df, uploaded_file):
+def prepare_data(df, uploaded_file, anno_riferimento):
+
+    # DOBBIAMO RINOMINARE TUTTE LE COLONNE PERCHÉ ARRIVANO
+    # IN TEDESCO E ITALIANO - USIAMO ITALIANO
+    # E SPERIAMO SIANO TUTTE NELLO STESSO ORDINE
+    df.columns = [
+        "Numero \nprogressivo",
+        "Cognome e nome bambino",
+        "Data di nascita",
+        "Codice fiscale",
+        "Assistente domiciliare all'infanzia",
+        "Comune di residenza assistente domiciliare all'infanzia",
+        "Data inizio contratto (o data inizio assistenza se diversa)",
+        "Data fine contratto\n(o data fine assistenza se diversa) *",
+        "Ore di assistenza \n ai sensi della delibera\nn. 666/2019",
+        "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020",
+        "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 733/2020",
+        "Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)",
+        "Ore totali rendicontate per il 2020",
+    ]
 
     # estraiamo comune e nome ente da dove ci aspettiamo che siano
     # nel dataframe creato dal singolo file Excel
@@ -904,26 +913,46 @@ def prepare_data(df, uploaded_file):
     traeger = traeger[3].title()
     gemeinde = df.iloc[3]
     gemeinde = gemeinde[3]
-    df = pd.read_excel(
-        uploaded_file,
-        parse_dates=[
-            "Data di nascita",
-            "Data fine contratto\n(o data fine assistenza se diversa) *",
-            "Data inizio contratto (o data inizio assistenza se diversa)",
-        ],
-        header=8,
-    )
+
+    # cancelliamo le righe che non ci servono
+    df = df.drop(labels=range(0, 8), axis=0)
 
     # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
     df["Numero \nprogressivo"] = pd.to_numeric(
         df["Numero \nprogressivo"], errors="coerce"
     )
+
     # selezioniamo solo le righe che hanno un valore numerico in *Numero progressivo*
     # in questo modo eliminiamo le righe inutili dopo l'ultimo *numero progressivo*
     validi = df["Numero \nprogressivo"].notna()
 
     # teniamo solo record validi
     df = df[validi]
+
+    # se troviamo data fine vuota la mettiamo al 31/12 dell'anno riferimento
+    condizione = pd.isnull(
+        df["Data fine contratto\n(o data fine assistenza se diversa) *"]
+    )
+    df.loc[
+        condizione, "Data fine contratto\n(o data fine assistenza se diversa) *"
+    ] = "12-31-" + str(anno_riferimento)
+    df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df[
+        "Data fine contratto\n(o data fine assistenza se diversa) *"
+    ].astype("datetime64[ns]")
+
+    # convertiamo colonne in data
+    df["Data di nascita"] = df["Data di nascita"].astype("datetime64[ns]")
+    df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df[
+        "Data fine contratto\n(o data fine assistenza se diversa) *"
+    ].astype("datetime64[ns]")
+    df["Data inizio contratto (o data inizio assistenza se diversa)"] = df[
+        "Data inizio contratto (o data inizio assistenza se diversa)"
+    ].astype("datetime64[ns]")
+
+    # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
+    df["Numero \nprogressivo"] = pd.to_numeric(
+        df["Numero \nprogressivo"], errors="coerce"
+    )
 
     # elimiamo colonne che sono servono più
     df = df.drop(["Numero \nprogressivo"], axis=1)
@@ -1009,6 +1038,7 @@ def make_df_solo_errori(dffinal):
         dffinal["errGesamtstundenVertragszeitraum"] == True
     )
 
+    # almeno 1 errore per record
     dffinal = dffinal[
         errCodFisc1
         | errCodFisc2
@@ -1035,7 +1065,7 @@ def app():
     # carichiamo qui la tabella dello storico??
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori KITAS (v. 0.9.10)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.11)")
     dfout = None
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
@@ -1056,7 +1086,7 @@ def app():
 
     # se button pigiato, allora esegui...
     if flag == 1:
-        dfout = get_data(uploaded_files)
+        dfout = get_data(uploaded_files, anno_riferimento)
         if dfout is not None:
             dfout = compute_hours(dfout, anno_riferimento)
             dffinal = check_data(dfout, checks)
