@@ -140,13 +140,6 @@ def check_data(df, checks):
     if "check_GesamtstundenVertragszeitraum" in checks:
         df = check_GesamtstundenVertragszeitraum(df)
 
-    # la tabella finale vorrei non fosse outputata qui
-    # inoltre vogliamo che contenga solo record che hanno almeno 1 errore
-    # expndr = st.expander("TABELLA FINALE ELABORATA")
-    # with expndr:
-    #    gridOptions = buildGrid(df)
-    #    AgGrid(df, gridOptions=gridOptions, enable_enterprise_modules=True)
-
     return df
 
 
@@ -698,7 +691,7 @@ def check_GesamtstundenVertragszeitraum(
 # fine checks
 
 
-def get_data(uploaded_files):
+def get_data(uploaded_files, anno_riferimento):
     dfout = None
     st.info("Sono stati caricati " + str(len(uploaded_files)) + " files")
     status = st.empty()
@@ -708,7 +701,7 @@ def get_data(uploaded_files):
             status.info("[*] " + uploaded_file.name + " caricato")
             df = pd.read_excel(uploaded_file)
             status.info("[*] " + uploaded_file.name + " elaborato")
-            df = prepare_data(df, uploaded_file)
+            df = prepare_data(df, uploaded_file, anno_riferimento)
         except:
             st.error(uploaded_file.name + " non è un file Excel")
             continue
@@ -896,7 +889,26 @@ def choose_checks():
     return checks
 
 
-def prepare_data(df, uploaded_file):
+def prepare_data(df, uploaded_file, anno_riferimento):
+
+    # DOBBIAMO RINOMINARE TUTTE LE COLONNE PERCHÉ ARRIVANO
+    # IN TEDESCO E ITALIANO - USIAMO ITALIANO
+    # E SPERIAMO SIANO TUTTE NELLO STESSO ORDINE
+    df.columns = [
+        "Numero \nprogressivo",
+        "Cognome e nome bambino",
+        "Data di nascita",
+        "Codice fiscale",
+        "Assistente domiciliare all'infanzia",
+        "Comune di residenza assistente domiciliare all'infanzia",
+        "Data inizio contratto (o data inizio assistenza se diversa)",
+        "Data fine contratto\n(o data fine assistenza se diversa) *",
+        "Ore di assistenza \n ai sensi della delibera\nn. 666/2019",
+        "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020",
+        "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 733/2020",
+        "Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)",
+        "Ore totali rendicontate per il 2020",
+    ]
 
     # estraiamo comune e nome ente da dove ci aspettiamo che siano
     # nel dataframe creato dal singolo file Excel
@@ -904,26 +916,38 @@ def prepare_data(df, uploaded_file):
     traeger = traeger[3].title()
     gemeinde = df.iloc[3]
     gemeinde = gemeinde[3]
-    df = pd.read_excel(
-        uploaded_file,
-        parse_dates=[
-            "Data di nascita",
-            "Data fine contratto\n(o data fine assistenza se diversa) *",
-            "Data inizio contratto (o data inizio assistenza se diversa)",
-        ],
-        header=8,
-    )
+
+    #cancelliamo le righe che non ci servono
+    df = df.drop(labels=range(0,8), axis=0)
 
     # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
     df["Numero \nprogressivo"] = pd.to_numeric(
         df["Numero \nprogressivo"], errors="coerce"
     )
+
     # selezioniamo solo le righe che hanno un valore numerico in *Numero progressivo*
     # in questo modo eliminiamo le righe inutili dopo l'ultimo *numero progressivo*
     validi = df["Numero \nprogressivo"].notna()
 
     # teniamo solo record validi
     df = df[validi]
+
+    # se troviamo data fine vuota la mettiamo al 31/12 dell'anno riferimento
+    condizione = pd.isnull(df["Data fine contratto\n(o data fine assistenza se diversa) *"])
+    df.loc[condizione, "Data fine contratto\n(o data fine assistenza se diversa) *"] = "12-31-" + str(anno_riferimento)
+    df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df["Data fine contratto\n(o data fine assistenza se diversa) *"].astype('datetime64[ns]')
+
+    # convertiamo colonne in data
+    df["Data di nascita"] = df["Data di nascita"].astype('datetime64[ns]')
+    df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df["Data fine contratto\n(o data fine assistenza se diversa) *"].astype('datetime64[ns]')
+    df["Data inizio contratto (o data inizio assistenza se diversa)"] = df["Data inizio contratto (o data inizio assistenza se diversa)"].astype('datetime64[ns]')
+
+
+    # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
+    df["Numero \nprogressivo"] = pd.to_numeric(
+        df["Numero \nprogressivo"], errors="coerce"
+    )
+
 
     # elimiamo colonne che sono servono più
     df = df.drop(["Numero \nprogressivo"], axis=1)
@@ -1056,7 +1080,7 @@ def app():
 
     # se button pigiato, allora esegui...
     if flag == 1:
-        dfout = get_data(uploaded_files)
+        dfout = get_data(uploaded_files, anno_riferimento)
         if dfout is not None:
             dfout = compute_hours(dfout, anno_riferimento)
             dffinal = check_data(dfout, checks)
