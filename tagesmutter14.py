@@ -9,7 +9,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
-    page_title="Controllo TAGESMÜTTER", layout="wide", page_icon="🤗"  # 👽
+    page_title="Controllo TAGESMÜTTER", layout="wide", page_icon="🤔"  # 👽
 )
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020",format='%d.%m.%Y')
