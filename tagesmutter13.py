@@ -1111,6 +1111,8 @@ def app():
                 dwnld(dffinalerr, "SCARICARE TABELLA CON SOLO ERRORI")
 
         # salviamo qui la tabella finale??
+        st.write("")
+        st.write("")
         try:
             dffinalerr.to_excel("storico.xlsx")
             st.success("Salvato file storico: OK")
