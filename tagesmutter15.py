@@ -161,7 +161,7 @@ def check_FehlerEingewöhnung543Notbetreuung(df):
                 (data_inizio_minima & data_inizio_massima & ore_543),
                 "errFehlerEingewöhnung543Notbetreuung",
             ] = True
-            x = dwnld(df, "SCARICARE TABELLA CON ERRORI Fehler Eingewöhnung 543 Notbetreuung","FehlerEingewoehnung543Notbetreuung")
+            x = dwnld(df[data_inizio_minima & data_inizio_massima & ore_543], "SCARICARE TABELLA CON ERRORI Fehler Eingewöhnung 543 Notbetreuung","FehlerEingewoehnung543Notbetreuung")
 
         return df
     # se non trovato errore il df è restituito come è stato ricevuto
@@ -190,7 +190,7 @@ def check_InizioMinoreFine(df):
             )
 
             df.loc[inizio_minore_fine, "errInizioMinoreFine"] = True
-            x = dwnld(df, "SCARICARE TABELLA CON ERRORI data Inizio maggiore data fine","FehlerInzioMinoreFine")
+            x = dwnld(df[inizio_minore_fine], "SCARICARE TABELLA CON ERRORI data Inizio maggiore data fine","FehlerInzioMinoreFine")
 
 
         return df
@@ -222,7 +222,7 @@ def check_codfisc(df):
             )
             # settiamo il flag bool per la tabella finale
             df.loc[codinvalido, "errCodFisc1"] = True
-            x = dwnld(df, "Scaricare tabella con errore codice fiscale","ErroreCodiceFiscale")
+            x = dwnld(df[codinvalido], "Scaricare tabella con errore codice fiscale","ErroreCodiceFiscale")
 
         return df
     # se non trovato errore il df è restituito come è stato ricevuto
@@ -307,7 +307,7 @@ def check_ErrorePresenza(df):
                 enable_enterprise_modules=True,
             )
             df.loc[ore_rendicontate_uguale_zero, "errErrorePresenza"] = True
-            x = dwnld(df, "Scaricare tabella con errore presenzae","ErrorePresenza")
+            x = dwnld(df[ore_rendicontate_uguale_zero], "Scaricare tabella con errore presenzae","ErrorePresenza")
 
         return df
     # se non trovato errore il df è restituito come è stato ricevuto
@@ -331,7 +331,7 @@ def check_AgeChild(df):
                 giorni,
                 "errAgeChild",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore età bambino","ErroreEtaBambino")
+            x = dwnld(df[giorni], "Scaricare tabella con errore età bambino","ErroreEtaBambino")
 
         return df
     else:
@@ -371,7 +371,7 @@ def check_ErroreDati543(df):
                 errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3,
                 "errErroreDati543",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore dati 543","ErroreDati543")
+            x = dwnld(df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3], "Scaricare tabella con errore dati 543","ErroreDati543")
 
         return df
     else:
@@ -396,7 +396,7 @@ def check_FineAssistenzaMax4Anni(df):
                 giorni,
                 "errFineAssistenzaMax4Anni",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore fine contratto assistenza","ErroreFineContratto")
+            x = dwnld(df[giorni], "Scaricare tabella con errore fine contratto assistenza","ErroreFineContratto")
 
         return df
     else:
@@ -425,7 +425,7 @@ def check_Kindergarten_1(df):
                 (data_nascita & data_fine_assistenza),
                 "errKindergarten_1",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore Kindergarten 1","ErroreKindergarten1")
+            x = dwnld(df[data_nascita & data_fine_assistenza], "Scaricare tabella con errore Kindergarten 1","ErroreKindergarten1")
 
 
         return df
@@ -458,7 +458,7 @@ def check_Kindergarten_2(df):
                 (data_nascita & data_fine_ass),
                 "errKindergarten_2",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore Kindergarten 2","ErroreKindergarten2")
+            x = dwnld(df[data_nascita & data_fine_ass], "Scaricare tabella con errore Kindergarten 2","ErroreKindergarten2")
 
         return df
     else:
@@ -494,7 +494,7 @@ def check_ErroreFinanziamentoCompensativo(df):
                 (data_inizio & ore_compensative),
                 "errErroreFinanziamentoCompensativo",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore finanziamento compensativo","ErroreFinanziamentoCompensativo")
+            x = dwnld(df[data_inizio & ore_compensative], "Scaricare tabella con errore finanziamento compensativo","ErroreFinanziamentoCompensativo")
 
         return df
     else:
@@ -535,7 +535,7 @@ def check_FehlerEingewöhnung(df):
                 (data_inizio_minima & data_inizio_massima & ore_contrattualizzate),
                 "errFehlerEingewöhnung",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore Eingewöhnung","ErroreEingewöhnung")
+            x = dwnld(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate], "Scaricare tabella con errore Eingewöhnung","ErroreEingewöhnung")
 
         return df
     else:
@@ -577,7 +577,7 @@ def check_FehlerEingewöhnung543Lockdown(df):
                 (data_inizio_minima & data_inizio_massima & ore_543),
                 "errFehlerEingewöhnung543Lockdown",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore Eingewöhnung 543 Lockdown","ErroreLockdown543")
+            x = dwnld(df[data_inizio_minima & data_inizio_massima & ore_543], "Scaricare tabella con errore Eingewöhnung 543 Lockdown","ErroreLockdown543")
 
         return df
     else:
@@ -625,7 +625,7 @@ def check_ErroreCovid(df):
                 (data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)),
                 "errErroreCovid",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore Covid 1","ErroreCovid1")
+            x = dwnld(df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)], "Scaricare tabella con errore Covid 1","ErroreCovid1")
 
         return df
     else:
@@ -679,7 +679,7 @@ def check_ErroreCovid2(df):
                 ),
                 "errErroreCovid2",
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore Covid 2","ErroreCovid2")
+            x = dwnld(df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)], "Scaricare tabella con errore Covid 2","ErroreCovid2")
 
         return df
     else:
@@ -709,7 +709,7 @@ def check_GesamtstundenVertragszeitraum(
             )
             # settiamo il flag bool per la tabella finale
             df.loc[condizioneerrore, "errGesamtstundenVertragszeitraum"] = True
-            x = dwnld(df, "Scaricare tabella con errore ore complessive per durata contrattuale","ErroreOreComplessive")
+            x = dwnld(df[condizioneerrore], "Scaricare tabella con errore ore complessive per durata contrattuale","ErroreOreComplessive")
 
         return df
     # se non trovato errore il df è restituito come è stato ricevuto
@@ -740,7 +740,7 @@ def check_OreComplessiveSuperiore1920(df):
             df.loc[
                 condizionlogica & condizionelogica2, "errSuperatoOreMassime1920"
             ] = True
-            x = dwnld(df, "Scaricare tabella con errore ore complessive maggiore 1920","ErroreOre1920")
+            x = dwnld(df[condizionlogica & condizionelogica2], "Scaricare tabella con errore ore complessive maggiore 1920","ErroreOre1920")
 
         return df
     else:
