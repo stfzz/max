@@ -1103,7 +1103,7 @@ def dwnld(df, k, ff):
     if ff != "soloerrori":
         df = df.drop(df.columns[[16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34]], axis=1)
 
-    f = df.to_csv(sep=";").encode("utf-8")
+    f = df.to_csv(sep=";").encode("utf-8-sig") #dobbiamo usare questo altrimenti windoof sballa Umlaute
     st.download_button(
         label=k,
         data=f,
