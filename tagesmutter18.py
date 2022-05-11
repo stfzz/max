@@ -974,16 +974,16 @@ def make_df_solo_errori(dffinal):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.17)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.18)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
-    #if path.exists("storico.xlsx"):
-    #    c1, c2 = st.columns(2)
-    #    c1.info("Trovato file storico")
-    #    storico = c2.checkbox("caricare file storico?")
-    #    if storico:
-    #        pass
+    if path.exists("storico.xlsx"):
+        c1, c2 = st.columns(2)
+        c1.info("Trovato file storico")
+        storico = c2.checkbox("caricare file storico?")
+        if storico:
+            pass
 
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
