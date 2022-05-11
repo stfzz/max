@@ -49,6 +49,9 @@ def buildGrid(data):
 
 
 def errorChecksList():
+    # gestiamo tutto quello che riguarda i controlli da fare qui
+    # in seguito usiamo la key del dict per creare sia le checkbox
+    # sia per chiamare le funzioni
     error_dict = {
         "errCodFisc1": "Controllo formato codice fiscale",
         "errCodFisc2": "Controllo data nascita per codice fiscale",
@@ -73,7 +76,7 @@ def errorChecksList():
 
 ERRORDICT = errorChecksList()
 
-# aggiungiamo le colonne bool per ogni errore che intercettiamo
+# aggiungiamo le colonne bool per ogni errore che abbiamo definito in ERRORDICT
 # ci serve per creare la tabella finale e per avere uno storico
 def make_bool_columns(df):
     for e in ERRORDICT.keys():
@@ -113,15 +116,7 @@ def errFehlerEingewöhnung543Notbetreuung(df):
             "Trovato errore Eingewöhnung 543 Notbetreuung (data inizio >= 26.10.2020 e <= 16.11.2020 e ore 543 > 0)"
         )
         with expndr:
-            # st.table(df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate])
-            gridOptions = buildGrid(
-                df[data_inizio_minima & data_inizio_massima & ore_543]
-            )
-            AgGrid(
-                df[data_inizio_minima & data_inizio_massima & ore_543],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[data_inizio_minima & data_inizio_massima & ore_543])
             # settiamo la colonna bool
             df.loc[
                 (data_inizio_minima & data_inizio_massima & ore_543),
@@ -151,13 +146,7 @@ def errInizioMinoreFine(df):
             "Trovato errore date contrattuali (Vertragsbeginn > Vertragsende)"
         )
         with expndr:
-            # st.table(df[inizio_minore_fine])
-            gridOptions = buildGrid(df[inizio_minore_fine])
-            AgGrid(
-                df[inizio_minore_fine],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[inizio_minore_fine])
 
             df.loc[inizio_minore_fine, "errInizioMinoreFine"] = True
             x = dwnld(
@@ -181,18 +170,10 @@ def errCodFisc1(df):
         == False
     )
 
-    # usiamo lunghezza del dataframe > 0 per vedere se è stato trovato l'errore
-    # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
-    # l = len(df[codinvalido])
-
-    # if l > 0:
     if not df[codinvalido].empty:
         expndr = st.expander("Trovato errore formato del codice Fiscale")
         with expndr:
-            gridOptions = buildGrid(df[codinvalido])
-            AgGrid(
-                df[codinvalido], gridOptions=gridOptions, enable_enterprise_modules=True
-            )
+            make_grid(df[codinvalido])
             # settiamo il flag bool per la tabella finale
             df.loc[codinvalido, "errCodFisc1"] = True
             x = dwnld(
@@ -246,8 +227,7 @@ def errCodFisc2(df):  # da finire, fa acqua da tutte le parti
             # lista dei due df con errori che concateniamo per fare un df
             frames = [dfnot40[~gg], df40[~gg40]]
             result = pd.concat(frames)
-            gridOptions = buildGrid(result)
-            AgGrid(result, gridOptions=gridOptions, enable_enterprise_modules=True)
+            make_grid(result)
             # non stiamo restituendo il df con errore gg nascita e non stiamo settando la colonna bool
 
     # condizione logica per ANNO NASCITA uguale anno codfisc
@@ -259,10 +239,7 @@ def errCodFisc2(df):  # da finire, fa acqua da tutte le parti
     if not dfcod[~anno].empty:
         expndr = st.expander("Trovato errore data nascita (anno) per codice fiscale")
         with expndr:
-            gridOptions = buildGrid(dfcod[~anno])
-            AgGrid(
-                dfcod[~anno], gridOptions=gridOptions, enable_enterprise_modules=True
-            )
+            make_grid(dfcod[~anno])
             # non stiamo settando la colonna bool
 
         return df
@@ -277,12 +254,7 @@ def errErrorePresenza(df):
     if not df[ore_rendicontate_uguale_zero].empty:
         expndr = st.expander("Trovato errore presenza (Ore totali rendicontate = 0)")
         with expndr:
-            gridOptions = buildGrid(df[ore_rendicontate_uguale_zero])
-            AgGrid(
-                df[ore_rendicontate_uguale_zero],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[ore_rendicontate_uguale_zero])
             df.loc[ore_rendicontate_uguale_zero, "errErrorePresenza"] = True
             x = dwnld(
                 df[ore_rendicontate_uguale_zero],
@@ -306,8 +278,7 @@ def errAgeChild(df):
     if not df[giorni].empty:
         expndr = st.expander("Trovato errore età bambino (< 90 giorni)")
         with expndr:
-            gridOptions = buildGrid(df[giorni])
-            AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
+            make_grid(df[giorni])
             df.loc[
                 giorni,
                 "errAgeChild",
@@ -346,12 +317,7 @@ def errErroreDati543(df):
             "Trovato errore dati 543 (Vertragsende vor 05.03.20 UND Vertragsbeginn nach 18.05.20 dann dürfen Stunden 543 nicht 0 sein)"
         )
         with expndr:
-            gridOptions = buildGrid(df[errore_dati_543p1 & errore_dati_543p2])
-            AgGrid(
-                df[errore_dati_543p1 & errore_dati_543p2],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3])
             df.loc[
                 errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3,
                 "errErroreDati543",
@@ -379,8 +345,8 @@ def errFineAssistenzaMax4Anni(df):
             "Trovato errore fine contratto assistenza (Vertragsende darf höchstens 4 Jahre größer als Geburtsdatum sein)"
         )
         with expndr:
-            gridOptions = buildGrid(df[giorni])
-            AgGrid(df[giorni], gridOptions=gridOptions, enable_enterprise_modules=True)
+            make_grid(df[giorni])
+
             df.loc[
                 giorni,
                 "errFineAssistenzaMax4Anni",
@@ -408,12 +374,7 @@ def errKindergarten_1(df):
             "Trovato errore Kindergarten #1 (Geburtsdatum kleiner/gleich 28.02.2017 ist, dann muss Vertragende kleiner/gleich 15.09.2019)"
         )
         with expndr:
-            gridOptions = buildGrid(df[data_nascita & data_fine_assistenza])
-            AgGrid(
-                df[data_nascita & data_fine_assistenza],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[data_nascita & data_fine_assistenza])
             df.loc[
                 (data_nascita & data_fine_assistenza),
                 "errKindergarten_1",
@@ -443,13 +404,7 @@ def errKindergarten_2(df):
             "Trovato errore controllo Kindergarten #2 (Geburtsdatum größer/gleich 01.03.2017 muss Vertragende <= 15.09 des Geburtsjahrs +3 Jahre sein)"
         )
         with expndr:
-            gridOptions = buildGrid(df[data_nascita & data_fine_ass])
-            AgGrid(
-                df[data_nascita & data_fine_ass],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
-
+            make_grid(df[data_nascita & data_fine_ass])
             df.loc[
                 (data_nascita & data_fine_ass),
                 "errKindergarten_2",
@@ -483,12 +438,7 @@ def errErroreFinanziamentoCompensativo(df):
             "Trovato errore finanziamento compensativo (Data inizio >= 05.03.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0 )"
         )
         with expndr:
-            gridOptions = buildGrid(df[data_inizio & ore_compensative])
-            AgGrid(
-                df[data_inizio & ore_compensative],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[data_inizio & ore_compensative])
 
             df.loc[
                 (data_inizio & ore_compensative),
@@ -526,13 +476,8 @@ def errFehlerEingewöhnung(df):
             "Trovato errore Eingewöhnung (data inizio >= 13.02.2020 e <= 05.03.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0)"
         )
         with expndr:
-            gridOptions = buildGrid(
+            make_grid(
                 df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate]
-            )
-            AgGrid(
-                df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
             )
 
             df.loc[
@@ -572,14 +517,7 @@ def errFehlerEingewöhnung543Lockdown(df):
             "Trovato errore Eingewöhnung 543 Lockdown (Vertragsbeginn >= 13.02.2020 und <= 05.03.2020 e ore543 > 0)"
         )
         with expndr:
-            gridOptions = buildGrid(
-                df[data_inizio_minima & data_inizio_massima & ore_543]
-            )
-            AgGrid(
-                df[data_inizio_minima & data_inizio_massima & ore_543],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[data_inizio_minima & data_inizio_massima & ore_543])
 
             df.loc[
                 (data_inizio_minima & data_inizio_massima & ore_543),
@@ -624,13 +562,8 @@ def errErroreCovid(df):
             "Trovato errore Covid #1 (data inizio < 05.03.2020 e Ore543 > 0) oppure (data fine < 05.03.2020 e Ore733 > 0) oppure (data fine < 05.03.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0)"
         )
         with expndr:
-            gridOptions = buildGrid(
+            make_grid(
                 df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)]
-            )
-            AgGrid(
-                df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
             )
 
             df.loc[
@@ -673,19 +606,11 @@ def errErroreCovid2(df):
             "Trovato errore Covid #2 ((data inizio >= 24.11.2020 e ore543 >0) oppure (data inizio >= 24.11.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo >0))"
         )
         with expndr:
-            gridOptions = buildGrid(
+            make_grid(
                 df[
                     (data_inizio_ass & ore_543)
                     | (data_inizio_ass & ore_contrattualizzate)
                 ]
-            )
-            AgGrid(
-                df[
-                    (data_inizio_ass & ore_543)
-                    | (data_inizio_ass & ore_contrattualizzate)
-                ],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
             )
 
             df.loc[
@@ -724,12 +649,8 @@ def errGesamtstundenVertragszeitraum(
             "Trovato errore ore complessive per durata contrattuale (Gesamtstundenzahl (Abgerechnete Betreuungsstunden 2020 Gesamt) pro Kind (pro St.Nummer) darf nicht höher als 1920 sein)"
         )
         with expndr:
-            gridOptions = buildGrid(df[condizioneerrore])
-            AgGrid(
-                df[condizioneerrore],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[condizioneerrore])
+
             # settiamo il flag bool per la tabella finale
             df.loc[condizioneerrore, "errGesamtstundenVertragszeitraum"] = True
             x = dwnld(
@@ -757,12 +678,8 @@ def errSuperatoOreMassime1920(df):
     if not df[condizionlogica & condizionelogica2].empty:
         expndr = st.expander("Trovato errore ore complessive maggiore di 1920")
         with expndr:
-            gridOptions = buildGrid(df[condizionlogica & condizionelogica2])
-            AgGrid(
-                df[condizionlogica & condizionelogica2],
-                gridOptions=gridOptions,
-                enable_enterprise_modules=True,
-            )
+            make_grid(df[condizionlogica & condizionelogica2])
+
             # settiamo flag per tabella finale
             df.loc[
                 condizionlogica & condizionelogica2, "errSuperatoOreMassime1920"
@@ -779,6 +696,13 @@ def errSuperatoOreMassime1920(df):
 
 
 # fine checks
+
+
+def make_grid(dff):
+    # togliamo le colonne bool
+    dff = drop_columns(dff)
+    gridOptions = buildGrid(dff)
+    AgGrid(dff, gridOptions=gridOptions, enable_enterprise_modules=True)
 
 
 def get_data(uploaded_files, anno_riferimento):
@@ -960,34 +884,39 @@ def compute_hours(df, ar):
     return df
 
 
+def drop_columns(df):
+    df = df.drop(
+        df.columns[
+            [
+                16,
+                17,
+                18,
+                19,
+                20,
+                21,
+                22,
+                23,
+                24,
+                25,
+                26,
+                27,
+                28,
+                29,
+                30,
+                31,
+                32,
+                33,
+                34,
+            ]
+        ],
+        axis=1,
+    )
+    return df
+
+
 def dwnld(df, k, ff):
     if ff != "soloerrori":
-        df = df.drop(
-            df.columns[
-                [
-                    16,
-                    17,
-                    18,
-                    19,
-                    20,
-                    21,
-                    22,
-                    23,
-                    24,
-                    25,
-                    26,
-                    27,
-                    28,
-                    29,
-                    30,
-                    31,
-                    32,
-                    33,
-                    34,
-                ]
-            ],
-            axis=1,
-        )
+        df = drop_columns(df)
 
     f = df.to_csv(sep=";").encode(
         "utf-8-sig"
