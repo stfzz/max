@@ -938,14 +938,17 @@ def dwnld(df, k, ff):
 
 
 def make_df_solo_errori(dffinal):
-
+    condizione = []
     for e in ERRORDICT.keys():
         globals()[f"{e}"] = dffinal[e] == True
+        #condizione.append(globals()[f"{e}"])
 
+    #st.write(condizione)
     # almeno 1 errore per record
+
     # st.write([(str(globals()[f"{e}"].name) + " | ") for e in ERRORDICT.keys()])
 
-    # dffinal = dffinal[[str(globals()[f"{e}"].name) + " | " for e in ERRORDICT.keys()]]
+    #dffinal = dffinal([e  for e in condizione]
 
     # come fare per creare la condizione in automatico da ERRORDICT?
 
