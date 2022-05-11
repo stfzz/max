@@ -90,7 +90,9 @@ def make_bool_columns(df):
 def check_data2(df, checks):
     for e in checks.keys():
         if checks[e]:
-            funzione = globals()[e] # il nome della funzione da chiamare è contenuta nel dict
+            funzione = globals()[
+                e
+            ]  # il nome della funzione da chiamare è contenuta nel dict
             df = funzione(df)
     return df
 
@@ -747,23 +749,28 @@ def get_data(uploaded_files, anno_riferimento):
 
 def choose_checks2():
     checks = {}
-    attivatutti = st.checkbox("Selezionare/deselezionare tutti i controlli")
+
     st.write("")
-    c1, c2, c3, c4 = st.columns(4)
+
     a = 1
 
     # creiamo i checkbox e i valori dinamicamente in base al dictionary che contiene
     # la lista degli errori
-
-    for e in ERRORDICT.keys():
-        locals()[f"{e}"] = locals()[f"c{a}"].checkbox(
-            ERRORDICT[e], value=attivatutti, key=e
-        )
-        if a == 4:
-            a = 1
-        else:
-            a = a + 1
-        checks[e] = locals()[f"{e}"]
+    expndr = st.expander("SCELTA CONTROLLI")
+    c1, c2, c3, c4 = expndr.columns(4)
+    with expndr:
+        st.write("")
+        attivatutti = expndr.checkbox("Selezionare/deselezionare tutti i controlli")
+        for e in ERRORDICT.keys():
+            # creiamo i nomi delle variabili in modo dinamico
+            locals()[f"{e}"] = locals()[f"c{a}"].checkbox(
+                ERRORDICT[e], value=attivatutti, key=e
+            )
+            if a == 4:
+                a = 1
+            else:
+                a = a + 1
+            checks[e] = locals()[f"{e}"]
 
     return checks
 
@@ -931,33 +938,19 @@ def dwnld(df, k, ff):
 
 
 def make_df_solo_errori(dffinal):
-    errCodFisc1 = dffinal["errCodFisc1"] == True
-    errCodFisc2 = dffinal["errCodFisc2"] == True
-    errAgeChild = dffinal["errAgeChild"] == True
-    errInizioMinoreFine = dffinal["errInizioMinoreFine"] == True
-    errErrorePresenza = dffinal["errErrorePresenza"] == True
-    errErroreDati543 = dffinal["errErroreDati543"] == True
-    errFineAssistenzaMax4Anni = dffinal["errFineAssistenzaMax4Anni"] == True
-    errKindergarten_1 = dffinal["errKindergarten_1"] == True
-    errKindergarten_2 = dffinal["errKindergarten_2"] == True
-    errErroreFinanziamentoCompensativo = (
-        dffinal["errErroreFinanziamentoCompensativo"] == True
-    )
-    errFehlerEingewöhnung = dffinal["errFehlerEingewöhnung"] == True
-    errErroreCovid = dffinal["errErroreCovid"] == True
-    errErroreCovid2 = dffinal["errErroreCovid2"] == True
-    errFehlerEingewöhnung543Lockdown = (
-        dffinal["errFehlerEingewöhnung543Lockdown"] == True
-    )
-    errFehlerEingewöhnung543Notbetreuung = (
-        dffinal["errFehlerEingewöhnung543Notbetreuung"] == True
-    )
-    errGesamtstundenVertragszeitraum = (
-        dffinal["errGesamtstundenVertragszeitraum"] == True
-    )
-    errSuperatoOreMassime1920 = dffinal["errSuperatoOreMassime1920"] == True
+
+    for e in ERRORDICT.keys():
+        globals()[f"{e}"] = dffinal[e] == True
 
     # almeno 1 errore per record
+    #st.write([(str(globals()[f"{e}"].name) + " | ") for e in ERRORDICT.keys()])
+
+    #dffinal = dffinal[[str(globals()[f"{e}"].name) + " | " for e in ERRORDICT.keys()]]
+
+
+
+    # come fare per creare la condizione in automatico da ERRORDICT?
+    
     dffinal = dffinal[
         errCodFisc1
         | errCodFisc2
@@ -996,20 +989,24 @@ def app():
 
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
-        "Scegliere file Excel da caricare", accept_multiple_files=True
+        "SCEGLIERE FILE EXCEL DA CONTROLLARE", accept_multiple_files=True
     )
 
-    anno_riferimento = st.selectbox("Anno riferimento", ("2020", "2021", "2022"))
+    anno_riferimento = st.selectbox("ANNO RIFERIMENTO", ("2020", "2021", "2022"))
 
     checks = choose_checks2()
 
     f = st.form("Auswahl", clear_on_submit=True)
     flag = 0
     with f:
+        # soluzione un po' assurda, ma vogliamo spostare gli expander fuori dalla form
+
         submit = f.form_submit_button("Iniziare elaborazione e controllo errori")
         if submit:
-            # soluzione un po' assurda, ma vogliamo spostare gli expander fuori dalla form
-            flag = 1
+            if len(uploaded_files) == 0:
+                st.error("Nessun file caricato!")
+            else:
+                flag = 1
 
     # se button pigiato, allora esegui...
     if flag == 1:
