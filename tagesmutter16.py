@@ -1,6 +1,7 @@
 from this import d
 from unicodedata import name
 
+from os import path
 import pandas as pd
 import streamlit as st
 import numpy as np
@@ -83,51 +84,16 @@ def make_bool_columns(df):
 
 
 # lancia i singoli controlli in base alla selezione fatta in GUI
-# siccome l'output GUI avviene nelle subroutine, l'expander usato
-# è creato nella form che attiva l'elaborazione
-def check_data(df, checks):
-    if "check_codfisc" in checks:
-        df = check_codfisc(df)
-    if "age_child" in checks:
-        df = check_AgeChild(df)
-    if "check_InizioMinoreFine" in checks:
-        df = check_InizioMinoreFine(df)
-    if "check_ErrorePresenza" in checks:
-        df = check_ErrorePresenza(df)
-    if "check_ErroreDati543" in checks:
-        df = check_ErroreDati543(df)
-    if "check_FineAssistenzaMax4Anni" in checks:
-        df = check_FineAssistenzaMax4Anni(df)
-    if "check_Kindergarten_1" in checks:
-        df = check_Kindergarten_1(df)
-    if "check_Kindergarten_2" in checks:
-        df = check_Kindergarten_2(df)
-    if "check_ErroreFinanziamentoCompensativo" in checks:
-        df = check_ErroreFinanziamentoCompensativo(df)
-    if "check_FehlerEingewöhnung" in checks:
-        df = check_FehlerEingewöhnung(df)
-    if "check_ErroreCovid" in checks:
-        df = check_ErroreCovid(df)
-    if "check_ErroreCovid2" in checks:
-        df = check_ErroreCovid2(df)
-    if "check_codfisc2" in checks:
-        df = check_codfisc2(df)
-    if "check_FehlerEingewöhnung543Lockdown" in checks:
-        df = check_FehlerEingewöhnung543Lockdown(df)
-
-    if "check_FehlerEingewöhnung543Notbetreuung" in checks:
-        df = check_FehlerEingewöhnung543Notbetreuung(df)
-
-    if "check_GesamtstundenVertragszeitraum" in checks:
-        df = check_GesamtstundenVertragszeitraum(df)
-
-    if "check_OreComplessiveSuperiore1920" in checks:
-        df = check_OreComplessiveSuperiore1920(df)
-
+def check_data2(df, checks):
+    for e in checks.keys():
+        if checks[e]:
+            # st.write(e + " is " + str(checks[e]))
+            funzione = globals()[e]
+            df = funzione(df)
     return df
 
 
-def check_FehlerEingewöhnung543Notbetreuung(df):
+def errFehlerEingewöhnung543Notbetreuung(df):
     data_inizio_minima = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
         >= KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMIN
@@ -173,7 +139,7 @@ def check_FehlerEingewöhnung543Notbetreuung(df):
         return df
 
 
-def check_InizioMinoreFine(df):
+def errInizioMinoreFine(df):
 
     inizio_minore_fine = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
@@ -206,7 +172,7 @@ def check_InizioMinoreFine(df):
         return df
 
 
-def check_codfisc(df):
+def errCodFisc1(df):
     # definiamo condizione logica trovare per codice fiscale invalido usando regex
     codinvalido = (
         df["Codice fiscale"].str.match(
@@ -241,7 +207,7 @@ def check_codfisc(df):
         return df
 
 
-def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
+def errCodFisc2(df):  # da finire, fa acqua da tutte le parti
     # condizione logica via regex per usare solo records con codfisc nel formato corretto
     codvalido = (
         df["Codice fiscale"].str.match(
@@ -274,7 +240,7 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
     # l40 = len(df40[~gg40])
 
     # se trovato errore maschhietti o femmine
-    if not dfnot40[~gg].empty or not df40[~gg40].empty > 0:
+    if not dfnot40[~gg].empty or not df40[~gg40].empty:
         expndr = st.expander("Trovato errore data nascita (giorno) per codice fiscale")
         with expndr:
             # lista dei due df con errori che concateniamo per fare un df
@@ -305,7 +271,7 @@ def check_codfisc2(df):  # da finire, fa acqua da tutte le parti
         return df
 
 
-def check_ErrorePresenza(df):
+def errErrorePresenza(df):
     # condizione logica
     ore_rendicontate_uguale_zero = df["Ore totali rendicontate per il 2020"] == 0
     if not df[ore_rendicontate_uguale_zero].empty:
@@ -330,7 +296,7 @@ def check_ErrorePresenza(df):
         return df
 
 
-def check_AgeChild(df):
+def errAgeChild(df):
 
     giorni = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
@@ -357,7 +323,7 @@ def check_AgeChild(df):
         return df
 
 
-def check_ErroreDati543(df):
+def errErroreDati543(df):
 
     errore_dati_543p1 = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
@@ -401,7 +367,7 @@ def check_ErroreDati543(df):
         return df
 
 
-def check_FineAssistenzaMax4Anni(df):
+def errFineAssistenzaMax4Anni(df):
 
     giorni = (
         df["Data fine contratto\n(o data fine assistenza se diversa) *"]
@@ -430,7 +396,7 @@ def check_FineAssistenzaMax4Anni(df):
         return df
 
 
-def check_Kindergarten_1(df):
+def errKindergarten_1(df):
 
     data_nascita = df["Data di nascita"] <= KONTROLLEKINDERGARTEN_DATANASCITA_1
     data_fine_assistenza = (
@@ -463,7 +429,7 @@ def check_Kindergarten_1(df):
         return df
 
 
-def check_Kindergarten_2(df):
+def errKindergarten_2(df):
 
     data_nascita = df["Data di nascita"] >= KONTROLLEKINDERGARTEN_DATANASCITA_2
     data_fine_ass = df[
@@ -499,7 +465,7 @@ def check_Kindergarten_2(df):
         return df
 
 
-def check_ErroreFinanziamentoCompensativo(df):
+def errErroreFinanziamentoCompensativo(df):
 
     data_inizio = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
@@ -539,7 +505,7 @@ def check_ErroreFinanziamentoCompensativo(df):
         return df
 
 
-def check_FehlerEingewöhnung(df):
+def errFehlerEingewöhnung(df):
 
     data_inizio_minima = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
@@ -584,7 +550,7 @@ def check_FehlerEingewöhnung(df):
         return df
 
 
-def check_FehlerEingewöhnung543Lockdown(df):
+def errFehlerEingewöhnung543Lockdown(df):
 
     data_inizio_minima = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
@@ -630,7 +596,7 @@ def check_FehlerEingewöhnung543Lockdown(df):
         return df
 
 
-def check_ErroreCovid(df):
+def errErroreCovid(df):
 
     data_fine_assistenza = (
         df["Data fine contratto\n(o data fine assistenza se diversa) *"]
@@ -682,7 +648,7 @@ def check_ErroreCovid(df):
         return df
 
 
-def check_ErroreCovid2(df):
+def errErroreCovid2(df):
 
     data_inizio_ass = (
         df["Data inizio contratto (o data inizio assistenza se diversa)"]
@@ -743,7 +709,7 @@ def check_ErroreCovid2(df):
         return df
 
 
-def check_GesamtstundenVertragszeitraum(
+def errGesamtstundenVertragszeitraum(
     df,
 ):  # incompleto perchè va verificato su più file Excel
     # la condizione logica per trovare l'errore
@@ -778,7 +744,7 @@ def check_GesamtstundenVertragszeitraum(
         return df
 
 
-def check_OreComplessiveSuperiore1920(df):
+def errSuperatoOreMassime1920(df):
     condizionlogica = (
         df.groupby("Codice fiscale")["Codice fiscale"].transform("count") > 1
     )
@@ -856,196 +822,26 @@ def get_data(uploaded_files, anno_riferimento):
     return dfout
 
 
-# def choose_checks2():
-#    checks = {}
-#    attivatutti = st.checkbox("Selezionare/deselezionare tutti i controlli")
-#    st.write("")
-#    c1, c2, c3, c4 = st.columns(4)
-
-#    if attivatutti:
-#        for e in ERRORDICT.keys():
-#            for a in range(4):
-#                e = c+a.checkbox(ERRORDICT[e], value=True, key = e)
-#    else:
-#        for e in ERRORDICT.keys():
-#            for a in range(4):
-#                e = c+a.checkbox(ERRORDICT[e], value=False, key = e)
-
-
-def choose_checks():
+def choose_checks2():
     checks = {}
     attivatutti = st.checkbox("Selezionare/deselezionare tutti i controlli")
     st.write("")
-
     c1, c2, c3, c4 = st.columns(4)
+    a = 1
 
-    if attivatutti:
-        checkcodfisc = c1.checkbox(
-            "Controllo formato codice fiscale", value=True, key="checkcodfiscale"
-        )
-        checkage = c2.checkbox("Controllo età bambino", value=True, key="checkage")
-        checkInizioMinoreFine = c3.checkbox(
-            "Controllo date contrattuali", value=True, key="checkInizioMinoreFine"
-        )
-        checkErrorePresenza = c4.checkbox(
-            "Controllo errore presenza", value=True, key="checkErrorePresenza"
-        )
-        checkErroreDati543 = c1.checkbox(
-            "Controllo errore dati 543", value=True, key="checkErroreDati543"
-        )
-        checkFineAssistenzaMax4Anni = c2.checkbox(
-            "Controllo fine contratto assistenza",
-            value=True,
-            key="checkFineAssistenzaMax4Anni",
-        )
-        checkKindergarten1 = c3.checkbox(
-            "Controllo Kindergarten #1", value=True, key="checkKindergarten1"
-        )
-        checkKindergarten2 = c4.checkbox(
-            "Controllo Kindergarten #2", value=True, key="checkKindergarten2"
-        )
-        checkErroreFinanziamentoCompensativo = c1.checkbox(
-            "Controllo finanziamento compensativo",
-            value=True,
-            key="checkErroreFinanziamentoCompensativo",
-        )
-        checkFehlerEingewöhnung = c2.checkbox(
-            "Controllo Fehler Eingewöhnung",
-            value=True,
-            key="checkFehlerEingewöhnung",
-        )
-        checkErroreCovid = c3.checkbox(
-            "Controllo Covid #1", value=True, key="checkErroreCovid"
-        )
-        checkErroreCovid2 = c4.checkbox(
-            "Controllo Covid #2", value=True, key="checkErroreCovid2"
-        )  #
-        checkcodfisc2 = c1.checkbox(
-            "Controllo data nascita per codice fiscale",
-            value=True,
-            key="checkcodfisc2",
-        )
-        checkFehlerEingewöhnung543Lockdown = c2.checkbox(
-            "Controllo Fehler Eingewöhnung 543 Lockdown",
-            value=True,
-            key="check_FehlerEingewöhnung543Lockdown",
-        )
-        checkFehlerEingewöhnung543Notbetreuung = c3.checkbox(
-            "Controllo Fehler Eingewöhnung 543 Notbetreuung",
-            value=True,
-            key="check_FehlerEingewöhnung543Notbetreuung",
-        )
-        checkGesamtstundenVertragszeitraum = c4.checkbox(
-            "Controllo ore complessive per periodo contrattuale",
-            value=True,
-            key="check_GesamtstundenVertragszeitraum",
-        )
-        checkOreComplessiveSuperiore1920 = c1.checkbox(
-            "Controllo ore complessive superiore a 1920",
-            value=True,
-            key="check_OreComplessiveSuperiore1920",
-        )
-    else:
-        checkcodfisc = c1.checkbox(
-            "Controllo formato codice fiscale", value=False, key="checkcodfiscale"
-        )
-        checkage = c2.checkbox("Controllo età bambino", value=False, key="checkage")
-        checkInizioMinoreFine = c3.checkbox(
-            "Controllo date contrattuali", value=False, key="checkInizioMinoreFine"
-        )
-        checkErrorePresenza = c4.checkbox(
-            "Controllo errore presenza", value=False, key="checkErrorePresenza"
-        )
-        checkErroreDati543 = c1.checkbox(
-            "Controllo errore dati 543", value=False, key="checkErroreDati543"
-        )
-        checkFineAssistenzaMax4Anni = c2.checkbox(
-            "Controllo fine contratto assistenza",
-            value=False,
-            key="checkFineAssistenzaMax4Anni",
-        )
-        checkKindergarten1 = c3.checkbox(
-            "Controllo Kindergarten #1", value=False, key="checkKindergarten1"
-        )
-        checkKindergarten2 = c4.checkbox(
-            "Controllo Kindergarten #2", value=False, key="checkKindergarten2"
-        )
-        checkErroreFinanziamentoCompensativo = c1.checkbox(
-            "Controllo finanziamento compensativo",
-            value=False,
-            key="checkErroreFinanziamentoCompensativo",
-        )
-        checkFehlerEingewöhnung = c2.checkbox(
-            "Controllo Fehler Eingewöhnung",
-            value=False,
-            key="checkFehlerEingewöhnung",
-        )
-        checkErroreCovid = c3.checkbox(
-            "Controllo Covid #1", value=False, key="checkErroreCovid"
-        )
-        checkErroreCovid2 = c4.checkbox(
-            "Controllo Covid #2", value=False, key="checkErroreCovid2"
-        )
-        checkcodfisc2 = c1.checkbox(
-            "Controllo data nascita per codice fiscale",
-            value=False,
-            key="checkcodfisc2",
-        )
-        checkFehlerEingewöhnung543Lockdown = c2.checkbox(
-            "Controllo Fehler Eingewöhnung 543 Lockdown",
-            value=False,
-            key="check_FehlerEingewöhnung543Lockdown",
-        )
-        checkFehlerEingewöhnung543Notbetreuung = c3.checkbox(
-            "Controllo Fehler Eingewöhnung 543 Notbetreuung",
-            value=False,
-            key="check_FehlerEingewöhnung543Notbetreuung",
-        )
-        checkGesamtstundenVertragszeitraum = c4.checkbox(
-            "Controllo ore complessive per perriodo contrattuale",
-            value=False,
-            key="check_GesamtstundenVertragszeitraum",
-        )
-        checkOreComplessiveSuperiore1920 = c1.checkbox(
-            "Controllo ore complessive superiore a 1920",
-            value=False,
-            key="check_OreComplessiveSuperiore1920",
-        )
+    # creiamo i checkbox e i valori dinamicamente in base al dictionary che contiene
+    # la lista degli errori
 
-    if checkcodfisc:
-        checks["check_codfisc"] = True
-    if checkage:
-        checks["age_child"] = True
-    if checkInizioMinoreFine:
-        checks["check_InizioMinoreFine"] = True
-    if checkErrorePresenza:
-        checks["check_ErrorePresenza"] = True
-    if checkErroreDati543:
-        checks["check_ErroreDati543"] = True
-    if checkFineAssistenzaMax4Anni:
-        checks["check_FineAssistenzaMax4Anni"] = True
-    if checkKindergarten1:
-        checks["check_Kindergarten_1"] = True
-    if checkKindergarten2:
-        checks["check_Kindergarten_2"] = True
-    if checkErroreFinanziamentoCompensativo:
-        checks["check_ErroreFinanziamentoCompensativo"] = True
-    if checkFehlerEingewöhnung:
-        checks["check_FehlerEingewöhnung"] = True
-    if checkErroreCovid:
-        checks["check_ErroreCovid"] = True
-    if checkErroreCovid2:
-        checks["check_ErroreCovid2"] = True
-    if checkcodfisc2:
-        checks["check_codfisc2"] = True
-    if checkFehlerEingewöhnung543Lockdown:
-        checks["check_FehlerEingewöhnung543Lockdown"] = True
-    if checkFehlerEingewöhnung543Notbetreuung:
-        checks["check_FehlerEingewöhnung543Notbetreuung"] = True
-    if checkGesamtstundenVertragszeitraum:
-        checks["check_GesamtstundenVertragszeitraum"] = True
-    if checkOreComplessiveSuperiore1920:
-        checks["check_OreComplessiveSuperiore1920"] = True
+    for e in ERRORDICT.keys():
+        locals()[f"{e}"] = locals()[f"c{a}"].checkbox(
+            ERRORDICT[e], value=attivatutti, key=e
+        )
+        if a == 4:
+            a = 1
+        else:
+            a = a + 1
+        checks[e] = locals()[f"{e}"]
+
     return checks
 
 
@@ -1258,11 +1054,18 @@ def make_df_solo_errori(dffinal):
 
 def app():
 
-    # carichiamo qui la tabella dello storico??
-
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
     st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.16)")
     dfout = None
+
+    # carichiamo qui la tabella dello storico??
+    if path.exists("storico.xlsx"):
+        c1, c2 = st.columns(2)
+        c1.info("Trovato file storico")
+        storico = c2.checkbox("caricare file storico?")
+        if storico:
+            pass
+
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
         "Scegliere file Excel da caricare", accept_multiple_files=True
@@ -1270,7 +1073,7 @@ def app():
 
     anno_riferimento = st.selectbox("Anno riferimento", ("2020", "2021", "2022"))
 
-    checks = choose_checks()
+    checks = choose_checks2()
 
     f = st.form("Auswahl", clear_on_submit=True)
     flag = 0
@@ -1285,7 +1088,7 @@ def app():
         dfout = get_data(uploaded_files, anno_riferimento)
         if dfout is not None:
             dfout = compute_hours(dfout, anno_riferimento)
-            dffinal = check_data(dfout, checks)
+            dffinal = check_data2(dfout, checks)
             st.write("")
             st.info("Tabelle elaborate")
 
