@@ -10,7 +10,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
-    page_title="Controllo TAGESMÜTTER", layout="wide", page_icon="😌"  # 👽
+    page_title="Controllo TAGESMÜTTER", layout="wide", page_icon="😋"  # 👽
 )
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020", format="%d.%m.%Y")
@@ -755,11 +755,11 @@ def choose_checks2():
     a = 1
     # creiamo le checkbox e i valori dinamicamente in base al dictionary che contiene
     # la lista degli errori
-    expndr = st.expander("SCELTA CONTROLLI")
+    expndr = st.expander("SCELTA CONTROLLI", expanded = True)
     c1, c2, c3, c4 = expndr.columns(4)
     with expndr:
         st.write("")
-        attivatutti = expndr.checkbox("Selezionare/deselezionare tutti i controlli")
+        attivatutti = expndr.checkbox("Selezionare/deselezionare tutti i controlli", value = True)
         for e in ERRORDICT.keys():
             # creiamo i nomi delle variabili in modo dinamico
             locals()[f"{e}"] = locals()[f"c{a}"].checkbox(
@@ -769,6 +769,7 @@ def choose_checks2():
                 a = 1
             else:
                 a = a + 1
+            # scriviamo nel dict il nome del controllo e il valore bool della checkbox
             checks[e] = locals()[f"{e}"]
 
     return checks
@@ -943,6 +944,8 @@ def make_df_solo_errori(dffinal):
         if "condizione" not in locals():
             condizione = dffinal[e] == True
         else:
+            # soluzione semplice: concateniamo le condizioni 
+            # per i controlli fatti
             condizione = condizione | dffinal[e] == True
 
     # creiamo df con soli record con errore
@@ -954,16 +957,16 @@ def make_df_solo_errori(dffinal):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.18)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.19)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
     if path.exists("storico.xlsx"):
         c1, c2 = st.columns(2)
         c1.info("Trovato file storico")
-        storico = c2.checkbox("caricare file storico?")
-        if storico:
-            pass
+    #    storico = c2.checkbox("caricare file storico?")
+    #    if storico:
+    #        pass
 
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
@@ -998,18 +1001,14 @@ def app():
             # la tabella finale, contiene TUTTI i record
             expndr = st.expander("TABELLA FINALE ELABORATA - TUTTI I DATI")
             with expndr:
-                gridOptions = buildGrid(dffinal)
-                AgGrid(dffinal, gridOptions=gridOptions, enable_enterprise_modules=True)
+                make_grid(dffinal)
                 dwnld(dffinal, "SCARICARE TABELLA CON TUTTI I DATI", "tuttidati")
 
             # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
             dffinalerr = make_df_solo_errori(dffinal)
             expndr = st.expander("TABELLA FINALE ELABORATA - SOLO ERRORI")
             with expndr:
-                gridOptions = buildGrid(dffinalerr)
-                AgGrid(
-                    dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True
-                )
+                make_grid(dffinalerr)
                 dwnld(dffinalerr, "SCARICARE TABELLA CON SOLO ERRORI", "soloerrori")
 
         # salviamo qui la tabella finale??
