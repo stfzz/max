@@ -100,8 +100,8 @@ def check_data2(df, checks):
             # ed è lo stesso nome dell'errore
             funzione = globals()[e]
             # abbiamo creato il nome della funzione da chiamare e salvato in "funzione"
-            # in questo modo vengono chiamate tutte le funzioni che hanno la 
-            # checkbox == True  
+            # in questo modo vengono chiamate tutte le funzioni che hanno la
+            # checkbox == True
             df = funzione(df)
     return df
 
@@ -198,7 +198,7 @@ def errCodFisc1(df):
         return df
 
 
-def errCodFisc2(df):  # da finire, fa acqua da tutte le parti
+def errCodFisc2(df):
     # condizione logica via regex per usare solo records con codfisc nel formato corretto
     codvalido = (
         df["Codice fiscale"].str.match(
@@ -235,27 +235,53 @@ def errCodFisc2(df):  # da finire, fa acqua da tutte le parti
     ].astype(int)
 
     # condizione logica per MESE NASCITA
-    # prima creiamo un dict con le mappature lettera-numeroMese
-    # mesi = {'a':'01','b':'02','c':'03', 'd':'04', 'e':'05', 'h':'06','l':'07','m':'08','p':'09','r':'10','s':'11','t':'12'}
-    
-    mese = dfcod["Data di nascita"].dt.month == dfcod["Codice fiscale"].str[8:9].astype('str').replace({'A':'1','B':'2','C':'3','D':'4', 'E':'5', 'H':'6','L':'7','M':'8','P':'9','R':'10','S':'11','T':'12'}).astype(int)
+    mese = dfcod["Data di nascita"].dt.month == dfcod["Codice fiscale"].str[8:9].astype(
+        "str"
+    ).replace(
+        {
+            "A": "1",
+            "B": "2",
+            "C": "3",
+            "D": "4",
+            "E": "5",
+            "H": "6",
+            "L": "7",
+            "M": "8",
+            "P": "9",
+            "R": "10",
+            "S": "11",
+            "T": "12",
+        }
+    ).astype(
+        int
+    )
 
     # se trovato errore maschhietti o femmine o mese o anno per maschi/femmine
-    if not dfcod[~mese].empty or not dfnot40[~gg].empty or not df40[~gg40].empty or not dfcod[~anno].empty:
-        expndr = st.expander("Trovato errore data nascita (giorno o mese o anno) per codice fiscale")
+    if (
+        not dfcod[~mese].empty
+        or not dfnot40[~gg].empty
+        or not df40[~gg40].empty
+        or not dfcod[~anno].empty
+    ):
+        expndr = st.expander(
+            "Trovato errore data nascita (giorno o mese o anno) per codice fiscale"
+        )
         with expndr:
             # lista dei df con errori che concateniamo per fare un unico df
-            frames = [dfnot40[~gg], df40[~gg40], dfcod[~mese], dfcod[~anno]] 
+            frames = [dfnot40[~gg], df40[~gg40], dfcod[~mese], dfcod[~anno]]
             result = pd.concat(frames)
             make_grid(result)
-            #settiamo il flag bool per i codfisc che sono presenti in results
-            df.loc[df['Codice fiscale'].isin(result['Codice fiscale']), "errCodFisc2"] = True
+            # settiamo il flag bool per i codfisc che sono presenti in results
+            df.loc[
+                df["Codice fiscale"].isin(result["Codice fiscale"]), "errCodFisc2"
+            ] = True
 
         return df
 
     # se non trovato errore il df è restituito come è stato ricevuto
     else:
         return df
+
 
 
 def errErrorePresenza(df):
@@ -762,11 +788,13 @@ def choose_checks2():
     a = 1
     # creiamo le checkbox e i valori dinamicamente in base al dictionary che contiene
     # la lista degli errori
-    expndr = st.expander("SCELTA CONTROLLI", expanded = True)
+    expndr = st.expander("SCELTA CONTROLLI", expanded=True)
     c1, c2, c3, c4 = expndr.columns(4)
     with expndr:
         st.write("")
-        attivatutti = expndr.checkbox("Selezionare/deselezionare tutti i controlli", value = True)
+        attivatutti = expndr.checkbox(
+            "Selezionare/deselezionare tutti i controlli", value=True
+        )
         for e in ERRORDICT.keys():
             # creiamo i nomi delle variabili in modo dinamico
             locals()[f"{e}"] = locals()[f"c{a}"].checkbox(
@@ -954,10 +982,10 @@ def make_df_solo_errori(dffinal):
         if "condizione" not in locals():
             condizione = dffinal[e] == True
         else:
-            # soluzione semplice: concateniamo le condizioni 
+            # soluzione semplice: concateniamo le condizioni
             # per i controlli fatti
             condizione = condizione | dffinal[e] == True
-    #st.write(condizione)
+    # st.write(condizione)
     # creiamo df con soli record con errore
     dffinal = dffinal[condizione]
 
@@ -1024,7 +1052,9 @@ def app():
                 # facciamo la grid qui così evitiamo che vengano
                 # droppate le colonne flag bool
                 gridOptions = buildGrid(dffinalerr)
-                AgGrid(dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True)
+                AgGrid(
+                    dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True
+                )
                 dwnld(dffinalerr, "SCARICARE TABELLA CON SOLO ERRORI", "soloerrori")
 
         # salviamo qui la tabella finale??
