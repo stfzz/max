@@ -93,9 +93,11 @@ def make_bool_columns(df):
 # lancia i singoli controlli in base alla selezione fatta in GUI
 def check_data2(df, checks):
     for e in checks.keys():
-        # se esiste vediamo se è True
+        # per ogni errore vediamo se è stato scelto come checkbox
+        # se è true, eseguiamo...
         if checks[e]:
             # il nome della funzione da chiamare è contenuta nel dict
+            # ed è lo stesso nome dell'errore
             funzione = globals()[e]
             # abbiamo creato il nome della funzione da chiamare e salvato in "funzione"
             # in questo modo vengono chiamate tutte le funzioni che hanno la 
