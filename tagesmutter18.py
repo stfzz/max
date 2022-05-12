@@ -711,7 +711,6 @@ def get_data(uploaded_files, anno_riferimento):
     st.info("Sono stati caricati " + str(len(uploaded_files)) + " files")
     status = st.empty()
     for uploaded_file in uploaded_files:
-        # st.write(uploaded_file.name)
         try:
             status.info("[*] " + uploaded_file.name + " caricato")
             df = pd.read_excel(uploaded_file)
@@ -719,6 +718,7 @@ def get_data(uploaded_files, anno_riferimento):
             st.error(uploaded_file.name + " non è un file Excel")
             continue
 
+        # lasciamo prepare_data qui?
         try:
             status.info("[*] " + uploaded_file.name + " elaborato")
             df = prepare_data(df, uploaded_file, anno_riferimento)
@@ -728,8 +728,6 @@ def get_data(uploaded_files, anno_riferimento):
                 + " --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione"
             )
             continue
-        # meglio lasciare prepare_data qui
-        # altrimenti diventa difficile estrarre comune ed ente
 
         # se dfout non esiste lo creiamo
         if dfout is None:
@@ -749,12 +747,9 @@ def get_data(uploaded_files, anno_riferimento):
 
 def choose_checks2():
     checks = {}
-
     st.write("")
-
     a = 1
-
-    # creiamo i checkbox e i valori dinamicamente in base al dictionary che contiene
+    # creiamo le checkbox e i valori dinamicamente in base al dictionary che contiene
     # la lista degli errori
     expndr = st.expander("SCELTA CONTROLLI")
     c1, c2, c3, c4 = expndr.columns(4)
@@ -938,39 +933,17 @@ def dwnld(df, k, ff):
 
 
 def make_df_solo_errori(dffinal):
-    condizione = []
+    # creiamo la condizione logica
+    # almeno un errore per tipologia errore
     for e in ERRORDICT.keys():
-        globals()[f"{e}"] = dffinal[e] == True
-        #condizione.append(globals()[f"{e}"])
+        if "condizione" not in locals():
+            condizione = dffinal[e] == True
+        else:
+            condizione = condizione | dffinal[e] == True
 
-    #st.write(condizione)
-    # almeno 1 errore per record
+    # creiamo df con soli record con errore
+    dffinal = dffinal[condizione]
 
-    # st.write([(str(globals()[f"{e}"].name) + " | ") for e in ERRORDICT.keys()])
-
-    #dffinal = dffinal([e  for e in condizione]
-
-    # come fare per creare la condizione in automatico da ERRORDICT?
-
-    dffinal = dffinal[
-        errCodFisc1
-        | errCodFisc2
-        | errAgeChild
-        | errInizioMinoreFine
-        | errErrorePresenza
-        | errErroreDati543
-        | errFineAssistenzaMax4Anni
-        | errKindergarten_1
-        | errKindergarten_2
-        | errErroreFinanziamentoCompensativo
-        | errFehlerEingewöhnung
-        | errErroreCovid
-        | errErroreCovid2
-        | errFehlerEingewöhnung543Lockdown
-        | errFehlerEingewöhnung543Notbetreuung
-        | errGesamtstundenVertragszeitraum
-        | errSuperatoOreMassime1920
-    ]
     return dffinal
 
 
@@ -1001,7 +974,7 @@ def app():
     flag = 0
     with f:
         # soluzione un po' assurda, ma vogliamo spostare gli expander fuori dalla form
-
+        # altrimenti non possiamo usare il button per download
         submit = f.form_submit_button("Iniziare elaborazione e controllo errori")
         if submit:
             if len(uploaded_files) == 0:
