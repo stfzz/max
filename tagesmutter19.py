@@ -93,10 +93,13 @@ def make_bool_columns(df):
 # lancia i singoli controlli in base alla selezione fatta in GUI
 def check_data2(df, checks):
     for e in checks.keys():
+        # se esiste vediamo se è True
         if checks[e]:
-            funzione = globals()[
-                e
-            ]  # il nome della funzione da chiamare è contenuta nel dict
+            # il nome della funzione da chiamare è contenuta nel dict
+            funzione = globals()[e]
+            # abbiamo creato il nome della funzione da chiamare e salvato in "funzione"
+            # in questo modo vengono chiamate tutte le funzioni che hanno la 
+            # checkbox == True  
             df = funzione(df)
     return df
 
@@ -201,12 +204,15 @@ def errCodFisc2(df):  # da finire, fa acqua da tutte le parti
         )
         == True
     )
-    # potremmo fare a meno di usare un nuovo df
+    # potremmo fare a meno di usare un nuovo df??
     dfcod = df[codvalido]
+
     # condizione logica per i maschietti
     ggnot40 = dfcod["Codice fiscale"].str[9:11].astype(int) < 40
+
     # condizione logica per e femmine, che hanno giorno nascita da 40 in poi
     g40 = dfcod["Codice fiscale"].str[9:11].astype(int) > 40
+
     # nuovi df per maschietti e femmine
     df40 = dfcod[g40]
     dfnot40 = dfcod[ggnot40]
@@ -221,33 +227,30 @@ def errCodFisc2(df):  # da finire, fa acqua da tutte le parti
         "Codice fiscale"
     ].str[9:11].astype(int)
 
-    # invertiamo la condizione logica per trovare errori
-    # l = len(dfnot40[~gg])
-    # l40 = len(df40[~gg40])
-
-    # se trovato errore maschhietti o femmine
-    if not dfnot40[~gg].empty or not df40[~gg40].empty:
-        expndr = st.expander("Trovato errore data nascita (giorno) per codice fiscale")
-        with expndr:
-            # lista dei due df con errori che concateniamo per fare un df
-            frames = [dfnot40[~gg], df40[~gg40]]
-            result = pd.concat(frames)
-            make_grid(result)
-            # non stiamo restituendo il df con errore gg nascita e non stiamo settando la colonna bool
-
     # condizione logica per ANNO NASCITA uguale anno codfisc
     anno = dfcod["Data di nascita"].dt.year == 2000 + dfcod["Codice fiscale"].str[
         6:8
     ].astype(int)
-    # invertiamo condizione logica per trovare errore
-    # trovato almeno un errore
-    if not dfcod[~anno].empty:
-        expndr = st.expander("Trovato errore data nascita (anno) per codice fiscale")
+
+    # condizione logica per MESE NASCITA
+    # prima creiamo un dict con le mappature lettera-numeroMese
+    mesi = {'a':'01','b':'02','c':'03', 'd':'04', 'e':'05', 'h':'06','l':'07','m':'08','p':'09','r':'10','s':'11','t':'12'}
+    
+    #mese = dfcod["Data di nascita"].dt.month == mesi[dfcod["Codice fiscale"].str[8:9].astype('str')].astype(int)
+
+    # se trovato errore maschhietti o femmine o anno per maschi/femmine
+    if not dfnot40[~gg].empty or not df40[~gg40].empty or not dfcod[~anno].empty:
+        expndr = st.expander("Trovato errore data nascita (giorno/anno) per codice fiscale")
         with expndr:
-            make_grid(dfcod[~anno])
-            # non stiamo settando la colonna bool
+            # lista dei df con errori che concateniamo per fare un unico df
+            frames = [dfnot40[~gg], df40[~gg40], dfcod[~anno]] 
+            result = pd.concat(frames)
+            make_grid(result)
+            #settiamo il flag bool per i codfisc che sono presenti in results
+            df.loc[df['Codice fiscale'].isin(result['Codice fiscale']), "errCodFisc2"] = True
 
         return df
+
     # se non trovato errore il df è restituito come è stato ricevuto
     else:
         return df
@@ -1001,14 +1004,20 @@ def app():
             # la tabella finale, contiene TUTTI i record
             expndr = st.expander("TABELLA FINALE ELABORATA - TUTTI I DATI")
             with expndr:
-                make_grid(dffinal)
+                # facciamo la grid qui così evitiamo che vengano
+                # droppate le colonne flag bool
+                gridOptions = buildGrid(dffinal)
+                AgGrid(dffinal, gridOptions=gridOptions, enable_enterprise_modules=True)
                 dwnld(dffinal, "SCARICARE TABELLA CON TUTTI I DATI", "tuttidati")
 
             # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
             dffinalerr = make_df_solo_errori(dffinal)
             expndr = st.expander("TABELLA FINALE ELABORATA - SOLO ERRORI")
             with expndr:
-                make_grid(dffinalerr)
+                # facciamo la grid qui così evitiamo che vengano
+                # droppate le colonne flag bool
+                gridOptions = buildGrid(dffinalerr)
+                AgGrid(dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True)
                 dwnld(dffinalerr, "SCARICARE TABELLA CON SOLO ERRORI", "soloerrori")
 
         # salviamo qui la tabella finale??
