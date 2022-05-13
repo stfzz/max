@@ -40,7 +40,7 @@ KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMAX = pd.to_datetime(
 ERRORDICT = {
     # gestiamo tutto quello che riguarda i controlli da fare qui
     # in seguito usiamo la key del dict per creare sia le checkbox
-    # sia per chiamare le funzioni, sia per creare la condizione logica
+    # sia per chiamare le funzioni, sia per creare la colonna bool
     # per la tabella con soli errori
     #
     # in sostanza: vogliamo che ERRORDICT sia il riferimento unico
@@ -70,7 +70,7 @@ ERRORDICT = {
 
 def buildGrid(data):
     gb = GridOptionsBuilder.from_dataframe(data)
-    # gb.configure_pagination()
+    #gb.configure_pagination()
     gb.configure_side_bar()
     gb.configure_selection(selection_mode="multiple", use_checkbox=True)
     gb.configure_default_column(
