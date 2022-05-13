@@ -252,6 +252,20 @@ def errCodFisc2(df):
             "R": "10",
             "S": "11",
             "T": "12",
+            "F": "99",
+            "G": "99",
+            "I": "99",
+            "J": "99",
+            "K": "99",
+            "N": "99",
+            "O": "99",
+            "Q": "99",
+            "U": "99",
+            "V": "99",
+            "W": "99",
+            "X": "99",
+            "Y": "99",
+            "Z": "99"
         }
     ).astype(
         int
@@ -833,9 +847,18 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     # estraiamo comune e nome ente da dove ci aspettiamo che siano
     # nel dataframe creato dal singolo file Excel
     traeger = df.iloc[2]
-    traeger = traeger[3].title()
-    gemeinde = df.iloc[3]
-    gemeinde = gemeinde[3]
+    # ente e traeger in e4/e5
+    if type(traeger[4]) == type('string'):
+        traeger = traeger[4].title()
+        gemeinde = df.iloc[3]
+        gemeinde = gemeinde[4]
+
+    else:
+        traeger = traeger[3].title()
+        gemeinde = df.iloc[3]
+        gemeinde = gemeinde[4]
+
+    #st.write(f"ente = {traeger} e comune = {gemeinde}")
 
     # cancelliamo le righe che non ci servono
     df = df.drop(labels=range(0, 8), axis=0)
