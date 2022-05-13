@@ -757,12 +757,11 @@ def get_data(uploaded_files, anno_riferimento):
 
         # lasciamo prepare_data qui?
         try:
-            status.info("[*] " + uploaded_file.name + " elaborato")
+            status.info(f"[*] {uploaded_file.name} elaborato")
             df = prepare_data(df, uploaded_file, anno_riferimento)
         except:
             st.error(
-                uploaded_file.name
-                + " --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione"
+                f"{uploaded_file.name} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione"
             )
             continue
 
