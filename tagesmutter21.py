@@ -70,7 +70,7 @@ ERRORDICT = {
 
 def buildGrid(data):
     gb = GridOptionsBuilder.from_dataframe(data)
-    #gb.configure_pagination()
+    # gb.configure_pagination()
     gb.configure_side_bar()
     gb.configure_selection(selection_mode="multiple", use_checkbox=True)
     gb.configure_default_column(
@@ -281,7 +281,6 @@ def errCodFisc2(df):
     # se non trovato errore il df è restituito come è stato ricevuto
     else:
         return df
-
 
 
 def errErrorePresenza(df):
