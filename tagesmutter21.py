@@ -10,7 +10,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
-    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="🥸"  # 👽
+    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😀"  # 👽
 )
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020", format="%d.%m.%Y")
@@ -207,6 +207,7 @@ def errCodFisc2(df):
         == True
     )
     # potremmo fare a meno di usare un nuovo df??
+    # è più semplice se usiamo un nuovo df
     dfcod = df[codvalido]
 
     # condizione logica per i maschietti
@@ -963,7 +964,7 @@ def dwnld(df, k, ff):
 
     f = df.to_csv(sep=";").encode(
         "utf-8-sig"
-    )  # dobbiamo usare questo altrimenti windoof sballa Umlaute
+    )  # dobbiamo usare questo encoding altrimenti windoof di m***a sballa Umlaute
     st.download_button(
         label=k,
         data=f,
@@ -978,13 +979,14 @@ def make_df_solo_errori(dffinal):
     # creiamo la condizione logica
     # almeno un errore per tipologia errore
     for e in ERRORDICT.keys():
+        # prima instanziazione di "condizione"
+        # in questo modo viene creato con type giusto
         if "condizione" not in locals():
             condizione = dffinal[e] == True
         else:
             # soluzione semplice: concateniamo le condizioni
             # per i controlli fatti
             condizione = condizione | dffinal[e] == True
-    # st.write(condizione)
     # creiamo df con soli record con errore
     dffinal = dffinal[condizione]
 
