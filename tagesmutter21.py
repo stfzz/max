@@ -852,13 +852,12 @@ def prepare_data(df, uploaded_file, anno_riferimento):
         traeger = traeger[4].title()
         gemeinde = df.iloc[3]
         gemeinde = gemeinde[4]
-
+    # ente/traeger in d4/d5
     else:
         traeger = traeger[3].title()
         gemeinde = df.iloc[3]
         gemeinde = gemeinde[4]
 
-    #st.write(f"ente = {traeger} e comune = {gemeinde}")
 
     # cancelliamo le righe che non ci servono
     df = df.drop(labels=range(0, 8), axis=0)
