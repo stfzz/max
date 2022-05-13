@@ -698,7 +698,7 @@ def errGesamtstundenVertragszeitraum(
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
     if not df[condizioneerrore].empty:
         expndr = st.expander(
-            "Trovato errore ore complessive per durata contrattuale (Gesamtstundenzahl (Abgerechnete Betreuungsstunden 2020 Gesamt) pro Kind (pro St.Nummer) darf nicht höher als 1920 sein)"
+            "Trovato errore ore -Proportion Maximalstunden überschritten-"
         )
         with expndr:
             make_grid(df[condizioneerrore])
@@ -718,26 +718,26 @@ def errGesamtstundenVertragszeitraum(
 
 
 def errSuperatoOreMassime1920(df):
-    condizionlogica = (
-        df.groupby("Codice fiscale")["Codice fiscale"].transform("count") > 1
-    )
+    #condizionlogica = (
+    #    df.groupby("Codice fiscale")["Codice fiscale"].transform("count") > 1
+    #)
     condizionelogica2 = (
         df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform(
             "sum"
         )
         > 1920
     )
-    if not df[condizionlogica & condizionelogica2].empty:
+    if not df[condizionelogica2].empty:
         expndr = st.expander("Trovato errore ore complessive maggiore di 1920")
         with expndr:
-            make_grid(df[condizionlogica & condizionelogica2])
+            make_grid(df[condizionelogica2])
 
             # settiamo flag per tabella finale
             df.loc[
-                condizionlogica & condizionelogica2, "errSuperatoOreMassime1920"
+                condizionelogica2, "errSuperatoOreMassime1920"
             ] = True
             x = dwnld(
-                df[condizionlogica & condizionelogica2],
+                df[condizionelogica2],
                 "Scaricare tabella con errore ore complessive maggiore 1920",
                 "ErroreOre1920",
             )
@@ -856,8 +856,7 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     else:
         traeger = traeger[3].title()
         gemeinde = df.iloc[3]
-        gemeinde = gemeinde[4]
-
+        gemeinde = gemeinde[3]
 
     # cancelliamo le righe che non ci servono
     df = df.drop(labels=range(0, 8), axis=0)
@@ -884,15 +883,25 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df[
         "Data fine contratto\n(o data fine assistenza se diversa) *"
     ].astype("datetime64[ns]")
-
+        
     # convertiamo colonne in data
-    df["Data di nascita"] = df["Data di nascita"].astype("datetime64[ns]")
-    df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df[
-        "Data fine contratto\n(o data fine assistenza se diversa) *"
-    ].astype("datetime64[ns]")
-    df["Data inizio contratto (o data inizio assistenza se diversa)"] = df[
-        "Data inizio contratto (o data inizio assistenza se diversa)"
-    ].astype("datetime64[ns]")
+    try:
+        df["Data di nascita"] = df["Data di nascita"].astype("datetime64[ns]")
+    except:
+        st.error(f"{uploaded_file.name} --> data di nascita contiene valori non data")
+    try:
+        df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df[
+            "Data fine contratto\n(o data fine assistenza se diversa) *"
+        ].astype("datetime64[ns]")
+    except:
+        st.error(f"{uploaded_file.name} --> data fine contratto contiene valori non data")
+
+    try:
+        df["Data inizio contratto (o data inizio assistenza se diversa)"] = df[
+            "Data inizio contratto (o data inizio assistenza se diversa)"
+        ].astype("datetime64[ns]")
+    except:
+        st.error(f"{uploaded_file.name} --> data inizio contratto contiene valori non data")
 
     # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
     df["Numero \nprogressivo"] = pd.to_numeric(
