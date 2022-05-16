@@ -89,6 +89,7 @@ def make_bool_columns(df):
 
     return df
 
+make
 
 # lancia i singoli controlli in base alla selezione fatta in GUI
 def check_data2(df, checks):
@@ -265,7 +266,7 @@ def errCodFisc2(df):
             "W": "99",
             "X": "99",
             "Y": "99",
-            "Z": "99"
+            "Z": "99",
         }
     ).astype(
         int
@@ -718,9 +719,9 @@ def errGesamtstundenVertragszeitraum(
 
 
 def errSuperatoOreMassime1920(df):
-    #condizionlogica = (
+    # condizionlogica = (
     #    df.groupby("Codice fiscale")["Codice fiscale"].transform("count") > 1
-    #)
+    # )
     condizionelogica2 = (
         df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform(
             "sum"
@@ -733,9 +734,7 @@ def errSuperatoOreMassime1920(df):
             make_grid(df[condizionelogica2])
 
             # settiamo flag per tabella finale
-            df.loc[
-                condizionelogica2, "errSuperatoOreMassime1920"
-            ] = True
+            df.loc[condizionelogica2, "errSuperatoOreMassime1920"] = True
             x = dwnld(
                 df[condizionelogica2],
                 "Scaricare tabella con errore ore complessive maggiore 1920",
@@ -848,7 +847,7 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     # nel dataframe creato dal singolo file Excel
     traeger = df.iloc[2]
     # ente e traeger in e4/e5
-    if type(traeger[4]) == type('string'):
+    if type(traeger[4]) == type("string"):
         traeger = traeger[4].title()
         gemeinde = df.iloc[3]
         gemeinde = gemeinde[4]
@@ -883,7 +882,7 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     df["Data fine contratto\n(o data fine assistenza se diversa) *"] = df[
         "Data fine contratto\n(o data fine assistenza se diversa) *"
     ].astype("datetime64[ns]")
-        
+
     # convertiamo colonne in data
     try:
         df["Data di nascita"] = df["Data di nascita"].astype("datetime64[ns]")
@@ -894,14 +893,18 @@ def prepare_data(df, uploaded_file, anno_riferimento):
             "Data fine contratto\n(o data fine assistenza se diversa) *"
         ].astype("datetime64[ns]")
     except:
-        st.error(f"{uploaded_file.name} --> data fine contratto contiene valori non data")
+        st.error(
+            f"{uploaded_file.name} --> data fine contratto contiene valori non data"
+        )
 
     try:
         df["Data inizio contratto (o data inizio assistenza se diversa)"] = df[
             "Data inizio contratto (o data inizio assistenza se diversa)"
         ].astype("datetime64[ns]")
     except:
-        st.error(f"{uploaded_file.name} --> data inizio contratto contiene valori non data")
+        st.error(
+            f"{uploaded_file.name} --> data inizio contratto contiene valori non data"
+        )
 
     # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
     df["Numero \nprogressivo"] = pd.to_numeric(
