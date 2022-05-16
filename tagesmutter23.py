@@ -93,7 +93,6 @@ def make_bool_columns(df):
     return df
 
 
-
 # lancia i singoli controlli in base alla selezione fatta in GUI
 def check_data2(df, checks):
     for e in checks.keys():
@@ -733,11 +732,22 @@ def errGesamtstundenVertragszeitraum(
         "Ore totali rendicontate per il 2020"
     ]
 
-    # usiamo lunghezza del dataframe > 0 per vedere se è stato trovato l'errore
+    condizionelogica2 = (
+        1920
+        * (
+            df.groupby("Codice fiscale")[
+                "Ore totali rendicontate per il 2020"
+            ].transform("sum")
+            / 366
+        )
+    ) < df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform(
+        "sum"
+    )
+
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
     if not df[condizioneerrore].empty:
         expndr = st.expander(
-            "Trovato errore ore -Proportion Maximalstunden überschritten-"
+            "Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verfificato!)"
         )
         with expndr:
             make_grid(df[condizioneerrore])
@@ -785,9 +795,7 @@ def errSuperatoOreMassime1920(df):
 
 
 def errBambinoInPiuComuni(df):
-    condizionlogica = (
-        df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
-     )
+    condizionlogica = df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
 
     if not df[condizionlogica].empty:
         expndr = st.expander("Trovato bambini presenti in più comuni")
@@ -796,26 +804,37 @@ def errBambinoInPiuComuni(df):
 
             # settiamo flag bool per tabella finale
             df.loc[condizionlogica, "errBambinoInPiuComuni"] = True
-            x = dwnld(df[condizionlogica], "Scaricare tabella con bambini in più comuni","errBambinoInPiuComuni")
+            x = dwnld(
+                df[condizionlogica],
+                "Scaricare tabella con bambini in più comuni",
+                "errBambinoInPiuComuni",
+            )
         return df
     else:
         return df
-    
+
 
 def errPresentiAnnotazioni(df):
-    condizione = df["Cognome e nome bambino"].str.contains("[@_!#$%^&*()<>?/|}{~:]") == True
+    condizione = (
+        df["Cognome e nome bambino"].str.contains("[@_!#$%^&*()<>?/|}{~:]") == True
+    )
 
     if not df[condizione].empty:
         expndr = st.expander("Trovati bambini con annotazioni")
         with expndr:
             make_grid(df[condizione])
 
-            #settiamo flag bool
+            # settiamo flag bool
             df.loc[condizione, "errPresentiAnnotazioni"] = True
-            x = dwnld(df[condizione], "Scaricare tabella con bambini con annotazioni","errPresentiAnnotazioni")
+            x = dwnld(
+                df[condizione],
+                "Scaricare tabella con bambini con annotazioni",
+                "errPresentiAnnotazioni",
+            )
         return df
     else:
-        return df            
+        return df
+
 
 # fine checks
 
