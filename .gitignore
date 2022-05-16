@@ -1,5 +1,6 @@
 .DS_Store
 Pipfile.lock
+storico.xlsx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -132,3 +133,4 @@ dmypy.json
 .pyre/
 .DS_Store
 Pipfile.lock
+storico.xlsx
