@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4f07c22ea400ab3bf46cfd862d378f010a9c4d8c0d7467a9daf7339af2a0a6ee"
+            "sha256": "e1cb8510e5e436c42e48a59ad468c0cc2087fcce3f61b2c46b72172a37787886"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -266,6 +266,14 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'",
             "version": "==0.7.1"
+        },
+        "digautoprofile": {
+            "hashes": [
+                "sha256:7eeb0eeaad78040522135fa4b466c2891371ea23e19af31da4baad545a241801",
+                "sha256:8a2e8a433929cadd3e4325d765c5ce53d88f7b100b1e4edfd7bd34ae81d140aa"
+            ],
+            "index": "pypi",
+            "version": "==0.1.3"
         },
         "entrypoints": {
             "hashes": [
