@@ -508,6 +508,7 @@ def errErroreFinanziamentoCompensativo2(df):
     else:
         return df
 
+
 def errErroreFinanziamentoCompensativo(df):
 
     data_inizio = (
@@ -1019,6 +1020,7 @@ def drop_columns(df):
                 32,
                 33,
                 34,
+                35,
             ]
         ],
         axis=1,
