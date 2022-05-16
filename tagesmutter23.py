@@ -63,7 +63,7 @@ ERRORDICT = {
     "errErroreCovid2": "Controllo Covid #2",
     "errFehlerEingewöhnung543Lockdown": "Controllo Fehler Eingewöhnung 543 Lockdown",
     "errFehlerEingewöhnung543Notbetreuung": "Controllo Fehler Eingewöhnung 543 Notbetreuung",
-    "errGesamtstundenVertragszeitraum": "Controllo ore complessive per periodo contrattuale",
+    "errGesamtstundenVertragszeitraum": "Controllo ore complessive periodo contrattuale",
     "errSuperatoOreMassime1920": "Controllo ore complessive superiore a 1920",
     "errErroreFinanziamentoCompensativo2": "Controllo finanziamento compensativo #2",
     "errBambinoInPiuComuni": "Bambino presente in più comuni",
@@ -732,7 +732,8 @@ def errGesamtstundenVertragszeitraum(
         "Ore totali rendicontate per il 2020"
     ]
 
-    condizionelogica2 = ((1920 * (df.groupby("Codice fiscale")["GiorniAssistenzaAnnoRiferimento"].transform("sum")) / 366)) < df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform("sum")
+    # non sappiamo perché ma la condizione di cui sopra basta per trovare l'errore
+    #condizionelogica2 = ((1920 * (df.groupby("Codice fiscale")["GiorniAssistenzaAnnoRiferimento"].transform("sum")) / 366)) < df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform("sum")
 
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
     if not df[condizioneerrore].empty:
