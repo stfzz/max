@@ -89,7 +89,7 @@ def make_bool_columns(df):
 
     return df
 
-make
+
 
 # lancia i singoli controlli in base alla selezione fatta in GUI
 def check_data2(df, checks):
