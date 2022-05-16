@@ -65,6 +65,7 @@ ERRORDICT = {
     "errFehlerEingewöhnung543Notbetreuung": "Controllo Fehler Eingewöhnung 543 Notbetreuung",
     "errGesamtstundenVertragszeitraum": "Controllo ore complessive per periodo contrattuale",
     "errSuperatoOreMassime1920": "Controllo ore complessive superiore a 1920",
+    "errErroreFinanziamentoCompensativo2": "Controllo finanziamento compensativo #2",
 }
 
 
@@ -472,6 +473,40 @@ def errKindergarten_2(df):
     else:
         return df
 
+
+def errErroreFinanziamentoCompensativo2(df):
+
+    data_fine = (
+        df["Data fine contratto\n(o data fine assistenza se diversa) *"]
+        <= DATAINIZIOMINIMA
+    )
+    ore_compensative = (
+        df[
+            "Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)"
+        ]
+        > 0
+    )
+
+    if not df[data_fine & ore_compensative].empty:
+        expndr = st.expander(
+            "Trovato errore finanziamento compensativo #2 (Data fine <= 18.05.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0 )"
+        )
+        with expndr:
+            make_grid(df[data_fine & ore_compensative])
+
+            df.loc[
+                (data_fine & ore_compensative),
+                "errErroreFinanziamentoCompensativo2",
+            ] = True
+            x = dwnld(
+                df[data_fine & ore_compensative],
+                "Scaricare tabella con errore finanziamento compensativo #2",
+                "ErroreFinanziamentoCompensativo2",
+            )
+
+        return df
+    else:
+        return df
 
 def errErroreFinanziamentoCompensativo(df):
 
