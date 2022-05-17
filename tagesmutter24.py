@@ -1183,9 +1183,9 @@ def app():
     dfout = None
 
     # carichiamo qui la tabella dello storico??
-    if path.exists("storico.xlsx"):
-        c1, c2 = st.columns(2)
-        c1.info("Trovato file storico")
+    #if path.exists("storico.xlsx"):
+    #    c1, c2 = st.columns(2)
+    #    c1.info("Trovato file storico")
     #    storico = c2.checkbox("caricare file storico?")
     #    if storico:
     #        pass
