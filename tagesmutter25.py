@@ -1179,7 +1179,7 @@ def make_df_solo_errori(dffinal):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.24)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.25)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??

@@ -9,7 +9,7 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from this import d
 
 st.set_page_config(
-    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃👽"  # 👽
+    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃"  # 👽
 )
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020", format="%d.%m.%Y")
@@ -1179,7 +1179,7 @@ def make_df_solo_errori(dffinal):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.24)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.25)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
