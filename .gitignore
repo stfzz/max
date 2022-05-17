@@ -1,3 +1,4 @@
+# my shit
 .DS_Store
 Pipfile.lock
 storico.xlsx
@@ -133,4 +134,5 @@ dmypy.json
 .pyre/
 .DS_Store
 Pipfile.lock
+storico.xlsx
 storico.xlsx
