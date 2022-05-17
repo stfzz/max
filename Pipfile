@@ -10,7 +10,6 @@ openpyxl = "*"
 streamlit-aggrid = "*"
 xlsxwriter = "*"
 streamlit = "~=1.8"
-jupyter = "*"
 protobuf = "==3.20.1"
 digautoprofile = "*"
 
