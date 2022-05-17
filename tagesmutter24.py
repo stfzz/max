@@ -769,11 +769,21 @@ def errGesamtstundenVertragszeitraum(
     df,
 ):  # incompleto perchè va verificato su più file Excel
     # la condizione logica per trovare l'errore
-    # condizioneerrore = ((1920 * (df["GiorniAssistenzaAnnoRiferimento"])) / 366) < df[
-    #    "Ore totali rendicontate per il 2020"
-    # ]
+    condizioneerrore1 = ((1920 * (df["GiorniAssistenzaAnnoRiferimento"])) / 366) < df[
+        "Ore totali rendicontate per il 2020"
+    ]
 
-    condizioneerrore = (
+    conta_cod_fiscale = df.groupby("Codice fiscale")["Codice fiscale"].transform("count") == 1
+
+    # presenza errore in caso di codfisc che occorre solo una volta
+    df1 = df[condizioneerrore1 & conta_cod_fiscale]
+
+
+
+
+
+
+    condizioneerrore2 = (
         (
             1920
             * (
@@ -787,17 +797,18 @@ def errGesamtstundenVertragszeitraum(
         "sum"
     )
 
-    if not df[condizioneerrore].empty:
+
+    if not df[condizioneerrore2].empty:
         expndr = st.expander(
             "Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verificato!)"
         )
         with expndr:
-            make_grid(df[condizioneerrore])
+            make_grid(df[condizioneerrore2])
 
             # settiamo il flag bool per la tabella finale
-            df.loc[condizioneerrore, "errGesamtstundenVertragszeitraum"] = True
+            df.loc[condizioneerrore2, "errGesamtstundenVertragszeitraum"] = True
             x = dwnld(
-                df[condizioneerrore],
+                df[condizioneerrore2],
                 "Scaricare tabella con errore ore complessive per durata contrattuale",
                 "ErroreOreComplessive",
             )
