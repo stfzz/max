@@ -12,6 +12,7 @@ xlsxwriter = "*"
 streamlit = "*"
 protobuf = "==3.20.1"
 digautoprofile = "*"
+mypy = "*"
 
 [dev-packages]
 black = "*"
