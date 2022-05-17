@@ -59,17 +59,18 @@ ERRORDICT = {
     "errKindergarten_1": "Controllo Kindergarten #1",
     "errKindergarten_2": "Controllo Kindergarten #2",
     "errErroreFinanziamentoCompensativo": "Controllo finanziamento compensativo",
-    "errFehlerEingewöhnung": "Controllo Fehler Eingewöhnung",
+    "errErroreFinanziamentoCompensativo2": "Controllo finanziamento compensativo #2",
     "errErroreCovid": "Controllo Covid #1",
     "errErroreCovid2": "Controllo Covid #2",
+    "errErroreCovid3": " Controllo Covid #3",
+    "errFehlerEingewöhnung": "Controllo Fehler Eingewöhnung",
     "errFehlerEingewöhnung543Lockdown": "Controllo Fehler Eingewöhnung 543 Lockdown",
     "errFehlerEingewöhnung543Notbetreuung": "Controllo Fehler Eingewöhnung 543 Notbetreuung",
     "errGesamtstundenVertragszeitraum": "Controllo ore complessive periodo contrattuale",
     "errSuperatoOreMassime1920": "Controllo ore complessive superiore a 1920",
-    "errErroreFinanziamentoCompensativo2": "Controllo finanziamento compensativo #2",
     "errBambinoInPiuComuni": "Bambino presente in più comuni",
     "errPresentiAnnotazioni": "Bambini con annotazioni",
-    "errErroreCovid3": " Controllo Covid #3",
+
 }
 
 
