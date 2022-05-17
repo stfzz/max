@@ -10,7 +10,7 @@ from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 st.set_page_config(
-    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="👽"  # 👽
+    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃"  # 👽
 )
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020", format="%d.%m.%Y")
@@ -26,7 +26,8 @@ KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_2 = pd.to_datetime(
 )
 EINGEWÖHNUNG_DATAINIZIO_MIN = pd.to_datetime("13.02.2020", format="%d.%m.%Y")
 EINGEWÖHNUNG_DATAINIZIO_MAX = pd.to_datetime("05.03.2020", format="%d.%m.%Y")
-KONTROLLECOVID_DATAFINEASSISTENZA = pd.to_datetime("03.05.2020", format="%d.%m.%Y")
+KONTROLLECOVID_DATAINIZIOASSISTENZA = pd.to_datetime("05.03.2020", format="%d.%m.%Y")
+KONTROLLECOVID_DATAFINEASSISTENZA2 = pd.to_datetime("30.10.2020", format="%d.%m.%Y")
 KONTROLLECOVID2_DATAINIZIOASSISTENZA = pd.to_datetime("24.11.2020", format="%d.%m.%Y")
 KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMIN = pd.to_datetime(
     "26.10.2020", format="%d.%m.%Y"
@@ -68,6 +69,7 @@ ERRORDICT = {
     "errErroreFinanziamentoCompensativo2": "Controllo finanziamento compensativo #2",
     "errBambinoInPiuComuni": "Bambino presente in più comuni",
     "errPresentiAnnotazioni": "Bambini con annotazioni",
+    "errErroreCovid3": " Controllo Covid #3",
 }
 
 
@@ -628,7 +630,7 @@ def errErroreCovid(df):
 
     data_fine_assistenza = (
         df["Data fine contratto\n(o data fine assistenza se diversa) *"]
-        < KONTROLLECOVID_DATAFINEASSISTENZA
+        < KONTROLLECOVID_DATAINIZIOASSISTENZA
     )
     ore_543 = (
         df[
@@ -724,6 +726,47 @@ def errErroreCovid2(df):
         return df
 
 
+def errErroreCovid3(df):
+    data_inizio = (
+        df["Data inizio contratto (o data inizio assistenza se diversa)"]
+        >= KONTROLLECOVID_DATAINIZIOASSISTENZA
+    )
+    data_fine = (
+        df["Data fine contratto\n(o data fine assistenza se diversa) *"]
+        <= KONTROLLECOVID_DATAFINEASSISTENZA2
+    )
+    ore_543 = (
+        df[
+            "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020"
+        ]
+        > 0
+    )
+
+    if not df[data_inizio & data_fine & ore_543].empty:
+        expndr = st.expander(
+            "Trovato errore Covid #3 (inizio >= 5/5/20 e fine <= 30/10/20 e ore543 > 0)"
+        )
+        with expndr:
+            make_grid(df[data_inizio & data_fine & ore_543])
+
+            df.loc[
+                data_inizio & data_fine & ore_543,
+                "errErroreCovid3",
+            ] = True
+            x = dwnld(
+                df[
+                    (data_inizio_ass & ore_543)
+                    | (data_inizio_ass & ore_contrattualizzate)
+                ],
+                "Scaricare tabella con errore Covid 2",
+                "ErroreCovid2",
+            )
+
+        return df
+    else:
+        return df
+
+
 def errGesamtstundenVertragszeitraum(
     df,
 ):  # incompleto perchè va verificato su più file Excel
@@ -733,12 +776,12 @@ def errGesamtstundenVertragszeitraum(
     ]
 
     # non sappiamo perché ma la condizione di cui sopra basta per trovare l'errore
-    #condizionelogica2 = ((1920 * (df.groupby("Codice fiscale")["GiorniAssistenzaAnnoRiferimento"].transform("sum")) / 366)) < df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform("sum")
+    # condizionelogica2 = ((1920 * (df.groupby("Codice fiscale")["GiorniAssistenzaAnnoRiferimento"].transform("sum")) / 366)) < df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform("sum")
 
     # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
     if not df[condizioneerrore].empty:
         expndr = st.expander(
-            "Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verfificato!)"
+            "Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verificato!)"
         )
         with expndr:
             make_grid(df[condizioneerrore])
@@ -941,6 +984,12 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     # cancelliamo le righe che non ci servono
     df = df.drop(labels=range(0, 8), axis=0)
 
+    # dobbiamo intercettare se c'è un * nella colonna del numero progressivo
+    # sostituire l'asterisco con 99 e aggiungere l'asterisco al nome
+    cond = df["Numero \nprogressivo"] == "*"
+    df.loc[cond, "Numero \nprogressivo"] = 99
+    df.loc[cond, "Cognome e nome bambino"] += " *"
+
     # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
     df["Numero \nprogressivo"] = pd.to_numeric(
         df["Numero \nprogressivo"], errors="coerce"
@@ -1037,7 +1086,7 @@ def compute_hours(df, ar):
     )  # aggiungiamo colonna e mettiamo anno riferimento
     df["GiorniAssistenzaAnnoRiferimento"] = (
         df["fineNorm"] - df["inizioNorm"]
-    ).dt.days  # calcolo giorni anno riferimento
+    ).dt.days + 1  # calcolo giorni anno riferimento. +1 perché il giorno fine va incluso
     # df = df.drop(['inizio','fine'], axis=1) # le colonne non servono più
     return df
 
