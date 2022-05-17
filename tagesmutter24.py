@@ -1122,6 +1122,7 @@ def drop_columns(df):
                 33,
                 34,
                 35,
+                36,
             ]
         ],
         axis=1,
