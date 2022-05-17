@@ -744,7 +744,7 @@ def errErroreCovid3(df):
 
     if not df[data_inizio & data_fine & ore_543].empty:
         expndr = st.expander(
-            "Trovato errore Covid #3 (inizio >= 5/5/20 e fine <= 30/10/20 e ore543 > 0)"
+            "Trovato errore Covid #3 (inizio >= 5/3/20 e fine <= 30/10/20 e ore543 > 0)"
         )
         with expndr:
             make_grid(df[data_inizio & data_fine & ore_543])
@@ -754,10 +754,7 @@ def errErroreCovid3(df):
                 "errErroreCovid3",
             ] = True
             x = dwnld(
-                df[
-                    (data_inizio_ass & ore_543)
-                    | (data_inizio_ass & ore_contrattualizzate)
-                ],
+                df[data_inizio & data_fine & ore_543],
                 "Scaricare tabella con errore Covid 2",
                 "ErroreCovid2",
             )
@@ -771,14 +768,24 @@ def errGesamtstundenVertragszeitraum(
     df,
 ):  # incompleto perchè va verificato su più file Excel
     # la condizione logica per trovare l'errore
-    condizioneerrore = ((1920 * (df["GiorniAssistenzaAnnoRiferimento"])) / 366) < df[
-        "Ore totali rendicontate per il 2020"
-    ]
+    # condizioneerrore = ((1920 * (df["GiorniAssistenzaAnnoRiferimento"])) / 366) < df[
+    #    "Ore totali rendicontate per il 2020"
+    # ]
 
-    # non sappiamo perché ma la condizione di cui sopra basta per trovare l'errore
-    # condizionelogica2 = ((1920 * (df.groupby("Codice fiscale")["GiorniAssistenzaAnnoRiferimento"].transform("sum")) / 366)) < df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform("sum")
+    condizioneerrore = (
+        (
+            1920
+            * (
+                df.groupby("Codice fiscale")[
+                    "GiorniAssistenzaAnnoRiferimento"
+                ].transform("sum")
+            )
+            / 366
+        )
+    ) < df.groupby("Codice fiscale")["Ore totali rendicontate per il 2020"].transform(
+        "sum"
+    )
 
-    # se maggiore di 0 allora abbiamo trovato codici fiscali invalidi
     if not df[condizioneerrore].empty:
         expndr = st.expander(
             "Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verificato!)"
