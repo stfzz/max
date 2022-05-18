@@ -14,6 +14,8 @@ st.set_page_config(
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020", format="%d.%m.%Y")
 DATAFINEMASSIMA = pd.to_datetime("05.03.2020", format="%d.%m.%Y")
+DATAFINEMASSIMA_COVID4 = pd.to_datetime("17.05.2020", format="%d.%m.%Y")
+
 ORE2020 = 1920
 KONTROLLEKINDERGARTEN_DATANASCITA_1 = pd.to_datetime("28.02.2017", format="%d.%m.%Y")
 KONTROLLEKINDERGARTEN_DATAFINEASSISTENZA_1 = pd.to_datetime(
@@ -61,7 +63,8 @@ ERRORDICT = {
     "errErroreFinanziamentoCompensativo2": "Controllo finanziamento compensativo #2",
     "errErroreCovid": "Controllo Covid #1",
     "errErroreCovid2": "Controllo Covid #2",
-    "errErroreCovid3": " Controllo Covid #3",
+    "errErroreCovid3": "Controllo Covid #3",
+    "errErroreCovid4": "Contratti lockdown sospetti (Covid #4)",
     "errFehlerEingewöhnung": "Controllo Fehler Eingewöhnung",
     "errFehlerEingewöhnung543Lockdown": "Controllo Fehler Eingewöhnung 543 Lockdown",
     "errFehlerEingewöhnung543Notbetreuung": "Controllo Fehler Eingewöhnung 543 Notbetreuung",
@@ -778,7 +781,41 @@ def errErroreCovid3(df):
             x = dwnld(
                 df[data_inizio & data_fine & ore_543],
                 "Scaricare tabella con errore Covid 3",
-                "ErroreCovid2",
+                "ErroreCovid3",
+            )
+
+        return df
+    else:
+        return df
+
+
+def errErroreCovid4(df):
+    condizione1 = (
+        df["Data inizio contratto (o data inizio assistenza se diversa)"]
+        >= DATAFINEMASSIMA
+    )
+    condizione2 = (
+        df["Data inizio contratto (o data inizio assistenza se diversa)"]
+        <= DATAFINEMASSIMA_COVID4
+    )
+
+
+    if not df[condizione1 & condizione2].empty:
+        expndr = st.expander("Trovato contratti lockdown da controllare (Covid #4)")
+        with expndr:
+            st.info(
+                "Elenco dei bambini per cui è soddisfatta la condizione: (5/3/2020 <= dataInizio <= 17/5/2020)"
+            )
+            make_grid(df[condizione1 & condizione2])
+
+            df.loc[
+                condizione1 & condizione2,
+                "errErroreCovid4",
+            ] = True
+            x = dwnld(
+                df[condizione1 & condizione2],
+                "Scaricare tabella con contratti lockdown da controllare (Covid #4)",
+                "ErroreCovid4",
             )
 
         return df
