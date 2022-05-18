@@ -9,7 +9,7 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from this import d
 
 st.set_page_config(
-    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃👽"  # 👽
+    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃"  # 👽
 )
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020", format="%d.%m.%Y")
@@ -69,7 +69,6 @@ ERRORDICT = {
     "errSuperatoOreMassime1920": "Controllo ore complessive superiore a 1920",
     "errBambinoInPiuComuni": "Bambino presente in più comuni",
     "errPresentiAnnotazioni": "Bambini con annotazioni",
-
 }
 
 
@@ -128,9 +127,10 @@ def errFehlerEingewöhnung543Notbetreuung(df):
     )
     if not df[data_inizio_minima & data_inizio_massima & ore_543].empty:
         expndr = st.expander(
-            "Trovato errore Eingewöhnung 543 Notbetreuung (data inizio >= 26.10.2020 e <= 16.11.2020 e ore 543 > 0)"
+            "Trovato errore Eingewöhnung 543 Notbetreuung"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato un errore secondo la condizione:  (dataInizio >= 26.10.2020 e dataInizio <= 16.11.2020 e ore543 > 0)")
             make_grid(df[data_inizio_minima & data_inizio_massima & ore_543])
             # settiamo la colonna bool
             df.loc[
@@ -158,9 +158,10 @@ def errInizioMinoreFine(df):
 
     if not df[inizio_minore_fine].empty:
         expndr = st.expander(
-            "Trovato errore date contrattuali (Vertragsbeginn > Vertragsende)"
+            "Trovato errore date contrattuali"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato un errore secondo la condizione:  (dataInizio > dataFine)")
             make_grid(df[inizio_minore_fine])
             # settiamo la colonna bool
             df.loc[inizio_minore_fine, "errInizioMinoreFine"] = True
@@ -186,8 +187,9 @@ def errCodFisc1(df):
     )
 
     if not df[codinvalido].empty:
-        expndr = st.expander("Trovato errore formato del codice Fiscale")
+        expndr = st.expander("Trovato errore formato del codice fiscale")
         with expndr:
+            st.info("Elenco dei bambini che hanno un codice fiscale nel formato non corretto")
             make_grid(df[codinvalido])
             # settiamo il flag bool per la tabella finale
             df.loc[codinvalido, "errCodFisc1"] = True
@@ -284,9 +286,10 @@ def errCodFisc2(df):
         or not dfcod[~anno].empty
     ):
         expndr = st.expander(
-            "Trovato errore data nascita (giorno o mese o anno) per codice fiscale"
+            "Trovato errore data nascita per codice fiscale"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui risulta un'incongruenza relativa alla data di nascita dichiarata e il codice fiscale")
             # lista dei df con errori che concateniamo per fare un unico df
             frames = [dfnot40[~gg], df40[~gg40], dfcod[~mese], dfcod[~anno]]
             result = pd.concat(frames)
@@ -307,8 +310,9 @@ def errErrorePresenza(df):
     # condizione logica
     ore_rendicontate_uguale_zero = df["Ore totali rendicontate per il 2020"] == 0
     if not df[ore_rendicontate_uguale_zero].empty:
-        expndr = st.expander("Trovato errore presenza (Ore totali rendicontate = 0)")
+        expndr = st.expander("Trovato errore presenza")
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (Ore totali rendicontate = 0)")
             make_grid(df[ore_rendicontate_uguale_zero])
             # settiamo la colonna bool
             df.loc[ore_rendicontate_uguale_zero, "errErrorePresenza"] = True
@@ -334,6 +338,7 @@ def errAgeChild(df):
     if not df[giorni].empty:
         expndr = st.expander("Trovato errore età bambino (< 90 giorni)")
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: il bambino ha meno di 3 mesi")
             make_grid(df[giorni])
             # settiamo la colonna bool
             df.loc[
@@ -371,9 +376,10 @@ def errErroreDati543(df):
 
     if not df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3].empty:
         expndr = st.expander(
-            "Trovato errore dati 543 (Vertragsende vor 05.03.20 UND Vertragsbeginn nach 18.05.20 dann dürfen Stunden 543 nicht 0 sein)"
+            "Trovato errore dati 543"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataFIne < 05.03.20 e dataInizio > 18.05.20 ore543 = 0)")
             make_grid(df[errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3])
             df.loc[
                 errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3,
@@ -396,12 +402,13 @@ def errFineAssistenzaMax4Anni(df):
         df["Data fine contratto\n(o data fine assistenza se diversa) *"]
         - df["Data di nascita"]
     ).dt.days > 1464
-    l = len(df[giorni])
+
     if not df[giorni].empty:
         expndr = st.expander(
-            "Trovato errore fine contratto assistenza (Vertragsende darf höchstens 4 Jahre größer als Geburtsdatum sein)"
+            "Trovato errore fine contratto assistenza"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'erorre secondo la condizione: dataFine non può essere oltre 4 anni da dataNascita")
             make_grid(df[giorni])
 
             df.loc[
@@ -428,9 +435,10 @@ def errKindergarten_1(df):
     )
     if not df[data_nascita & data_fine_assistenza].empty:
         expndr = st.expander(
-            "Trovato errore Kindergarten #1 (Geburtsdatum kleiner/gleich 28.02.2017 ist, dann muss Vertragende kleiner/gleich 15.09.2019)"
+            "Trovato errore Kindergarten #1"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataNascita <= 28.02.2017 e dataFine > 15.09.2019)")
             make_grid(df[data_nascita & data_fine_assistenza])
             df.loc[
                 (data_nascita & data_fine_assistenza),
@@ -458,9 +466,10 @@ def errKindergarten_2(df):
     )
     if not df[data_nascita & data_fine_ass].empty:
         expndr = st.expander(
-            "Trovato errore controllo Kindergarten #2 (Geburtsdatum größer/gleich 01.03.2017 muss Vertragende <= 15.09 des Geburtsjahrs +3 Jahre sein)"
+            "Trovato errore Kindergarten #2"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataNascita >= 01.03.2017 e dataFine > 15.09 dell'anno di nascita + 3 anni)")
             make_grid(df[data_nascita & data_fine_ass])
             df.loc[
                 (data_nascita & data_fine_ass),
@@ -492,9 +501,10 @@ def errErroreFinanziamentoCompensativo2(df):
 
     if not df[data_fine & ore_compensative].empty:
         expndr = st.expander(
-            "Trovato errore finanziamento compensativo #2 (Data fine <= 18.05.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0 )"
+            "Trovato errore finanziamento compensativo #2"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato l'errore secondo la condizione: (dataFine <= 18.05.2020 e finanzCompensativo > 0 )")
             make_grid(df[data_fine & ore_compensative])
 
             df.loc[
@@ -527,9 +537,10 @@ def errErroreFinanziamentoCompensativo(df):
 
     if not df[data_inizio & ore_compensative].empty:
         expndr = st.expander(
-            "Trovato errore finanziamento compensativo (Data inizio >= 05.03.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0 )"
+            "Trovato errore finanziamento compensativo #1"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione:  (dataInizio >= 05.03.2020 e finanzCompensativo > 0)")
             make_grid(df[data_inizio & ore_compensative])
 
             df.loc[
@@ -565,9 +576,10 @@ def errFehlerEingewöhnung(df):
     )
     if not df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate].empty:
         expndr = st.expander(
-            "Trovato errore Eingewöhnung (data inizio >= 13.02.2020 e <= 05.03.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0)"
+            "Trovato errore Eingewöhnung"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataInizio >= 13.02.2020 e dataInizio <= 05.03.2020 e finanzCompensativo) > 0)")
             make_grid(
                 df[data_inizio_minima & data_inizio_massima & ore_contrattualizzate]
             )
@@ -606,9 +618,10 @@ def errFehlerEingewöhnung543Lockdown(df):
 
     if not df[data_inizio_minima & data_inizio_massima & ore_543].empty:
         expndr = st.expander(
-            "Trovato errore Eingewöhnung 543 Lockdown (Vertragsbeginn >= 13.02.2020 und <= 05.03.2020 e ore543 > 0)"
+            "Trovato errore Eingewöhnung 543 Lockdown"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataInizio >= 13.02.2020 e dataInizio <= 05.03.2020 e ore543 > 0)")
             make_grid(df[data_inizio_minima & data_inizio_massima & ore_543])
 
             df.loc[
@@ -651,9 +664,10 @@ def errErroreCovid(df):
 
     if not df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)].empty:
         expndr = st.expander(
-            "Trovato errore Covid #1 (data inizio < 05.03.2020 e Ore543 > 0) oppure (data fine < 05.03.2020 e Ore733 > 0) oppure (data fine < 05.03.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo) > 0)"
+            "Trovato errore Covid #1"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataFine < 05.03.2020 e Ore543 > 0) oppure (dataFine < 05.03.2020 e Ore733 > 0) oppure (dataFine < 05.03.2020 e finanzCompensativo) > 0)")
             make_grid(
                 df[data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate)]
             )
@@ -695,9 +709,10 @@ def errErroreCovid2(df):
         (data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)
     ].empty:
         expndr = st.expander(
-            "Trovato errore Covid #2 ((data inizio >= 24.11.2020 e ore543 >0) oppure (data inizio >= 24.11.2020 e OreContrattualizzateNonErogateFase2 (finanziamento compensativo >0))"
+            "Trovato errore Covid #2"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui risulta l'errore secondo la condizione: (data inizio >= 24.11.2020 e ore543 > 0) oppure (data inizio >= 24.11.2020 e finanzCompensativo > 0)")
             make_grid(
                 df[
                     (data_inizio_ass & ore_543)
@@ -744,9 +759,10 @@ def errErroreCovid3(df):
 
     if not df[data_inizio & data_fine & ore_543].empty:
         expndr = st.expander(
-            "Trovato errore Covid #3 (inizio >= 5/3/20 e fine <= 30/10/20 e ore543 > 0)"
+            "Trovato errore Covid #3"
         )
         with expndr:
+            st.info("Elenco dei bambini per cui risulta l'errore secondo la condizione: (dataInizio >= 5/3/20) e (dataFine <= 30/10/20) e (ore543 > 0)")
             make_grid(df[data_inizio & data_fine & ore_543])
 
             df.loc[
@@ -772,15 +788,12 @@ def errGesamtstundenVertragszeitraum(
         "Ore totali rendicontate per il 2020"
     ]
 
-    conta_cod_fiscale = df.groupby("Codice fiscale")["Codice fiscale"].transform("count") == 1
+    conta_cod_fiscale = (
+        df.groupby("Codice fiscale")["Codice fiscale"].transform("count") == 1
+    )
 
     # presenza errore in caso di codfisc che occorre solo una volta
     df1 = df[condizioneerrore1 & conta_cod_fiscale]
-
-
-
-
-
 
     condizioneerrore2 = (
         (
@@ -796,12 +809,14 @@ def errGesamtstundenVertragszeitraum(
         "sum"
     )
 
-
     if not df[condizioneerrore2].empty:
         expndr = st.expander(
             "Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verificato!)"
         )
         with expndr:
+            st.info(
+                "Elenco dei bambini per cui la proporzione delle ore per i giorni di assistenza è inferiore alla somma delle ore rendicontate per il 2020. Secondo la formula: (1920*(giorniAssistenzaAnnoRiferimento)/366) < (oreTotaliRendicontate2020))"
+            )
             make_grid(df[condizioneerrore2])
 
             # settiamo il flag bool per la tabella finale
@@ -831,6 +846,9 @@ def errSuperatoOreMassime1920(df):
     if not df[condizionelogica2].empty:
         expndr = st.expander("Trovato errore ore complessive maggiore di 1920")
         with expndr:
+            st.info(
+                "Elenco dei bambini per cui la somma delle ore totali rendicontate per il 2020 è maggiore di 1920"
+            )
             make_grid(df[condizionelogica2])
 
             # settiamo flag per tabella finale
@@ -850,8 +868,9 @@ def errBambinoInPiuComuni(df):
     condizionlogica = df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
 
     if not df[condizionlogica].empty:
-        expndr = st.expander("Trovato bambini presenti in più comuni")
+        expndr = st.expander("Trovati bambini presenti in più comuni")
         with expndr:
+            st.info("Elenco dei bambini trovati in più comuni (in più file Excel)")
             make_grid(df[condizionlogica])
 
             # settiamo flag bool per tabella finale
@@ -874,6 +893,9 @@ def errPresentiAnnotazioni(df):
     if not df[condizione].empty:
         expndr = st.expander("Trovati bambini con annotazioni")
         with expndr:
+            st.info(
+                "Elenco dei bambini che hanno una annotazione, o direttamente nel nome o nella colonna del numero progressivo (dal quale viene cancellato e aggiunto al nome)"
+            )
             make_grid(df[condizione])
 
             # settiamo flag bool
