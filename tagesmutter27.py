@@ -72,7 +72,8 @@ ERRORDICT = {
     "errSuperatoOreMassime1920": "Controllo ore complessive superiore a 1920",
     "errBambinoInPiuComuni": "Bambino presente in più comuni",
     "errPresentiAnnotazioni": "Bambini con annotazioni",
-
+    "errMassimo543": "Controllo valore massimo ore 543",
+    #"errOreRendicontateZero": "Controllo ore rendicontate uguali a zero"
 }
 
 
@@ -96,6 +97,10 @@ def make_bool_columns(df):
         df[e] = df[e].astype("boolean")
 
     return df
+
+
+def errOreRendicontateZero(df):
+    pass
 
 
 # lancia i singoli controlli in base alla selezione fatta in GUI
@@ -468,25 +473,26 @@ def errKindergarten_1(df):
 def errKindergarten_2(df):
 
     data_nascita = df["Data di nascita"] >= KONTROLLEKINDERGARTEN_DATANASCITA_2
+    data_nascita2 = df["Data di nascita"] < pd.to_datetime("01.01.2018", format="%d.%m.%Y")
     data_fine_ass = df[
         "Data fine contratto\n(o data fine assistenza se diversa) *"
     ] > pd.to_datetime(
         "15.09." + (pd.to_datetime(df["Data di nascita"]).dt.year + 3).astype("str"),
         format="%d.%m.%Y",
     )
-    if not df[data_nascita & data_fine_ass].empty:
+    if not df[data_nascita & data_nascita2 & data_fine_ass].empty:
         expndr = st.expander("Trovato errore Kindergarten #2")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataNascita >= 01.03.2017 e dataFine > 15.09 dell'anno di nascita + 3 anni)"
             )
-            make_grid(df[data_nascita & data_fine_ass])
+            make_grid(df[data_nascita & data_nascita2 & data_fine_ass])
             df.loc[
-                (data_nascita & data_fine_ass),
+                (data_nascita & data_nascita2 & data_fine_ass),
                 "errKindergarten_2",
             ] = True
             x = dwnld(
-                df[data_nascita & data_fine_ass],
+                df[data_nascita & data_nascita2 & data_fine_ass],
                 "Scaricare tabella con errore Kindergarten 2",
                 "ErroreKindergarten2",
             )
@@ -953,6 +959,168 @@ def errPresentiAnnotazioni(df):
         return df
 
 
+def errMassimo543(df):
+
+    cond1 = df[
+        "Data inizio contratto (o data inizio assistenza se diversa)"
+    ] <= pd.to_datetime("05.03.2020", format="%d.%m.%Y")
+    cond1b = df[
+        "Data fine contratto\n(o data fine assistenza se diversa) *"
+    ] > pd.to_datetime("17.05.2020", format="%d.%m.%Y")
+
+    cond2 = df[
+        "Data inizio contratto (o data inizio assistenza se diversa)"
+    ] <= pd.to_datetime("16.11.2020", format="%d.%m.%Y")
+    cond2b = df[
+        "Data fine contratto\n(o data fine assistenza se diversa) *"
+    ] >= pd.to_datetime("23.11.2020", format="%d.%m.%Y")
+
+    cond3 = df[
+        "Data inizio contratto (o data inizio assistenza se diversa)"
+    ] <= pd.to_datetime("05.11.2020", format="%d.%m.%Y")
+    cond3b = df[
+        "Data fine contratto\n(o data fine assistenza se diversa) *"
+    ] > pd.to_datetime("06.11.2020", format="%d.%m.%Y")
+
+    cond3c = (
+        df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "eppan"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "bozen"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "branzoll"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "freienfeld"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "auer"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "leifers"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "mals"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "nals"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "welschnofen"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "ratschings"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "pfatten"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "feldthurns"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "sterzing"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "bolzano"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "bronzolo"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "trens"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "egna"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "laives"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "malles"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "nalles"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "levante"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "racines"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "vadena"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "velturno"
+        )
+        | df["Comune di residenza assistente domiciliare all'infanzia"].str.lower().str.contains(
+            "vipiteno"
+        )
+    )
+
+    if not df[cond1 & cond1b].empty:
+        df.loc[cond1 & cond1b,"gg1"] = 74
+    else:
+        df[cond1 & cond1b,"gg1"] = 0
+
+    if not df[cond2 & cond2b].empty:
+        df.loc[cond2 & cond2b,"gg2"] = 8
+    else:
+        df.loc[cond2 & cond2b,"gg2"] = 0
+
+    if not df[cond3 & cond3b & cond3c].empty:
+        df.loc[cond3 & cond3b & cond3c, "gg3"] = 2
+    else:
+        df.loc[cond3 & cond3b & cond3c, "gg3"] = 0
+
+    df.insert(13, "massimo543", 0)
+
+    df["massimo543"] = (
+        (
+            (
+                0.055
+                * (
+                    df["Ore totali rendicontate per il 2020"]
+                    / df["GiorniAssistenzaAnnoRiferimento"]
+                )
+            )
+            + df["Ore totali rendicontate per il 2020"]
+        )
+        / df["GiorniAssistenzaAnnoRiferimento"]
+    ) * (df["gg1"] + df["gg2"] + df["gg3"])
+
+    df["massimo543"] = df["massimo543"].astype(int)
+
+    df = df.drop(["gg1", "gg2", "gg3"], axis=1)  # non servono più
+
+    if not df[(cond1 & cond1b) | (cond2 & cond2b) | (cond3 & cond3b & cond3c)].empty:
+        expndr = st.expander("Calcolata colonna massimo ore 543")
+        with expndr:
+            st.info(
+                "Elenco dei bambini per cui è stato calcolato il valore ore massime 543"
+            )
+            make_grid(
+                df[(cond1 & cond1b) | (cond2 & cond2b) | (cond3 & cond3b & cond3c)]
+            )
+
+            # settiamo flag bool
+            df.loc[
+                (cond1 & cond1b) | (cond2 & cond2b) | (cond3 & cond3b & cond3c),
+                "errMassimo543",
+            ] = True
+            x = dwnld(
+                df[(cond1 & cond1b) | (cond2 & cond2b) | (cond3 & cond3b & cond3c)],
+                "Scaricare tabella con bambini con valore massimo 543 calcolato",
+                "errMassimo543",
+            )
+        # st.write(df[(cond1 & cond1b) | (cond2 & cond2b) | (cond3 & cond3b & cond3c)])
+        return df
+    else:
+        return df
+
+
 # fine checks
 
 
@@ -970,7 +1138,7 @@ def get_data(uploaded_files, anno_riferimento):
     for uploaded_file in uploaded_files:
         try:
             status.info("[*] " + uploaded_file.name + " caricato")
-            df = pd.read_excel(uploaded_file)
+            df = pd.read_excel(uploaded_file, usecols = "A:M")
         except:
             st.error(uploaded_file.name + " non è un file Excel")
             continue
@@ -998,6 +1166,12 @@ def get_data(uploaded_files, anno_riferimento):
         status.success(
             "[*] Tutti i dati sono stati elaborati -  PER INIZIARE DA CAPO: RICARICARE LA PAGINA"
         )
+    
+    # ci servono inizializzate per il calcolo delle ora massime 543
+    dfout["gg1"] = 0
+    dfout["gg2"] = 0
+    dfout["gg3"] = 0
+
     return dfout
 
 
@@ -1070,8 +1244,9 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     # dobbiamo intercettare se c'è un * nella colonna del numero progressivo
     # sostituire l'asterisco con 99 e aggiungere l'asterisco al nome
     cond = df["Numero \nprogressivo"] == "*"
-    df.loc[cond, "Numero \nprogressivo"] = 99
     df.loc[cond, "Cognome e nome bambino"] += " *"
+    df.loc[cond, "Numero \nprogressivo"] = 99
+
 
     # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
     df["Numero \nprogressivo"] = pd.to_numeric(
@@ -1084,6 +1259,9 @@ def prepare_data(df, uploaded_file, anno_riferimento):
 
     # teniamo solo record validi
     df = df[validi]
+
+    # elimiamo colonne che sono servono più
+    df = df.drop(["Numero \nprogressivo"], axis=1)
 
     # se troviamo data fine vuota la mettiamo al 31/12 dell'anno riferimento
     condizione = pd.isnull(
@@ -1119,14 +1297,6 @@ def prepare_data(df, uploaded_file, anno_riferimento):
             f"{uploaded_file.name} --> data inizio contratto contiene valori non data"
         )
 
-    # prima convertiamo la colonna in numerica, forzando NaN sui non numerici
-    df["Numero \nprogressivo"] = pd.to_numeric(
-        df["Numero \nprogressivo"], errors="coerce"
-    )
-
-    # elimiamo colonne che sono servono più
-    df = df.drop(["Numero \nprogressivo"], axis=1)
-
     # creiamo due nuove colonne e le riempiamo con comune ed ente
     # estratti prima
     df.insert(1, "Comune", gemeinde)
@@ -1145,6 +1315,8 @@ def prepare_data(df, uploaded_file, anno_riferimento):
     # aggiungiamo le colonne che ci servono più tardi per i codici errore
     # e assegniamo un valore dummy
     dfbool = make_bool_columns(df)
+
+
 
     return dfbool
 
@@ -1175,35 +1347,40 @@ def compute_hours(df, ar):
 
 
 def drop_columns(df):
-    df = df.drop(
-        df.columns[
-            [
-                16,
-                17,
-                18,
-                19,
-                20,
-                21,
-                22,
-                23,
-                24,
-                25,
-                26,
-                27,
-                28,
-                29,
-                30,
-                31,
-                32,
-                33,
-                34,
-                35,
-                36,
-                37,
-            ]
-        ],
-        axis=1,
-    )
+    #    df = df.drop(
+    #        df.columns[
+    #            [
+    #                16,
+    #                17,
+    #                18,
+    #                19,
+    #                20,
+    #                21,
+    #                22,
+    #                23,
+    #                24,
+    #                25,
+    #                26,
+    #                27,
+    #                28,
+    #                29,
+    #                30,
+    #                31,
+    #                32,
+    #                33,
+    #                34,
+    #                35,
+    #                36,
+    #                37,
+    #                38,
+    #            ]
+    #        ],
+    #        axis=1,
+    #    )
+
+    for k in ERRORDICT:
+        df = df.drop([k], axis=1)
+
     return df
 
 
@@ -1245,7 +1422,7 @@ def make_df_solo_errori(dffinal):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.26)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.27)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
