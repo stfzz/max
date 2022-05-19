@@ -799,7 +799,6 @@ def errErroreCovid4(df):
         <= DATAFINEMASSIMA_COVID4
     )
 
-
     if not df[condizione1 & condizione2].empty:
         expndr = st.expander("Trovato contratti lockdown da controllare (Covid #4)")
         with expndr:
