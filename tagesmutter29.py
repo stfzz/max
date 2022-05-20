@@ -773,7 +773,7 @@ def errErroreCovid2(df):
     if not df[
         (data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)
     ].empty:
-        expndr = st.expander(f"Trovato errore Covid #2 ({len(df[condizione_logica])} errori)")
+        expndr = st.expander(f"Trovato errore Covid #2 ({len(df[(data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui risulta l'errore secondo la condizione: (data inizio >= 24.11.2020 e ore543 > 0) oppure (data inizio >= 24.11.2020 e finanzCompensativo > 0)"
