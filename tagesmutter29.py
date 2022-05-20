@@ -126,9 +126,9 @@ def errOreRendicontateZero(df):
     condizione = df['Ore totali rendicontate per il 2020'] == 0
 
     if not df[condizione].empty:
-        expndr = st.expander("Trovati bambini con ore totali rendicontate = 0")
+        expndr = st.expander(f"Trovati bambini con ore totali rendicontate = 0 ({len(df[condizione])} errori)")
         with expndr:
-            st.info("Elenco dei bambini che hanno un valore di zero nelle ore rendicontate per l'anno 2020")
+            st.info(f"Elenco dei bambini che hanno un valore di zero nelle ore rendicontate per l'anno 2020")
             make_grid(df[condizione])
             # settiamo la colonna bool
             df.loc[condizione, "errOreRendicontateZero"] = True
@@ -165,7 +165,7 @@ def errFehlerEingewöhnung543Notbetreuung(df):
 
     
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore Eingewöhnung 543 Notbetreuung")
+        expndr = st.expander(f"Trovato errore Eingewöhnung 543 Notbetreuung ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato un errore secondo la condizione:  (dataInizio >= 26.10.2020 e dataInizio <= 16.11.2020 e ore543 > 0)"
@@ -197,7 +197,7 @@ def errInizioMinoreFine(df):
     condizione_logica = inizio_minore_fine & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore date contrattuali")
+        expndr = st.expander(f"Trovato errore date contrattuali ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato un errore secondo la condizione:  (dataInizio > dataFine)"
@@ -228,7 +228,7 @@ def errCodFisc1(df):
     condizione_logica = codinvalido & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore formato del codice fiscale")
+        expndr = st.expander(f"Trovato errore formato del codice fiscale ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini che hanno un codice fiscale nel formato non corretto"
@@ -321,14 +321,14 @@ def errCodFisc2(df):
         int
     )
 
-    # se trovato errore maschhietti o femmine o mese o anno per maschi/femmine
+    # se trovato errore maschietti o femmine o mese o anno per maschi/femmine
     if (
         not dfcod[~mese].empty
         or not dfnot40[~gg].empty
         or not df40[~gg40].empty
         or not dfcod[~anno].empty
     ):
-        expndr = st.expander("Trovato errore data nascita per codice fiscale")
+        expndr = st.expander(f"Trovato errore data nascita per codice fiscale ({len(dfcod[~mese]) + len(dfnot40[~gg]) + len(df40[~gg40]) + len(dfcod[~anno])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui risulta un'incongruenza relativa alla data di nascita dichiarata e il codice fiscale"
@@ -355,7 +355,7 @@ def errErrorePresenza(df):
     condizione_logica = ore_rendicontate_uguale_zero & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore presenza")
+        expndr = st.expander(f"Trovato errore presenza ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (Ore totali rendicontate = 0)"
@@ -384,7 +384,7 @@ def errAgeChild(df):
     condizione_logica = giorni & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore età bambino (< 90 giorni)")
+        expndr = st.expander(f"Trovato errore età bambino (< 90 giorni) ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: il bambino ha meno di 3 mesi"
@@ -427,7 +427,7 @@ def errErroreDati543(df):
     condizione_logica = errore_dati_543p1 & errore_dati_543p2 & errore_dati_543p3 & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore dati 543")
+        expndr = st.expander(f"Trovato errore dati 543 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataFIne < 05.03.20 e dataInizio > 18.05.20 ore543 = 0)"
@@ -458,7 +458,7 @@ def errFineAssistenzaMax4Anni(df):
     condizione_logica = giorni & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore fine contratto assistenza")
+        expndr = st.expander(f"Trovato errore fine contratto assistenza ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'erorre secondo la condizione: dataFine non può essere oltre 4 anni da dataNascita"
@@ -489,7 +489,7 @@ def errKindergarten_1(df):
     )
     condizione_logica = data_nascita & data_fine_assistenza & NO_ZERO
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore Kindergarten #1")
+        expndr = st.expander(f"Trovato errore Kindergarten #1 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataNascita <= 28.02.2017 e dataFine > 15.09.2019)"
@@ -522,7 +522,7 @@ def errKindergarten_2(df):
     )
     condizione_logica = data_nascita & data_nascita2 & data_fine_ass & NO_ZERO
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore Kindergarten #2")
+        expndr = st.expander(f"Trovato errore Kindergarten #2 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataNascita >= 01.03.2017 e dataFine > 15.09 dell'anno di nascita + 3 anni)"
@@ -558,7 +558,7 @@ def errErroreFinanziamentoCompensativo2(df):
     condizione_logica = data_fine & ore_compensative & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore finanziamento compensativo #2")
+        expndr = st.expander(f"Trovato errore finanziamento compensativo #2 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato l'errore secondo la condizione: (dataFine <= 18.05.2020 e finanzCompensativo > 0 )"
@@ -595,7 +595,7 @@ def errErroreFinanziamentoCompensativo(df):
     condizione_logica = data_inizio & ore_compensative & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore finanziamento compensativo #1")
+        expndr = st.expander(f"Trovato errore finanziamento compensativo #1 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione:  (dataInizio >= 05.03.2020 e finanzCompensativo > 0)"
@@ -636,7 +636,7 @@ def errFehlerEingewöhnung(df):
     condizione_logica = data_inizio_minima & data_inizio_massima & ore_contrattualizzate & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore Eingewöhnung")
+        expndr = st.expander(f"Trovato errore Eingewöhnung ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataInizio >= 13.02.2020 e dataInizio <= 05.03.2020 e finanzCompensativo) > 0)"
@@ -679,7 +679,7 @@ def errFehlerEingewöhnung543Lockdown(df):
     condizione_logica = data_inizio_minima & data_inizio_massima & ore_543 & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore Eingewöhnung 543 Lockdown")
+        expndr = st.expander(f"Trovato errore Eingewöhnung 543 Lockdown ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataInizio >= 13.02.2020 e dataInizio <= 05.03.2020 e ore543 > 0)"
@@ -726,7 +726,7 @@ def errErroreCovid(df):
     condizione_logica = data_fine_assistenza & (ore_543 | ore_733 | ore_contrattualizzate) & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore Covid #1")
+        expndr = st.expander(f"Trovato errore Covid #1 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataFine < 05.03.2020 e Ore543 > 0) oppure (dataFine < 05.03.2020 e Ore733 > 0) oppure (dataFine < 05.03.2020 e finanzCompensativo) > 0)"
@@ -773,7 +773,7 @@ def errErroreCovid2(df):
     if not df[
         (data_inizio_ass & ore_543) | (data_inizio_ass & ore_contrattualizzate)
     ].empty:
-        expndr = st.expander("Trovato errore Covid #2")
+        expndr = st.expander(f"Trovato errore Covid #2 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui risulta l'errore secondo la condizione: (data inizio >= 24.11.2020 e ore543 > 0) oppure (data inizio >= 24.11.2020 e finanzCompensativo > 0)"
@@ -824,7 +824,7 @@ def errErroreCovid3(df):
     condizione_logica = data_inizio & data_fine & ore_543 & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore Covid #3")
+        expndr = st.expander(f"Trovato errore Covid #3 ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui risulta l'errore secondo la condizione: (dataInizio >= 5/3/20) e (dataFine <= 30/10/20) e (ore543 > 0)"
@@ -858,7 +858,7 @@ def errErroreCovid4(df):
     condizione_logica = condizione1 & condizione2 & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato contratti lockdown da controllare (Covid #4)")
+        expndr = st.expander(f"Trovato contratti lockdown da controllare (Covid #4) ({len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è soddisfatta la condizione: (5/3/2020 <= dataInizio <= 17/5/2020)"
@@ -914,7 +914,7 @@ def errGesamtstundenVertragszeitraum(
 
     if not df[condizione_logica].empty:
         expndr = st.expander(
-            "Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verificato!)"
+            f"Trovato errore ore -Proportion Maximalstunden überschritten- (ATTENZIONE: va verificato!) (trovati {len(df[condizione_logica])} errori)"
         )
         with expndr:
             st.info(
@@ -949,7 +949,7 @@ def errSuperatoOreMassime1920(df):
     condizione_logica = condizionelogica2 & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovato errore ore complessive maggiore di 1920")
+        expndr = st.expander(f"Trovato errore ore complessive maggiore di 1920 (trovati {len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui la somma delle ore totali rendicontate per il 2020 è maggiore di 1920"
@@ -973,7 +973,7 @@ def errBambinoInPiuComuni(df):
     condizionlogica1 = df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
     condizione_logica = condizionlogica1 & NO_ZERO
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovati bambini presenti in più comuni")
+        expndr = st.expander(f"Trovati bambini presenti in più comuni (trovati {len(df[condizione_logica])} errori)")
         with expndr:
             st.info("Elenco dei bambini trovati in più comuni (in più file Excel)")
             make_grid(df[condizione_logica])
@@ -997,7 +997,7 @@ def errPresentiAnnotazioni(df):
     condizione_logica = condizione & NO_ZERO
 
     if not df[condizione_logica].empty:
-        expndr = st.expander("Trovati bambini con annotazioni")
+        expndr = st.expander(f"Trovati bambini con annotazioni (trovati {len(df[condizione_logica])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini che hanno una annotazione, o direttamente nel nome o nella colonna del numero progressivo (dal quale viene cancellato e aggiunto al nome)"
@@ -1155,7 +1155,7 @@ def errMassimo543(df):
 
 
     if not df[(cond1 & cond1b & NO_ZERO) | (cond2 & cond2b & NO_ZERO) | (cond3 & cond3b & cond3c & NO_ZERO)].empty:
-        expndr = st.expander("Calcolata colonna massimo ore 543")
+        expndr = st.expander(f"Calcolata colonna massimo ore 543 (trovati {len(df[(cond1 & cond1b & NO_ZERO) | (cond2 & cond2b & NO_ZERO) | (cond3 & cond3b & cond3c & NO_ZERO)])} errori)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato calcolato il valore ore massime 543"
@@ -1509,7 +1509,7 @@ def app():
 
             # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
             dffinalerr = make_df_solo_errori(dffinal)
-            expndr = st.expander("TABELLA FINALE ELABORATA - SOLO ERRORI")
+            expndr = st.expander("TABELLA FINALE ELABORATA - SOLO ERRORI (senza massimo543)")
             with expndr:
                 # facciamo la grid qui così evitiamo che vengano
                 # droppate le colonne flag bool
