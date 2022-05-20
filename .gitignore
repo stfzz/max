@@ -2,6 +2,10 @@
 .DS_Store
 Pipfile.lock
 storico.xlsx
+*.ttf
+*.pkl
+
+
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -137,3 +141,4 @@ Pipfile.lock
 storico.xlsx
 storico.xlsx
 storico.xlsx
+testPDF.pdf

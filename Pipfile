@@ -13,6 +13,7 @@ streamlit = "*"
 protobuf = "==3.20.1"
 digautoprofile = "*"
 mypy = "*"
+fpdf = "*"
 
 [dev-packages]
 black = "*"
