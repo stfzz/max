@@ -96,14 +96,15 @@ def app():
     lista_enti = df["Ente"].unique()
     #st.write(lista_enti)
     for ente in lista_enti:
+        st.write(lista_enti)
         pdf.cell(1,5,f"Risultati per {ente}",0,1)
         pdf.ln(4)
         df_errori = df[df["Ente"] == ente]
-        for errore in ERRORDICT:
-            if not df_errori[df_errori[errore] == True].empty:
-                pdf.cell(1,5,f"Trovato un errore per  {ERRORDICT[errore]}",0,1)
-                st.write(df_errori[df_errori[errore] == True])
-                
+        #for errore in ERRORDICT:
+        #    if not df_errori[df_errori[errore] == True].empty:
+        #        pdf.cell(1,5,f"Trovato un errore per  {ERRORDICT[errore]}",0,1)
+        #        st.write(df_errori[df_errori[errore] == True])
+
         pdf.ln(4)
 
     pdf.output("testPDF.pdf", "F")

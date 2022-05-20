@@ -1436,6 +1436,8 @@ def make_df_solo_errori(dffinal):
     # creiamo la condizione logica
     # almeno un errore per tipologia errore
     for e in ERRORDICT.keys():
+        if e == "errMassimo543":
+            continue
         # prima instanziazione di "condizione"
         # in questo modo viene creato con type giusto
         if "condizione" not in locals():
@@ -1445,7 +1447,9 @@ def make_df_solo_errori(dffinal):
             # per i controlli fatti
             condizione = condizione | dffinal[e] == True
     # creiamo df con soli record con errore
+    
     dffinal = dffinal[condizione]
+    dffinal = dffinal.drop(["errMassimo543"], axis = 1)
 
     return dffinal
 
