@@ -1,8 +1,10 @@
+from curses import ERR
 from os import path
 from unicodedata import name
 
 import numpy as np
 import pandas as pd
+import xlsxwriter
 import streamlit as st
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
@@ -1462,6 +1464,54 @@ def make_df_solo_errori(dffinal):
     return dffinal
 
 
+def genera_report(df):
+    st.info("Generazione file riassunto analisi")
+    workbook = xlsxwriter.Workbook("riassuntoAutomatico.xlsx")
+    worksheet = workbook.add_worksheet()
+    row = 0
+    col = 0
+    worksheet.write(row,col,"Riassunto analisi")
+    nr_bambini = df["Codice fiscale"].nunique()
+    row += 2
+    worksheet.write(row,col,f"Trovati errori per {nr_bambini} bambini")
+    row += 2
+    for e in ERRORDICT:
+        if e == "errMassimo543":
+            continue
+        condizione = df[e] == True
+        nrerr = len(df[condizione])
+        #st.write(f"Trovate {nrerr} occorrenze per il controllo {ERRORDICT[e]}")
+        if nrerr > 0:
+            worksheet.write(row, col, f"Trovate {nrerr} occorrenze per il controllo {ERRORDICT[e]}")
+            row += 1
+    
+    row += 2
+    bold = workbook.add_format({'bold': True})
+    # start riassunto per tipo errore
+    for e in ERRORDICT:
+        
+        if e == "errMassimo543":
+            continue        
+        condizione = df[e] == True
+        df_bambini = df[condizione]
+        nrerr = len(df_bambini)
+        if nrerr > 0:
+            worksheet.write(row,col,f"{ERRORDICT[e]}",bold)
+            row += 2
+            #elenco_bambini = df["Cognome e nome bambino"][condizione].unique()
+            for i,r in df_bambini.iterrows():
+                #st.write(r["Cognome e nome bambino"])
+                n = r["Cognome e nome bambino"]
+                c = r["Codice fiscale"]
+                nato = r["Data di nascita"]
+                worksheet.write(row, col+1,f"{n}")
+                worksheet.write(row,col+2,f"{c}")
+                worksheet.write(row,col+3,f"{nato}")
+                row += 1
+            row += 1
+
+    workbook.close()
+
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
@@ -1487,6 +1537,7 @@ def app():
 
     f = st.form("Auswahl", clear_on_submit=True)
     flag = 0
+    
     with f:
         # soluzione un po' assurda, ma vogliamo spostare gli expander fuori dalla form
         # altrimenti non possiamo usare il button per download
@@ -1535,6 +1586,16 @@ def app():
             st.success("Salvato file storico: OK")
         except:
             st.error("ERRORE salvataggio file storico")
+
+        #try:
+        genera_report(dffinalerr)
+        #except:
+        #    st.error("Errore durante generazione automatica report")
+
+        
+
+
+
 
 
 app()
