@@ -1159,7 +1159,7 @@ def errMassimo543(df):
 
 
     if not df[(cond1 & cond1b & NO_ZERO) | (cond2 & cond2b & NO_ZERO) | (cond3 & cond3b & cond3c & NO_ZERO)].empty:
-        expndr = st.expander(f"Calcolata colonna massimo ore 543 (trovati {len(df[(cond1 & cond1b & NO_ZERO) | (cond2 & cond2b & NO_ZERO) | (cond3 & cond3b & cond3c & NO_ZERO)])} errori)")
+        expndr = st.expander(f"Calcolata colonna massimo ore 543 (trovati {len(df[(cond1 & cond1b & NO_ZERO) | (cond2 & cond2b & NO_ZERO) | (cond3 & cond3b & cond3c & NO_ZERO)])} casi)")
         with expndr:
             st.info(
                 "Elenco dei bambini per cui è stato calcolato il valore ore massime 543"
@@ -1489,7 +1489,6 @@ def genera_report(df):
     bold = workbook.add_format({'bold': True})
     # start riassunto per tipo errore
     for e in ERRORDICT:
-        
         if e == "errMassimo543":
             continue        
         condizione = df[e] == True
@@ -1519,9 +1518,9 @@ def app():
     dfout = None
 
     # carichiamo qui la tabella dello storico??
-    if path.exists("storico.xlsx"):
-        c1, c2 = st.columns(2)
-        c1.info("Trovato file storico")
+    #if path.exists("storico.xlsx"):
+    #    c1, c2 = st.columns(2)
+    #    c1.info("Trovato file storico")
     #    storico = c2.checkbox("caricare file storico?")
     #    if storico:
     #        pass
