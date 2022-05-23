@@ -74,8 +74,9 @@ ERRORDICT = {
     "errSuperatoOreMassime1920": "Controllo ore complessive superiore a 1920",
     "errBambinoInPiuComuni": "Bambino presente in più comuni",
     "errPresentiAnnotazioni": "Bambini con annotazioni",
-    "errMassimo543": "Controllo valore massimo ore 543",
     "errOreRendicontateZero": "Controllo ore rendicontate uguali a zero",
+    "errMassimo543": "Controllo valore massimo ore 543",
+
 }
 
 
