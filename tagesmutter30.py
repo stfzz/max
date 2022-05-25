@@ -1018,7 +1018,7 @@ def errSuperatoOreMassime1920(df):
 
 def errBambinoInPiuComuni(df):
     condizionlogica1 = df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
-    condizione_logica = condizionlogica1 & NO_ZERO
+    condizione_logica = condizionlogica1 # & NO_ZERO - tolto qui perché nella tabella dei bimbi in più comuni li vogliamo vedere
     if not df[condizione_logica].empty:
         expndr = st.expander(
             f"Trovati bambini presenti in più comuni (trovati {len(df[condizione_logica])} errori)"
