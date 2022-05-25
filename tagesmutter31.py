@@ -126,7 +126,21 @@ def check_data2(df, checks):
 ##################### START CHECKS
 
 def errSommaOre(df):
-    
+    df_somme = df.groupby("Ente", as_index=False).sum()
+    if not df_somme.empty:
+        expndr = st.expander("Tabella con calcolo delle somme")
+        with expndr:
+            st.info("Valori sommati")
+            make_grid(df_somme)
+            #st.write(df_somme)
+            x = dwnld(
+                df_somme,
+                "SCARICARE TABELLA CON SOMME DELLE ORE",
+                "errSommaOre",
+            )      
+        return df
+    else:
+        return df      
 
 def errOreRendicontateZero(df):
     condizione = df["Ore totali rendicontate per il 2020"] == 0
