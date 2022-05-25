@@ -125,6 +125,8 @@ def check_data2(df, checks):
 ##################################
 ##################### START CHECKS
 
+def errSommaOre(df):
+    
 
 def errOreRendicontateZero(df):
     condizione = df["Ore totali rendicontate per il 2020"] == 0
