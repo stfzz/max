@@ -1641,9 +1641,9 @@ def app():
             with expndr:
                 # facciamo la grid qui così evitiamo che vengano
                 # droppate le colonne flag bool
-                gridOptions = buildGrid(dffinal)
-                AgGrid(dffinal, gridOptions=gridOptions, enable_enterprise_modules=True)
-                dwnld(dffinal, "SCARICARE TABELLA CON TUTTI I DATI", "tuttidati")
+                gridOptions = buildGrid(dffinal.sort_values(by=['Cognome e nome bambino']))
+                AgGrid(dffinal.sort_values(by=['Cognome e nome bambino']), gridOptions=gridOptions, enable_enterprise_modules=True)
+                dwnld(dffinal.sort_values(by=['Cognome e nome bambino']), "SCARICARE TABELLA CON TUTTI I DATI", "tuttidati")
 
             # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
             dffinalerr = make_df_solo_errori(dffinal)
@@ -1653,11 +1653,11 @@ def app():
             with expndr:
                 # facciamo la grid qui così evitiamo che vengano
                 # droppate le colonne flag bool
-                gridOptions = buildGrid(dffinalerr)
+                gridOptions = buildGrid(dffinalerr.sort_values(by=['Cognome e nome bambino']))
                 AgGrid(
-                    dffinalerr, gridOptions=gridOptions, enable_enterprise_modules=True
+                    dffinalerr.sort_values(by=['Cognome e nome bambino']), gridOptions=gridOptions, enable_enterprise_modules=True
                 )
-                dwnld(dffinalerr, "SCARICARE TABELLA CON SOLO ERRORI", "soloerrori")
+                dwnld(dffinalerr.sort_values(by=['Cognome e nome bambino']), "SCARICARE TABELLA CON SOLO ERRORI", "soloerrori")
 
         # salviamo qui la tabella finale??
         st.write("")
