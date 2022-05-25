@@ -77,7 +77,7 @@ ERRORDICT = {
     "errOreRendicontateZero": "Controllo ore rendicontate uguali a zero",
     "errMassimo543": "Controllo valore massimo ore 543",
     "errSommaOre": "Calcolo somme per le ore riportate",
-    "errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo"
+    #"errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo"
 }
 
 
@@ -1038,17 +1038,18 @@ def errBambinoInPiuComuni(df):
     condizionlogica1 = df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
     condizione_logica = condizionlogica1 # & NO_ZERO - tolto qui perché nella tabella dei bimbi in più comuni li vogliamo vedere
     if not df[condizione_logica].empty:
+
         expndr = st.expander(
             f"Trovati bambini presenti in più comuni (trovati {len(df[condizione_logica])} errori)"
         )
         with expndr:
             st.info("Elenco dei bambini trovati in più comuni (in più file Excel)")
-            make_grid(df[condizione_logica])
+            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
 
             # settiamo flag bool per tabella finale
             df.loc[condizione_logica, "errBambinoInPiuComuni"] = True
             x = dwnld(
-                df[condizione_logica],
+                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
                 "Scaricare tabella con bambini in più comuni",
                 "errBambinoInPiuComuni",
             )
@@ -1071,12 +1072,12 @@ def errPresentiAnnotazioni(df):
             st.info(
                 "Elenco dei bambini che hanno una annotazione, o direttamente nel nome o nella colonna del numero progressivo (dal quale viene cancellato e aggiunto al nome)"
             )
-            make_grid(df[condizione_logica])
+            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
 
             # settiamo flag bool
             df.loc[condizione_logica, "errPresentiAnnotazioni"] = True
             x = dwnld(
-                df[condizione_logica],
+                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
                 "Scaricare tabella con bambini con annotazioni",
                 "errPresentiAnnotazioni",
             )
@@ -1260,6 +1261,9 @@ def errMassimo543(df):
     else:
         return df
 
+
+def errMassimoFC(df):
+    return df
 
 ##################### FINE CHECKS
 ##################################
@@ -1591,7 +1595,7 @@ def genera_report(df):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.31)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.32)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
