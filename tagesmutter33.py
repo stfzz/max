@@ -133,7 +133,6 @@ def errSommaOre(df):
         with expndr:
             st.info("Valori sommati")
             make_grid(df_somme)
-            #st.write(df_somme)
             x = dwnld(
                 df_somme,
                 "SCARICARE TABELLA CON SOMME DELLE ORE",
