@@ -1594,7 +1594,7 @@ def genera_report(df):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.33)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.34)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
