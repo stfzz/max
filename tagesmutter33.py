@@ -77,7 +77,7 @@ ERRORDICT = {
     "errOreRendicontateZero": "Controllo ore rendicontate uguali a zero",
     "errMassimo543": "Controllo valore massimo ore 543",
     "errSommaOre": "Calcolo somme per le ore riportate",
-    #"errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo"
+    "errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo"
 }
 
 
