@@ -188,8 +188,6 @@ def errFehlerEingewöhnung543Notbetreuung(df):
         > 0
     )
 
-    # NO_ZERO =  df["Ore totali rendicontate per il 2020"] > 0
-
     condizione_logica = data_inizio_minima & data_inizio_massima & ore_543 & NO_ZERO
 
     if not df[condizione_logica].empty:
