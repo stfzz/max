@@ -1546,7 +1546,10 @@ def make_df_solo_errori(dffinal):
     return dffinal
 
 
-def genera_report(df):
+def genera_report(dff):
+    dff.to_csv("test2.csv", encoding="utf-8-sig")
+    df = pd.read_csv("test2.csv")
+
     st.info("Generazione file riassunto analisi")
     workbook = xlsxwriter.Workbook("riassuntoAutomatico.xlsx")
     worksheet = workbook.add_worksheet()
@@ -1562,7 +1565,6 @@ def genera_report(df):
             continue
         condizione = df[e] == True
         nrerr = len(df[condizione])
-        # st.write(f"Trovate {nrerr} occorrenze per il controllo {ERRORDICT[e]}")
         if nrerr > 0:
             worksheet.write(
                 row, col, f"Trovate {nrerr} occorrenze per il controllo {ERRORDICT[e]}"
@@ -1587,13 +1589,25 @@ def genera_report(df):
                 n = r["Cognome e nome bambino"]
                 c = r["Codice fiscale"]
                 nato = r["Data di nascita"]
+                comune = r["Comune"]
                 worksheet.write(row, col + 1, f"{n}")
                 worksheet.write(row, col + 2, f"{c}")
                 worksheet.write(row, col + 3, f"{nato}")
+                worksheet.write(row, col + 4, f"{comune}")
                 row += 1
             row += 1
 
     workbook.close()
+
+    ddff = pd.read_excel("riassuntoAutomatico.xlsx")
+    file = ddff.to_csv(sep=';').encode("utf-8-sig")
+    st.download_button(
+        label="Scarica riassunto",
+        data=file,
+        file_name="riassuntoAutomaticoDati.csv",
+        mime="text/plain",
+        key="fileRiassunto",
+    )
 
 
 def app():
