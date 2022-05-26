@@ -133,11 +133,13 @@ def errSommaOre(df):
         with expndr:
             st.info("Valori sommati")
             make_grid(df_somme)
+            # non settiamo il flag bool perché qui non ci serve  
             x = dwnld(
                 df_somme,
                 "SCARICARE TABELLA CON SOMME DELLE ORE",
                 "errSommaOre",
-            )      
+            )
+                
         return df
     else:
         return df      
