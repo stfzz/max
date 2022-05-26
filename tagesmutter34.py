@@ -1,6 +1,6 @@
-from curses import ERR
+#from curses import ERR
 from os import path
-from unicodedata import name
+#from unicodedata import name
 
 import numpy as np
 import pandas as pd
@@ -8,7 +8,7 @@ import xlsxwriter
 import streamlit as st
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
-from this import d
+#from this import d
 
 st.set_page_config(
     page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃"  # 👽
@@ -75,9 +75,9 @@ ERRORDICT = {
     "errBambinoInPiuComuni": "Bambino presente in più comuni",
     "errPresentiAnnotazioni": "Bambini con annotazioni",
     "errOreRendicontateZero": "Controllo ore rendicontate uguali a zero",
-    "errMassimo543": "Controllo valore massimo ore 543",
+    "errMassimo543": "Calcolo valore massimo ore 543",
     "errSommaOre": "Calcolo somme per le ore riportate",
-    "errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo"
+    "errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo",
 }
 
 
@@ -126,6 +126,7 @@ def check_data2(df, checks):
 ##################################
 ##################### START CHECKS
 
+
 def errSommaOre(df):
     df_somme = df.groupby("Ente", as_index=False).sum()
     if not df_somme.empty:
@@ -133,16 +134,17 @@ def errSommaOre(df):
         with expndr:
             st.info("Valori sommati")
             make_grid(df_somme)
-            # non settiamo il flag bool perché qui non ci serve  
+            # non settiamo il flag bool perché qui non ci serve
             x = dwnld(
                 df_somme,
                 "SCARICARE TABELLA CON SOMME DELLE ORE",
                 "errSommaOre",
             )
-                
+
         return df
     else:
-        return df      
+        return df
+
 
 def errOreRendicontateZero(df):
     condizione = df["Ore totali rendicontate per il 2020"] == 0
@@ -155,11 +157,11 @@ def errOreRendicontateZero(df):
             st.info(
                 f"Elenco dei bambini che hanno un valore di zero nelle ore rendicontate per l'anno 2020"
             )
-            make_grid(df[condizione].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione].sort_values(by=["Cognome e nome bambino"]))
             # settiamo la colonna bool
             df.loc[condizione, "errOreRendicontateZero"] = True
             x = dwnld(
-                df[condizione].sort_values(by=['Cognome e nome bambino']),
+                df[condizione].sort_values(by=["Cognome e nome bambino"]),
                 "SCARICARE TABELLA CON VALORE ZERO PER ORE RENDICONTATE 2020",
                 "errOreRendicontateZero",
             )
@@ -196,14 +198,14 @@ def errFehlerEingewöhnung543Notbetreuung(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato un errore secondo la condizione:  (dataInizio >= 26.10.2020 e dataInizio <= 16.11.2020 e ore543 > 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             # settiamo la colonna bool
             df.loc[
                 (condizione_logica),
                 "errFehlerEingewöhnung543Notbetreuung",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "SCARICARE TABELLA CON ERRORI Fehler Eingewöhnung 543 Notbetreuung",
                 "FehlerEingewoehnung543Notbetreuung",
             )
@@ -230,11 +232,11 @@ def errInizioMinoreFine(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato un errore secondo la condizione:  (dataInizio > dataFine)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             # settiamo la colonna bool
             df.loc[condizione_logica, "errInizioMinoreFine"] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "SCARICARE TABELLA CON ERRORI data Inizio maggiore data fine",
                 "FehlerInzioMinoreFine",
             )
@@ -263,11 +265,11 @@ def errCodFisc1(df):
             st.info(
                 "Elenco dei bambini che hanno un codice fiscale nel formato non corretto"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             # settiamo il flag bool per la tabella finale
             df.loc[condizione_logica, "errCodFisc1"] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore codice fiscale",
                 "ErroreCodiceFiscale",
             )
@@ -368,7 +370,7 @@ def errCodFisc2(df):
             # lista dei df con errori che concateniamo per fare un unico df
             frames = [dfnot40[~gg], df40[~gg40], dfcod[~mese], dfcod[~anno]]
             result = pd.concat(frames)
-            make_grid(result.sort_values(by=['Cognome e nome bambino']))
+            make_grid(result.sort_values(by=["Cognome e nome bambino"]))
             # settiamo il flag bool per i codfisc che sono presenti in results
             df.loc[
                 df["Codice fiscale"].isin(result["Codice fiscale"]), "errCodFisc2"
@@ -394,11 +396,11 @@ def errErrorePresenza(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (Ore totali rendicontate = 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             # settiamo la colonna bool
             df.loc[condizione_logica, "errErrorePresenza"] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore presenzae",
                 "ErrorePresenza",
             )
@@ -425,14 +427,14 @@ def errAgeChild(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: il bambino ha meno di 3 mesi"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             # settiamo la colonna bool
             df.loc[
                 condizione_logica,
                 "errAgeChild",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore età bambino",
                 "ErroreEtaBambino",
             )
@@ -472,13 +474,13 @@ def errErroreDati543(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataFIne < 05.03.20 e dataInizio > 18.05.20 ore543 = 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             df.loc[
                 condizione_logica,
                 "errErroreDati543",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore dati 543",
                 "ErroreDati543",
             )
@@ -505,14 +507,14 @@ def errFineAssistenzaMax4Anni(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'erorre secondo la condizione: dataFine non può essere oltre 4 anni da dataNascita"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 condizione_logica,
                 "errFineAssistenzaMax4Anni",
             ] = True
             x = dwnld(
-                df[giorni].sort_values(by=['Cognome e nome bambino']),
+                df[giorni].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore fine contratto assistenza",
                 "ErroreFineContratto",
             )
@@ -538,13 +540,13 @@ def errKindergarten_1(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataNascita <= 28.02.2017 e dataFine > 15.09.2019)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             df.loc[
                 (condizione_logica),
                 "errKindergarten_1",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore Kindergarten 1",
                 "ErroreKindergarten1",
             )
@@ -575,13 +577,13 @@ def errKindergarten_2(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataNascita >= 01.03.2017 e dataFine > 15.09 dell'anno di nascita + 3 anni)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
             df.loc[
                 (condizione_logica),
                 "errKindergarten_2",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore Kindergarten 2",
                 "ErroreKindergarten2",
             )
@@ -613,14 +615,14 @@ def errErroreFinanziamentoCompensativo2(df):
             st.info(
                 "Elenco dei bambini per cui è stato l'errore secondo la condizione: (dataFine <= 18.05.2020 e finanzCompensativo > 0 )"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 (condizione_logica),
                 "errErroreFinanziamentoCompensativo2",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore finanziamento compensativo #2",
                 "ErroreFinanziamentoCompensativo2",
             )
@@ -652,14 +654,14 @@ def errErroreFinanziamentoCompensativo(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione:  (dataInizio >= 05.03.2020 e finanzCompensativo > 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 (condizione_logica),
                 "errErroreFinanziamentoCompensativo",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore finanziamento compensativo",
                 "ErroreFinanziamentoCompensativo",
             )
@@ -697,14 +699,14 @@ def errFehlerEingewöhnung(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataInizio >= 13.02.2020 e dataInizio <= 05.03.2020 e finanzCompensativo) > 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 (condizione_logica),
                 "errFehlerEingewöhnung",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore Eingewöhnung",
                 "ErroreEingewöhnung",
             )
@@ -740,14 +742,14 @@ def errFehlerEingewöhnung543Lockdown(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataInizio >= 13.02.2020 e dataInizio <= 05.03.2020 e ore543 > 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 (condizione_logica),
                 "errFehlerEingewöhnung543Lockdown",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore Eingewöhnung 543 Lockdown",
                 "ErroreLockdown543",
             )
@@ -791,14 +793,14 @@ def errErroreCovid(df):
             st.info(
                 "Elenco dei bambini per cui è stato trovato l'errore secondo la condizione: (dataFine < 05.03.2020 e Ore543 > 0) oppure (dataFine < 05.03.2020 e Ore733 > 0) oppure (dataFine < 05.03.2020 e finanzCompensativo) > 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 (condizione_logica),
                 "errErroreCovid",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore Covid 1",
                 "ErroreCovid1",
             )
@@ -842,7 +844,7 @@ def errErroreCovid2(df):
                 df[
                     (data_inizio_ass & ore_543)
                     | (data_inizio_ass & ore_contrattualizzate)
-                ].sort_values(by=['Cognome e nome bambino'])
+                ].sort_values(by=["Cognome e nome bambino"])
             )
 
             df.loc[
@@ -856,7 +858,7 @@ def errErroreCovid2(df):
                 df[
                     (data_inizio_ass & ore_543)
                     | (data_inizio_ass & ore_contrattualizzate)
-                ].sort_values(by=['Cognome e nome bambino']),
+                ].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore Covid 2",
                 "ErroreCovid2",
             )
@@ -891,14 +893,14 @@ def errErroreCovid3(df):
             st.info(
                 "Elenco dei bambini per cui risulta l'errore secondo la condizione: (dataInizio >= 5/3/20) e (dataFine <= 30/10/20) e (ore543 > 0)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 condizione_logica,
                 "errErroreCovid3",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore Covid 3",
                 "ErroreCovid3",
             )
@@ -927,14 +929,14 @@ def errErroreCovid4(df):
             st.info(
                 "Elenco dei bambini per cui è soddisfatta la condizione: (5/3/2020 <= dataInizio <= 17/5/2020)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             df.loc[
                 condizione_logica,
                 "errErroreCovid4",
             ] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con contratti lockdown da controllare (Covid #4)",
                 "ErroreCovid4",
             )
@@ -984,12 +986,12 @@ def errGesamtstundenVertragszeitraum(
             st.info(
                 "Elenco dei bambini per cui la proporzione delle ore per i giorni di assistenza è inferiore alla somma delle ore rendicontate per il 2020. Secondo la formula: (1920*(giorniAssistenzaAnnoRiferimento)/366) < (oreTotaliRendicontate2020))"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             # settiamo il flag bool per la tabella finale
             df.loc[condizione_logica, "errGesamtstundenVertragszeitraum"] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore ore complessive per durata contrattuale",
                 "ErroreOreComplessive",
             )
@@ -1020,12 +1022,12 @@ def errSuperatoOreMassime1920(df):
             st.info(
                 "Elenco dei bambini per cui la somma delle ore totali rendicontate per il 2020 è maggiore di 1920"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             # settiamo flag per tabella finale
             df.loc[condizione_logica, "errSuperatoOreMassime1920"] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con errore ore complessive maggiore 1920",
                 "ErroreOre1920",
             )
@@ -1037,7 +1039,7 @@ def errSuperatoOreMassime1920(df):
 
 def errBambinoInPiuComuni(df):
     condizionlogica1 = df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
-    condizione_logica = condizionlogica1 # & NO_ZERO - tolto qui perché nella tabella dei bimbi in più comuni li vogliamo vedere
+    condizione_logica = condizionlogica1  # & NO_ZERO - tolto qui perché nella tabella dei bimbi in più comuni li vogliamo vedere
     if not df[condizione_logica].empty:
 
         expndr = st.expander(
@@ -1045,12 +1047,12 @@ def errBambinoInPiuComuni(df):
         )
         with expndr:
             st.info("Elenco dei bambini trovati in più comuni (in più file Excel)")
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             # settiamo flag bool per tabella finale
             df.loc[condizione_logica, "errBambinoInPiuComuni"] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con bambini in più comuni",
                 "errBambinoInPiuComuni",
             )
@@ -1073,12 +1075,12 @@ def errPresentiAnnotazioni(df):
             st.info(
                 "Elenco dei bambini che hanno una annotazione, o direttamente nel nome o nella colonna del numero progressivo (dal quale viene cancellato e aggiunto al nome)"
             )
-            make_grid(df[condizione_logica].sort_values(by=['Cognome e nome bambino']))
+            make_grid(df[condizione_logica].sort_values(by=["Cognome e nome bambino"]))
 
             # settiamo flag bool
             df.loc[condizione_logica, "errPresentiAnnotazioni"] = True
             x = dwnld(
-                df[condizione_logica].sort_values(by=['Cognome e nome bambino']),
+                df[condizione_logica].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con bambini con annotazioni",
                 "errPresentiAnnotazioni",
             )
@@ -1238,7 +1240,7 @@ def errMassimo543(df):
                     (cond1 & cond1b & NO_ZERO)
                     | (cond2 & cond2b & NO_ZERO)
                     | (cond3 & cond3b & cond3c & NO_ZERO)
-                ].sort_values(by=['Cognome e nome bambino'])
+                ].sort_values(by=["Cognome e nome bambino"])
             )
 
             # settiamo flag bool
@@ -1253,7 +1255,7 @@ def errMassimo543(df):
                     (cond1 & cond1b & NO_ZERO)
                     | (cond2 & cond2b & NO_ZERO)
                     | (cond3 & cond3b & cond3c & NO_ZERO)
-                ].sort_values(by=['Cognome e nome bambino']),
+                ].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con bambini con valore massimo 543 calcolato",
                 "errMassimo543",
             )
@@ -1265,6 +1267,7 @@ def errMassimo543(df):
 
 def errMassimoFC(df):
     return df
+
 
 ##################### FINE CHECKS
 ##################################
@@ -1643,9 +1646,19 @@ def app():
             with expndr:
                 # facciamo la grid qui così evitiamo che vengano
                 # droppate le colonne flag bool
-                gridOptions = buildGrid(dffinal.sort_values(by=['Cognome e nome bambino']))
-                AgGrid(dffinal.sort_values(by=['Cognome e nome bambino']), gridOptions=gridOptions, enable_enterprise_modules=True)
-                dwnld(dffinal.sort_values(by=['Cognome e nome bambino']), "SCARICARE TABELLA CON TUTTI I DATI", "tuttidati")
+                gridOptions = buildGrid(
+                    dffinal.sort_values(by=["Cognome e nome bambino"])
+                )
+                AgGrid(
+                    dffinal.sort_values(by=["Cognome e nome bambino"]),
+                    gridOptions=gridOptions,
+                    enable_enterprise_modules=True,
+                )
+                dwnld(
+                    dffinal.sort_values(by=["Cognome e nome bambino"]),
+                    "SCARICARE TABELLA CON TUTTI I DATI",
+                    "tuttidati",
+                )
 
             # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
             dffinalerr = make_df_solo_errori(dffinal)
@@ -1655,11 +1668,19 @@ def app():
             with expndr:
                 # facciamo la grid qui così evitiamo che vengano
                 # droppate le colonne flag bool
-                gridOptions = buildGrid(dffinalerr.sort_values(by=['Cognome e nome bambino']))
-                AgGrid(
-                    dffinalerr.sort_values(by=['Cognome e nome bambino']), gridOptions=gridOptions, enable_enterprise_modules=True
+                gridOptions = buildGrid(
+                    dffinalerr.sort_values(by=["Cognome e nome bambino"])
                 )
-                dwnld(dffinalerr.sort_values(by=['Cognome e nome bambino']), "SCARICARE TABELLA CON SOLO ERRORI", "soloerrori")
+                AgGrid(
+                    dffinalerr.sort_values(by=["Cognome e nome bambino"]),
+                    gridOptions=gridOptions,
+                    enable_enterprise_modules=True,
+                )
+                dwnld(
+                    dffinalerr.sort_values(by=["Cognome e nome bambino"]),
+                    "SCARICARE TABELLA CON SOLO ERRORI",
+                    "soloerrori",
+                )
 
         # salviamo qui la tabella finale??
         st.write("")
