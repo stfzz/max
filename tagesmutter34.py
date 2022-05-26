@@ -10,7 +10,7 @@ import streamlit as st
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
 
-# from this import d
+from this import d
 
 st.set_page_config(
     page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃"  # 👽
