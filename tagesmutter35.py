@@ -1546,9 +1546,9 @@ def make_df_solo_errori(dffinal):
     return dffinal
 
 
-def genera_report(dff):
-    dff.to_csv("test2.csv", encoding="utf-8-sig")
-    df = pd.read_csv("test2.csv")
+def genera_report(df):
+    #dff.to_csv("test2.csv", encoding="utf-8-sig")
+    #df = pd.read_csv("test2.csv")
 
     st.info("Generazione file riassunto analisi")
     workbook = xlsxwriter.Workbook("riassuntoAutomatico.xlsx")
@@ -1584,6 +1584,7 @@ def genera_report(dff):
             worksheet.write(row, col, f"{ERRORDICT[e]}", bold)
             row += 2
             # elenco_bambini = df["Cognome e nome bambino"][condizione].unique()
+            df_bambini.sort_values(by="Cognome e nome bambino", ascending=True, inplace=True)
             for i, r in df_bambini.iterrows():
                 # st.write(r["Cognome e nome bambino"])
                 n = r["Cognome e nome bambino"]
@@ -1613,7 +1614,7 @@ def genera_report(dff):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.34)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.35)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
