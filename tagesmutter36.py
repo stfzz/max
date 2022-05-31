@@ -1598,8 +1598,8 @@ def genera_report(df):
         if nrerr > 0:
             worksheet.write(row, col, f"{ERRORDICT[e]}", bold)
             row += 2
-            df_bambini.sort_values(by="Cognome e nome bambino", ascending=True, inplace=True)
-            for i, r in df_bambini.iterrows():
+            df_bimbi = df_bambini.sort_values(by="Cognome e nome bambino", ascending=True)#, inplace=True)
+            for i, r in df_bimbi.iterrows():
                 n = r["Cognome e nome bambino"]
                 c = r["Codice fiscale"]
                 nato = r["Data di nascita"]
