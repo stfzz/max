@@ -1604,7 +1604,7 @@ def genera_report(df):
     ddff = pd.read_excel("riassuntoAutomatico.xlsx",index_col = False)
     #del ddff[ddff.columns[0]]
     ddff.reset_index(drop=True, inplace = True)
-    st.write(ddff)
+    #st.write(ddff)
     file = ddff.to_csv(sep=';').encode("utf-8-sig")
     st.download_button(
         label="Scarica riassunto",
