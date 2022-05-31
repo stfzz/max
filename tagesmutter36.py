@@ -1547,13 +1547,9 @@ def make_df_solo_errori(dffinal):
 
 
 def genera_report(df):
-    #dff.to_csv("test2.csv", encoding="utf-8-sig")
-    #df = pd.read_csv("test2.csv")
-
     st.info("Generazione file riassunto analisi")
     workbook = xlsxwriter.Workbook("riassuntoAutomatico.xlsx")
     worksheet = workbook.add_worksheet()
-    #worksheet.set_column('A:A',0) 
     row = 0
     col = 0
     worksheet.write(row, col, "Riassunto analisi")
@@ -1584,10 +1580,8 @@ def genera_report(df):
         if nrerr > 0:
             worksheet.write(row, col, f"{ERRORDICT[e]}", bold)
             row += 2
-            # elenco_bambini = df["Cognome e nome bambino"][condizione].unique()
             df_bambini.sort_values(by="Cognome e nome bambino", ascending=True, inplace=True)
             for i, r in df_bambini.iterrows():
-                # st.write(r["Cognome e nome bambino"])
                 n = r["Cognome e nome bambino"]
                 c = r["Codice fiscale"]
                 nato = r["Data di nascita"]
@@ -1598,13 +1592,10 @@ def genera_report(df):
                 worksheet.write(row, col + 4, f"{comune}")
                 row += 1
             row += 1
-    #worksheet.set_column('A:A',0) 
     workbook.close()
 
     ddff = pd.read_excel("riassuntoAutomatico.xlsx",index_col = False)
-    #del ddff[ddff.columns[0]]
     ddff.reset_index(drop=True, inplace = True)
-   #st.write(ddff)
     file = ddff.to_csv(sep=';').encode("utf-8-sig")
     st.download_button(
         label="Scarica riassunto",
