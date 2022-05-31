@@ -80,6 +80,7 @@ ERRORDICT = {
     "errMassimo543": "Calcolo valore massimo ore 543",
     "errSommaOre": "Calcolo somme per le ore riportate",
     "errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo",
+    "errCalcoloSomme": "Calcolo delle somme ore per comune"
 }
 
 
@@ -128,6 +129,23 @@ def check_data2(df, checks):
 ##################################
 ##################### START CHECKS
 
+def errCalcoloSomme(df):
+    df_somme = df.groupby("Comune",as_index=False).sum()
+    if not df_somme.empty:
+        expndr = st.expander("Tabella con somme ore per comune")
+        with expndr:
+            st.info("Valori sommati ore per comune")
+            make_grid(df_somme)
+            # non settiamo il flag bool perché qui non ci serve
+            x = dwnld(
+                df_somme,
+                "SCARICARE TABELLA CON SOMME DELLE ORE PER COMUNE",
+                "errCalcoloSomme",
+            )
+
+        return df
+    else:
+        return df          
 
 def errSommaOre(df):
     df_somme = df.groupby("Ente", as_index=False).sum()
