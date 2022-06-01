@@ -1627,7 +1627,7 @@ def genera_report(df):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.36)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 0.9.37)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
@@ -1691,7 +1691,7 @@ def app():
             # la tabella finale che contiene soltanto record con ALMENO UN ERRORE
             dffinalerr = make_df_solo_errori(dffinal)
             expndr = st.expander(
-                "TABELLA FINALE ELABORATA - SOLO ERRORI (senza massimo543)"
+                "TABELLA FINALE ELABORATA - SOLO ERRORI (senza massimo543 e somme ore)"
             )
             with expndr:
                 # facciamo la grid qui così evitiamo che vengano
