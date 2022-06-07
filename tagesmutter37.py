@@ -80,7 +80,8 @@ ERRORDICT = {
     "errMassimo543": "Calcolo valore massimo ore 543",
     "errSommaOre": "Calcolo somme per le ore riportate",
     "errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo",
-    "errCalcoloSomme": "Calcolo delle somme ore per comune"
+    "errCalcoloSomme": "Calcolo delle somme ore per comune",
+    "errCalcoloNumeroBimbi": "Calcolo numero bambini per comune e tipo ore"
 }
 
 
@@ -128,6 +129,35 @@ def check_data2(df, checks):
 
 ##################################
 ##################### START CHECKS
+
+def errCalcoloNumeroBimbi(df):
+    df1 = df.groupby('Comune',as_index=False)['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020'].apply(lambda x: x[x > 0].count())
+    df2 = df.groupby('Comune',as_index=False)['Ore di assistenza \n ai sensi della delibera\nn. 666/2019'].apply(lambda x: x[x > 0].count())
+    df3 = df.groupby('Comune',as_index=False)['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 733/2020'].apply(lambda x: x[x > 0].count())
+    df4 = df.groupby('Comune',as_index=False)['Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)'].apply(lambda x: x[x > 0].count())
+    dfx = pd.merge(df1,df2, on = 'Comune', how = 'outer')
+    dfx = pd.merge(dfx,df3, on = 'Comune', how = 'outer')
+    dfx = pd.merge(dfx,df4, on = 'Comune', how = 'outer')
+
+    dfx.columns = ["Comune", "Nr. bimbi ore 543", "Nr. bimbi ore 666", "Nr. bimbi ore 733", "Nr. bimbi finanziamento compensativo"]
+
+    expndr = st.expander("Tabella conteggio bimbi per comune e tipologia ore")
+    with expndr:
+        st.info("Conteggio dei bambini per tipologia di ora e per comune")
+        gridOptions = buildGrid(dfx)
+        AgGrid(dfx, gridOptions=gridOptions, enable_enterprise_modules=True)
+        # non settiamo il flag bool perché qui non ci serve
+        x = dwnld(
+            dfx,
+            "SCARICARE TABELLA CON CONTEGGIO NUMERO BIMBI PER COMUNE E TIPO ORE",
+            "soloerrori",
+        )
+
+    return df         
+
+
+
+
 
 def errCalcoloSomme(df):
     df_somme = df.groupby("Comune",as_index=False).sum()
