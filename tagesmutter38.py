@@ -81,7 +81,7 @@ ERRORDICT = {
     "errSommaOre": "Calcolo somme per le ore riportate",
     "errMassimoFC": "Calcolo valore massimo ore finanziamento compensativo",
     "errCalcoloSomme": "Calcolo delle somme ore per comune",
-    "errCalcoloNumeroBimbi": "Calcolo numero bambini per comune e tipo ore"
+    "errCalcoloNumeroBimbi": "Calcolo numero bambini per comune e tipo ore",
 }
 
 
@@ -128,18 +128,33 @@ def check_data2(df, checks):
 
 
 ##################################
-##################### START CHECKS
+# START CHECKS
+
 
 def errCalcoloNumeroBimbi(df):
-    df1 = df.groupby('Comune',as_index=False)['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020'].apply(lambda x: x[x > 0].count())
-    df2 = df.groupby('Comune',as_index=False)['Ore di assistenza \n ai sensi della delibera\nn. 666/2019'].apply(lambda x: x[x > 0].count())
-    df3 = df.groupby('Comune',as_index=False)['Ore contrattualizzate non erogate\nai sensi della delibera\nn. 733/2020'].apply(lambda x: x[x > 0].count())
-    df4 = df.groupby('Comune',as_index=False)['Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)'].apply(lambda x: x[x > 0].count())
-    dfx = pd.merge(df1,df2, on = 'Comune', how = 'outer')
-    dfx = pd.merge(dfx,df3, on = 'Comune', how = 'outer')
-    dfx = pd.merge(dfx,df4, on = 'Comune', how = 'outer')
+    df1 = df.groupby("Comune", as_index=False)[
+        "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 543_1025/2020"
+    ].apply(lambda x: x[x > 0].count())
+    df2 = df.groupby("Comune", as_index=False)[
+        "Ore di assistenza \n ai sensi della delibera\nn. 666/2019"
+    ].apply(lambda x: x[x > 0].count())
+    df3 = df.groupby("Comune", as_index=False)[
+        "Ore contrattualizzate non erogate\nai sensi della delibera\nn. 733/2020"
+    ].apply(lambda x: x[x > 0].count())
+    df4 = df.groupby("Comune", as_index=False)[
+        "Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)"
+    ].apply(lambda x: x[x > 0].count())
+    dfx = pd.merge(df1, df2, on="Comune", how="outer")
+    dfx = pd.merge(dfx, df3, on="Comune", how="outer")
+    dfx = pd.merge(dfx, df4, on="Comune", how="outer")
 
-    dfx.columns = ["Comune", "Nr. bimbi ore 543", "Nr. bimbi ore 666", "Nr. bimbi ore 733", "Nr. bimbi finanziamento compensativo"]
+    dfx.columns = [
+        "Comune",
+        "Nr. bimbi ore 543",
+        "Nr. bimbi ore 666",
+        "Nr. bimbi ore 733",
+        "Nr. bimbi finanziamento compensativo",
+    ]
 
     expndr = st.expander("Tabella conteggio bimbi per comune e tipologia ore")
     with expndr:
@@ -153,14 +168,11 @@ def errCalcoloNumeroBimbi(df):
             "soloerrori",
         )
 
-    return df         
-
-
-
+    return df
 
 
 def errCalcoloSomme(df):
-    df_somme = df.groupby("Comune",as_index=False).sum()
+    df_somme = df.groupby("Comune", as_index=False).sum()
     if not df_somme.empty:
         expndr = st.expander("Tabella con somme ore per comune")
         with expndr:
@@ -175,7 +187,8 @@ def errCalcoloSomme(df):
 
         return df
     else:
-        return df          
+        return df
+
 
 def errSommaOre(df):
     df_somme = df.groupby("Ente", as_index=False).sum()
@@ -1087,7 +1100,8 @@ def errSuperatoOreMassime1920(df):
 
 def errBambinoInPiuComuni(df):
     condizionlogica1 = df.groupby("Codice fiscale")["Comune"].transform("nunique") > 1
-    condizione_logica = condizionlogica1  # & NO_ZERO - tolto qui perché nella tabella dei bimbi in più comuni li vogliamo vedere
+    # & NO_ZERO - tolto qui perché nella tabella dei bimbi in più comuni li vogliamo vedere
+    condizione_logica = condizionlogica1
     if not df[condizione_logica].empty:
 
         expndr = st.expander(
@@ -1317,7 +1331,7 @@ def errMassimoFC(df):
     return df
 
 
-##################### FINE CHECKS
+# FINE CHECKS
 ##################################
 
 
@@ -1628,7 +1642,9 @@ def genera_report(df):
         if nrerr > 0:
             worksheet.write(row, col, f"{ERRORDICT[e]}", bold)
             row += 2
-            df_bimbi = df_bambini.sort_values(by="Cognome e nome bambino", ascending=True)#, inplace=True)
+            df_bimbi = df_bambini.sort_values(
+                by="Cognome e nome bambino", ascending=True
+            )  # , inplace=True)
             for i, r in df_bimbi.iterrows():
                 n = r["Cognome e nome bambino"]
                 c = r["Codice fiscale"]
@@ -1642,9 +1658,9 @@ def genera_report(df):
             row += 1
     workbook.close()
 
-    ddff = pd.read_excel("riassuntoAutomatico.xlsx",index_col = False)
-    ddff.reset_index(drop=True, inplace = True)
-    file = ddff.to_csv(sep=';').encode("utf-8-sig")
+    ddff = pd.read_excel("riassuntoAutomatico.xlsx", index_col=False)
+    ddff.reset_index(drop=True, inplace=True)
+    file = ddff.to_csv(sep=";").encode("utf-8-sig")
     st.download_button(
         label="Scarica riassunto",
         data=file,
