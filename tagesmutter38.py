@@ -144,7 +144,7 @@ def errCalcoloNumeroBimbi(df):
     df4 = df.groupby("Comune", as_index=False)[
         "Ore contrattualizzate non erogate\nnella fase 2 (finanziamento compensativo)"
     ].apply(lambda x: x[x > 0].count())
-    dfx = pd.merge(df1, df2, on="Comune", how="outer")
+    dfx = pd.merge(df1, df2, on="Comune", how="outer") # outer join
     dfx = pd.merge(dfx, df3, on="Comune", how="outer")
     dfx = pd.merge(dfx, df4, on="Comune", how="outer")
 
