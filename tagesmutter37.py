@@ -1378,7 +1378,7 @@ def choose_checks2():
     a = 1
     # creiamo le checkbox e i valori dinamicamente in base al dictionary che contiene
     # la lista degli errori
-    expndr = st.expander("SCELTA CONTROLLI", expanded=True)
+    expndr = st.expander("SELEZIONE CONTROLLI DA ESEGUIRE", expanded=True)
     c1, c2, c3, c4 = expndr.columns(4)
     with expndr:
         st.write("")
