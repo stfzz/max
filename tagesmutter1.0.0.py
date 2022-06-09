@@ -1824,5 +1824,6 @@ def app():
         # except:
         #    st.error("Errore durante generazione automatica report")
 
+        #st.balloons()
 
 app()
