@@ -1384,7 +1384,7 @@ def errMassimoFC(df):
     df["massimofc"] = df["massimofc"].astype(int)
 
     if not df[
-        (cond1 & cond1b & cond1c & NO_ZERO) | (cond1 & cond1 & cond1d & NO_ZERO)
+        (cond1 & cond1b & cond1c & NO_ZERO) | (cond1 & cond1b & cond1d & NO_ZERO)
     ].empty:
         expndr = st.expander("Calcolata colonna massimo FC")
         with expndr:
@@ -1392,14 +1392,14 @@ def errMassimoFC(df):
             make_grid(
                 df[
                     (cond1 & cond1b & cond1c & NO_ZERO)
-                    | (cond1 & cond1 & cond1d & NO_ZERO)
+                    | (cond1 & cond1b & cond1d & NO_ZERO)
                 ].sort_values(by=["Cognome e nome bambino"])
             )
             # non settiamo il flag bool perché non ci serve
             x = dwnld(
                 df[
                     (cond1 & cond1b & cond1c & NO_ZERO)
-                    | (cond1 & cond1 & cond1d & NO_ZERO)
+                    | (cond1 & cond1b & cond1d & NO_ZERO)
                 ].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con bambini con valore massimo FC calcolato",
                 "errMassimoFC",
