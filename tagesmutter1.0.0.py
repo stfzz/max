@@ -13,7 +13,7 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 from this import d
 
 st.set_page_config(
-    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="😃"  # 👽
+    page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="🤗"  # 👽
 )
 
 DATAINIZIOMINIMA = pd.to_datetime("18.05.2020", format="%d.%m.%Y")
@@ -1331,7 +1331,7 @@ def errMassimoFC(df):
     cond1 = df[
         "Data inizio contratto (o data inizio assistenza se diversa)"
     ] <= pd.to_datetime("05.03.2020", format="%d.%m.%Y")
-    
+
     cond1b = df[
         "Data fine contratto\n(o data fine assistenza se diversa) *"
     ] > pd.to_datetime("18.05.2020", format="%d.%m.%Y")
@@ -1345,15 +1345,30 @@ def errMassimoFC(df):
     ] > pd.to_datetime("31.08.2020", format="%d.%m.%Y")
 
     if not df[cond1 & cond1b & cond1c & NO_ZERO].empty:
-        df.loc[cond1 & cond1b & cond1c & NO_ZERO, "fc"] =  (df.loc[cond1 & cond1b & cond1c & NO_ZERO, "Data fine contratto\n(o data fine assistenza se diversa) *"] - df.loc[cond1 & cond1b & cond1c & NO_ZERO, "Data inizio contratto (o data inizio assistenza se diversa)"]).dt.days + 1
+        df.loc[cond1 & cond1b & cond1c & NO_ZERO, "fc"] = (
+            df.loc[
+                cond1 & cond1b & cond1c & NO_ZERO,
+                "Data fine contratto\n(o data fine assistenza se diversa) *",
+            ]
+            - df.loc[
+                cond1 & cond1b & cond1c & NO_ZERO,
+                "Data inizio contratto (o data inizio assistenza se diversa)",
+            ]
+        ).dt.days + 1
 
-    if not df[cond1 & cond1 & cond1d & NO_ZERO].empty:
-        df.loc[cond1 & cond1b & cond1d & NO_ZERO, "fc"] =  (pd.to_datetime("31.08.2020", format="%d.%m.%Y") - df.loc[cond1 & cond1b & cond1d & NO_ZERO, "Data inizio contratto (o data inizio assistenza se diversa)"]).dt.days + 1
+    if not df[cond1 & cond1b & cond1d & NO_ZERO].empty:
+        df.loc[cond1 & cond1b & cond1d & NO_ZERO, "fc"] = (
+            pd.to_datetime("31.08.2020", format="%d.%m.%Y")
+            - df.loc[
+                cond1 & cond1b & cond1d & NO_ZERO,
+                "Data inizio contratto (o data inizio assistenza se diversa)",
+            ]
+        ).dt.days + 1
 
     df.insert(16, "massimofc", 0)
 
     df["massimofc"] = (
-        (   
+        (
             (
                 0.055
                 * (
@@ -1368,17 +1383,27 @@ def errMassimoFC(df):
 
     df["massimofc"] = df["massimofc"].astype(int)
 
-    if not df[(cond1 & cond1b & cond1c & NO_ZERO) | (cond1 & cond1 & cond1d & NO_ZERO)].empty:
+    if not df[
+        (cond1 & cond1b & cond1c & NO_ZERO) | (cond1 & cond1 & cond1d & NO_ZERO)
+    ].empty:
         expndr = st.expander("Calcolata colonna massimo FC")
         with expndr:
             st.info("Tabella con valore calcolato massimo FC")
-            make_grid(df[(cond1 & cond1b & cond1c & NO_ZERO) | (cond1 & cond1 & cond1d & NO_ZERO)].sort_values(by=["Cognome e nome bambino"]))
+            make_grid(
+                df[
+                    (cond1 & cond1b & cond1c & NO_ZERO)
+                    | (cond1 & cond1 & cond1d & NO_ZERO)
+                ].sort_values(by=["Cognome e nome bambino"])
+            )
             # non settiamo il flag bool perché non ci serve
             x = dwnld(
-                df[(cond1 & cond1b & cond1c & NO_ZERO) | (cond1 & cond1 & cond1d & NO_ZERO)].sort_values(by=["Cognome e nome bambino"]),
+                df[
+                    (cond1 & cond1b & cond1c & NO_ZERO)
+                    | (cond1 & cond1 & cond1d & NO_ZERO)
+                ].sort_values(by=["Cognome e nome bambino"]),
                 "Scaricare tabella con bambini con valore massimo FC calcolato",
                 "errMassimoFC",
-            )            
+            )
         return df
     else:
         return df
@@ -1435,7 +1460,7 @@ def get_data(uploaded_files, anno_riferimento):
     dfout["gg1"] = 0
     dfout["gg2"] = 0
     dfout["gg3"] = 0
-    dfout["fc"] = 0 #server per calcolo massimo finanziamento compensativo
+    dfout["fc"] = 0  # server per calcolo massimo finanziamento compensativo
 
     return dfout
 
@@ -1824,6 +1849,7 @@ def app():
         # except:
         #    st.error("Errore durante generazione automatica report")
 
-        #st.balloons()
+        # st.balloons()
+
 
 app()
