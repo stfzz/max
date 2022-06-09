@@ -1350,7 +1350,7 @@ def errMassimoFC(df):
     if not df[cond1 & cond1 & cond1d & NO_ZERO].empty:
         df.loc[cond1 & cond1b & cond1d & NO_ZERO, "fc"] =  (pd.to_datetime("31.08.2020", format="%d.%m.%Y") - df.loc[cond1 & cond1b & cond1d & NO_ZERO, "Data inizio contratto (o data inizio assistenza se diversa)"]).dt.days + 1
 
-    df.insert(15, "massimofc", 0)
+    df.insert(16, "massimofc", 0)
 
     df["massimofc"] = (
         (   
