@@ -1,5 +1,4 @@
 # from curses import ERR
-from lib2to3.pgen2.pgen import DFAState
 from os import path
 
 # from unicodedata import name
@@ -41,6 +40,7 @@ KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMIN = pd.to_datetime(
 KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMAX = pd.to_datetime(
     "16.11.2020", format="%d.%m.%Y"
 )
+
 
 
 # riferimento centrale e unico per la gestione dei controlli
