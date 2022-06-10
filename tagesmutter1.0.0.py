@@ -12,6 +12,8 @@ from st_aggrid.grid_options_builder import GridOptionsBuilder
 
 from this import d
 
+from datetime import date
+
 st.set_page_config(
     page_title="Controllo Errori TAGESMÜTTER", layout="wide", page_icon="🤗"  # 👽
 )
@@ -1416,6 +1418,9 @@ def errMassimoFC(df):
 def make_grid(dff):
     # togliamo le colonne bool
     dff = drop_columns(dff)
+    # inseriamo la data di creazione nella prima riga
+    dff = dff.append({"Cognome e nome bambino":"  "}, ignore_index=True ) # riga vuota
+    dff = dff.append({"Comune di residenza assistente domiciliare all'infanzia":"file creato il:","Data inizio contratto (o data inizio assistenza se diversa)":date.today().strftime("%d/%m/%Y")}, ignore_index=True)
     gridOptions = buildGrid(dff)
     AgGrid(dff, gridOptions=gridOptions, enable_enterprise_modules=True)
 
@@ -1752,7 +1757,7 @@ def genera_report(df):
 def app():
 
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori TAGESMÜTTER (v. 1.0.0)")
+    st.subheader("Controllo errori TAGESMÜTTER (v. 1.0.1)")
     dfout = None
 
     # carichiamo qui la tabella dello storico??
