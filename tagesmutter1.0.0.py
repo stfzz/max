@@ -42,7 +42,6 @@ KONTROLLEEINGEWÖHNUNG543NOTBETREUUNG_DATAINIZIOMAX = pd.to_datetime(
 )
 
 
-
 # riferimento centrale e unico per la gestione dei controlli
 ERRORDICT = {
     # gestiamo tutto quello che riguarda i controlli da fare qui
