@@ -1,4 +1,5 @@
 # from curses import ERR
+from lib2to3.pgen2.pgen import DFAState
 from os import path
 
 # from unicodedata import name
