@@ -108,8 +108,10 @@ def prepare_data(df, foglio):
     if foglio == 0:
         df = df.drop(['Unnamed: 6', 'Unnamed: 7'], axis=1)
         df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine"]
-    elif foglio == 1:
+    
+    if foglio == 1:
         df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine","delibera666", "delibera543","delibera733","Entrate"]
+
         #st.dataframe(df)
         # selezioniamo solo le righe che hanno un valore numerico in *Numero progressivo*
         # in questo modo eliminiamo le righe inutili dopo l'ultimo *numero progressivo*
@@ -118,6 +120,8 @@ def prepare_data(df, foglio):
         # teniamo solo record validi
         #df = df[validi]
 
+    #df["DataInizio"] = df["DataInizio"].astype("datetime64[ns]")
+    #df["DataFine"] = df["DataFine"].astype("datetime64[ns]")
 
     microstruttura = df.iloc[1]
     microstruttura = microstruttura[1]
@@ -125,8 +129,9 @@ def prepare_data(df, foglio):
     ente = ente[1]
     df.insert(0, "Microstruttura", microstruttura)
     df.insert(0, "Ente", ente)
-    df = df.drop(labels=range(0, 8), axis=0)
-
+    df = df.drop(labels=range(0, 6), axis=0)
+    validi = df["Cognome"].notna()
+    df = df[validi]
 
 
     return df
