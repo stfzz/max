@@ -45,9 +45,96 @@ ERRORDICT = {
     "errOre543DataFine": "Controllo ore 543 su data fine",
     "errDataInizio2": "Controllo data inizio foglio 1 minore anno riferimento",
     "errOccorrenzeBambinoKitas": "Controllo occorrenze bambino per Kitas",
-    
+
 
 }
+
+
+def get_data(uploaded_files, anno_riferimento):
+    dfout1 = None
+    dfout2 = None
+    st.info("Sono stati caricati " + str(len(uploaded_files)) + " files")
+    status = st.empty()
+    for uploaded_file in uploaded_files:
+        try:
+            status.info("[*] " + uploaded_file.name + " caricato")
+            df1 = pd.read_excel(uploaded_file,0)   #, usecols="A:M")
+            df2 = pd.read_excel(uploaded_file,1)
+        except:
+            st.error(uploaded_file.name + " non è un file Excel")
+            continue
+        
+
+        # lasciamo prepare_data qui?
+        try:
+            status.info(f"[*] {uploaded_file.name} elaborato")
+            df1 = prepare_data(df1,0)
+            df2 = prepare_data(df2,1)
+        except:
+            st.error(
+                f"{uploaded_file.name} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione"
+            )
+            continue
+
+        st.write(df1)
+        st.write(df2)
+
+        # se dfout1 non esiste lo creiamo
+        if dfout1 is None:
+            dfout1 = pd.DataFrame(columns=df1.columns)
+            dfout1 = df1
+        else:
+            # inserire qui il controllo del nome ente, che deve essere lo stesso per i file caricati?
+            dfout1 = pd.concat([dfout1, df1])
+
+        # se dfout2 non esiste lo creiamo
+        if dfout2 is None:
+            dfout2 = pd.DataFrame(columns=df2.columns)
+            dfout2 = df2
+        else:
+            # inserire qui il controllo del nome ente, che deve essere lo stesso per i file caricati?
+            dfout2 = pd.concat([dfout2, df2])
+
+    # ora sono tutti concatenati e possiamo restituire il dataframe
+    if dfout1 is not None and dfout2 is not None:
+        status.success(
+            "[*] Tutti i dati sono stati elaborati -  PER INIZIARE DA CAPO: RICARICARE LA PAGINA"
+        )
+
+    return dfout1, dfout2
+
+def prepare_data(df, foglio):
+    st.write(foglio)
+    if foglio == 0:
+        df = df.drop(['Unnamed: 6', 'Unnamed: 7'], axis=1)
+        df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine"]
+    elif foglio == 1:
+        df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine","delibera666", "delibera543","delibera733","Entrate"]
+        #st.dataframe(df)
+        # selezioniamo solo le righe che hanno un valore numerico in *Numero progressivo*
+        # in questo modo eliminiamo le righe inutili dopo l'ultimo *numero progressivo*
+        #validi = df["Cognome"].notna()
+
+        # teniamo solo record validi
+        #df = df[validi]
+
+
+    microstruttura = df.iloc[1]
+    microstruttura = microstruttura[1]
+    ente = df.iloc[2]
+    ente = ente[1]
+    df.insert(0, "Microstruttura", microstruttura)
+    df.insert(0, "Ente", ente)
+    df = df.drop(labels=range(0, 8), axis=0)
+
+
+
+    return df
+
+
+
+
+
 
 
 def choose_checks2():
@@ -110,7 +197,22 @@ def app():
 
     checks = choose_checks2()
 
+    f = st.form("Auswahl", clear_on_submit=True)
+    flag = 0
 
+    with f:
+        # soluzione un po' assurda, ma vogliamo spostare gli expander fuori dalla form
+        # altrimenti non possiamo usare il button per download
+        submit = f.form_submit_button("Iniziare elaborazione e controllo errori")
+        if submit:
+            if len(uploaded_files) == 0:
+                st.error("Nessun file caricato!")
+            else:
+                flag = 1
+
+    # se button pigiato, allora esegui...
+    if flag == 1:
+        dfout1, dfout2 = get_data(uploaded_files, anno_riferimento)
 
 
 app()
