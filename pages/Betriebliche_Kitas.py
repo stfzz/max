@@ -29,8 +29,8 @@ ERRORDICT = {
     #
     # basta aggiungere qui un nuovo errore e la descrizione
     # e i checkbox etc vengono creati automaticamente
-    "errMicrostruttura":"Controllo compilazione microstruttura",
-    "errGestore":"Controllo compilazione gestore",
+    "errMicrostruttura": "Controllo compilazione microstruttura",
+    "errGestore": "Controllo compilazione gestore",
     "errNome": "Controllo compilazione cognome e nome bambino",
     "errData": "Controllo formato data inizio e fine assistenza",
     "errDataInizioFine": "Controllo data inizio_minore_fine",
@@ -43,10 +43,7 @@ ERRORDICT = {
     "errOre543DataFine": "Controllo ore 543 su data fine",
     "errDataInizio2": "Controllo data inizio foglio 1 minore anno riferimento",
     "errOccorrenzeBambinoKitas": "Controllo occorrenze bambino per Kitas",
-
-
 }
-
 
 
 def app():
@@ -79,15 +76,20 @@ def app():
     if flag == 1:
         dfout1, dfout2 = get_data(uploaded_files)
 
-        #if not dfout1.empty and not dfout2.empty:
+        if not dfout1.empty and not dfout2.empty:
 
-        #    dffinal1, dffinal2 = check_data2(dfout1, dfout2, checks)
+            #dffinal1, dffinal2 = check_data2(dfout1, dfout2, checks)
 
-        st.write(dfout1)
-        st.write(dfout2)
+            st.write(dfout1)
+            st.write(dfout2)
 
 
+#################################
+## INIZIO CHECKS
+#################################
 
+def errMicrostruttura(df):
+    pass
 
 
 
@@ -99,23 +101,28 @@ def get_data(uploaded_files):
     for uploaded_file in uploaded_files:
         try:
             status.info("[*] " + uploaded_file.name + " caricato")
-            df1 = pd.read_excel(uploaded_file,0)   #, usecols="A:F")
-            df2 = pd.read_excel(uploaded_file,1)
-        except:
-            st.error(uploaded_file.name + " non è un file Excel")
+            df1 = pd.read_excel(uploaded_file, 0)  # , usecols="A:F")
+            df2 = pd.read_excel(uploaded_file, 1)
+        except ValueError as errore_Riscontrato:
+            st.error(
+                uploaded_file.name
+                + " non è un file Excel. Errore riscontrato: "
+                + str(errore_Riscontrato)
+            )
             continue
-        
+
         # lasciamo prepare_data qui?
         try:
             status.info(f"[*] {uploaded_file.name} elaborato")
-            df1 = prepare_data(df1,uploaded_file.name, 0)
-            df2 = prepare_data(df2,uploaded_file.name, 1)
-        except:
+            df1 = prepare_data(df1, uploaded_file.name, 0)
+            df2 = prepare_data(df2, uploaded_file.name, 1)
+        except ValueError as errore_Riscontrato:
             st.error(
-                f"{uploaded_file.name} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione"
+                f"{uploaded_file.name} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione. Errore: "
+                + {errore_Riscontrato}
             )
             continue
-        
+
         # se dfout1 non esiste lo creiamo
         if dfout1 is None:
             dfout1 = pd.DataFrame(columns=df1.columns)
@@ -146,15 +153,42 @@ def get_data(uploaded_files):
 
 def prepare_data(df, fn, foglio):
     if foglio == 0:
-        df = df.drop(['Unnamed: 6', 'Unnamed: 7'], axis=1)
-        df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine"]
+        df = df.drop(["Unnamed: 6", "Unnamed: 7"], axis=1)
+        df.columns = [
+            "Cognome",
+            "Nome",
+            "utente",
+            "ComuneProvenienza",
+            "DataInizio",
+            "DataFine",
+        ]
     elif foglio == 1:
-        df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine","delibera666", "delibera543","delibera733","Entrate"]
+        df.columns = [
+            "Cognome",
+            "Nome",
+            "utente",
+            "ComuneProvenienza",
+            "DataInizio",
+            "DataFine",
+            "delibera666",
+            "delibera543",
+            "delibera733",
+            "Entrate",
+        ]
 
     microstruttura = df.iloc[1]
     microstruttura = microstruttura[1]
+    #st.write(f"microstruttura {microstruttura}")
+    res = isinstance(microstruttura, str)
+    if not res:
+        st.error(f"Manca informazione MICROSTRUTTURA nel foglio {foglio} nel file --> {fn}")
     ente = df.iloc[2]
     ente = ente[1]
+    res = isinstance(ente, str)
+    if not res:
+        st.error(f"Manca informazione GESTORE nel foglio {foglio} nel file --> {fn}")
+
+
     df.insert(0, "Microstruttura", microstruttura)
     df.insert(0, "Ente", ente)
     # scriviamo anche il nome del file perché non si sa mai che non possa servire
@@ -162,86 +196,17 @@ def prepare_data(df, fn, foglio):
     df = df.drop(labels=range(0, 6), axis=0)
     validi = df["Cognome"].notna()
     df = df[validi]
-    #st.write(df)
+    # st.write(df)
     df = make_bool_columns(df)
 
-    conditionInizio = pd.to_datetime(df['DataInizio'], errors='coerce').isnull()
-    conditionFine = pd.to_datetime(df['DataFine'], errors='coerce').isnull()
+    conditionInizio = pd.to_datetime(df["DataInizio"], errors="coerce").isnull()
+    conditionFine = pd.to_datetime(df["DataFine"], errors="coerce").isnull()
     condition = conditionInizio | conditionFine
 
     if not df[condition].empty:
-        expndr = st.expander(f"Trovati {len(df[condition])} errori formato data in foglio 0")
-        with expndr:
-            st.info("Errori nel formato della data inizio o data fine")
-            make_grid(df[condition].sort_values(by=["Cognome"]))
-            # settiamo la colonna bool
-            df.loc[condition, "errData"] = True
-
-    # SOLUZIONE TEMPORANEA (?)
-    # se restituiamo con la data invalida crea problemi in seguito
-    df = df[~condition]
-    
-    return df
-
-
-def prepare_data1(df, fn):
-    df = df.drop(['Unnamed: 6', 'Unnamed: 7'], axis=1)
-    df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine"]
- 
-    microstruttura = df.iloc[1]
-    microstruttura = microstruttura[1]
-    ente = df.iloc[2]
-    ente = ente[1]
-    df.insert(0, "Microstruttura", microstruttura)
-    df.insert(0, "Ente", ente)
-    # scriviamo anche il nome del file perché non si sa mai che non possa servire
-    df.insert(0, "filename", fn)
-    df = df.drop(labels=range(0, 6), axis=0)
-    validi = df["Cognome"].notna()
-    df = df[validi]
-    #st.write(df)
-    df = make_bool_columns(df)
-
-    conditionInizio = pd.to_datetime(df['DataInizio'], errors='coerce').isnull()
-    conditionFine = pd.to_datetime(df['DataFine'], errors='coerce').isnull()
-    
-    condition = conditionInizio | conditionFine
-
-    if not df[condition].empty:
-        expndr = st.expander(f"Trovati {len(df[condition])} errori formato data in foglio 0")
-        with expndr:
-            st.info("Errori nel formato della data inizio o data fine")
-            make_grid(df[condition].sort_values(by=["Cognome"]))
-            # settiamo la colonna bool
-            df.loc[condition, "errData"] = True
-
-    # SOLUZIONE TEMPORANEA (?)
-    # se restituiamo con la data invalida crea problemi in seguito
-    df = df[~condition]
-    return df
-
-
-def prepare_data2(df, fn):
-
-    df.columns = ["Cognome", "Nome", "utente", "ComuneProvenienza", "DataInizio","DataFine","delibera666", "delibera543","delibera733","Entrate"]
-    microstruttura = df.iloc[1]
-    microstruttura = microstruttura[1]
-    ente = df.iloc[2]
-    ente = ente[1]
-    df.insert(0, "Microstruttura", microstruttura)
-    df.insert(0, "Ente", ente)
-    # scriviamo anche il nome del file perché non si sa mai che non possa servire
-    df.insert(0, "filename", fn)
-    df = df.drop(labels=range(0, 6), axis=0)
-    validi = df["Cognome"].notna()
-    df = df[validi]
-    df = make_bool_columns(df)
-
-    conditionInizio = pd.to_datetime(df['DataInizio'], errors='coerce').isnull()
-    conditionFine = pd.to_datetime(df['DataFine'], errors='coerce').isnull()
-    condition = conditionInizio | conditionFine
-    if not df[condition].empty:
-        expndr = st.expander(f"Trovati {len(df[condition])} errori formato data in foglio 1")
+        expndr = st.expander(
+            f"Trovati {len(df[condition])} errori formato data in foglio {foglio}"
+        )
         with expndr:
             st.info("Errori nel formato della data inizio o data fine")
             make_grid(df[condition].sort_values(by=["Cognome"]))
@@ -253,11 +218,6 @@ def prepare_data2(df, fn):
     df = df[~condition]
 
     return df
-
-
-
-
-
 
 
 def choose_checks2():
@@ -287,11 +247,12 @@ def choose_checks2():
 
     return checks
 
+
 def check_data2(df, checks):
     # definiamo come variabile globale la condizione logica per evitare i record con
     # ore rendicontate 2020 = 0
-    #global NO_ZERO
-    #NO_ZERO = df["Ore totali rendicontate per il 2020"] > 0
+    # global NO_ZERO
+    # NO_ZERO = df["Ore totali rendicontate per il 2020"] > 0
     for e in checks.keys():
         # per ogni errore vediamo se è stato scelto come checkbox
         # se è true, eseguiamo...
@@ -324,9 +285,10 @@ def buildGrid(data):
     gridOptions = gb.build()
     return gridOptions
 
+
+def make_bool_columns(df):
 # aggiungiamo le colonne bool per ogni errore che abbiamo definito in ERRORDICT
 # ci serve per creare la tabella finale e per avere uno storico
-def make_bool_columns(df):
     for e in ERRORDICT.keys():
         df[e] = np.nan
         df[e] = df[e].astype("boolean")
@@ -339,5 +301,6 @@ def drop_columns(df):
     for k in ERRORDICT:
         df = df.drop([k], axis=1)
     return df
+
 
 app()
