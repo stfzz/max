@@ -1,3 +1,5 @@
+from ast import Global
+from calendar import c
 from os import path
 
 # from unicodedata import name
@@ -29,21 +31,37 @@ ERRORDICT = {
     #
     # basta aggiungere qui un nuovo errore e la descrizione
     # e i checkbox etc vengono creati automaticamente
-    "errMicrostruttura": "Controllo compilazione microstruttura",
-    "errGestore": "Controllo compilazione gestore",
+    #
+    # distinguiamo tra errori nei file (errData*) ed errori logici (err*)
+    #
+    # "dataErrMicrostruttura": "Controllo compilazione microstruttura",
+    # "dataErrGestore": "Controllo compilazione gestore",
     "errNome": "Controllo compilazione cognome e nome bambino",
-    "errData": "Controllo formato data inizio e fine assistenza",
+    # "dataErrData": "Controllo formato data inizio e fine assistenza",
+    "errTipoKitas": "Controllo tipologia Kitas",
     "errDataInizioFine": "Controllo data inizio_minore_fine",
-    "errOccorrenzeBambino": "Controllo occorrenze bambino",
-    "errComuneProvenienza": "Controllo comune provenienza del bambino",
-    "errCompilazione666": "Controllo compilazione ore 666",
-    "errCompilazione543": "Controllo compilazione ore 543",
+    "errInizioAnnoRiferimento": "Controllo data inizio per anno riferimento",
+    "errFineAnnoRiferimento": "Controllo data fine per anno riferimento",
+    # "errOccorrenzeBambino": "Controllo occorrenze bambino",
+    # "errComuneProvenienza": "Controllo comune provenienza del bambino",
+    # "errCompilazione666": "Controllo compilazione ore 666",
+    # "errCompilazione543": "Controllo compilazione ore 543",
     "errOre666": "Controllo ore 666 maggiore di zero",
     "errOre543DataInizio": "Controllo ore 543 su data inizio",
     "errOre543DataFine": "Controllo ore 543 su data fine",
-    "errDataInizio2": "Controllo data inizio foglio 1 minore anno riferimento",
-    "errOccorrenzeBambinoKitas": "Controllo occorrenze bambino per Kitas",
+    # "errDataInizio2": "Controllo data inizio foglio 1 minore anno riferimento",
+    # "errOccorrenzeBambinoKitas": "Controllo occorrenze bambino per Kitas",
 }
+
+COSTANTI = {}
+costanti_2020 = {
+    "datainiziomin": "01.01.2017",
+    "datainiziomax": "31.12.2020",
+    "datafine": "31.12.2023",
+    "datainizio543": "23.11.2020",
+    "datafine543": "24.02.2020",
+}
+COSTANTI = {"2020": costanti_2020}
 
 
 def app():
@@ -54,8 +72,8 @@ def app():
     uploaded_files = st.file_uploader(
         "SCEGLIERE FILE EXCEL DA CONTROLLARE", accept_multiple_files=True
     )
-
-    anno_riferimento = st.selectbox("ANNO RIFERIMENTO", ("2020", "2021", "2022"))
+    global ANNO_RIFERIMENTO
+    ANNO_RIFERIMENTO = st.selectbox("ANNO RIFERIMENTO", ("2020", "2021", "2022"))
 
     checks = choose_checks2()
 
@@ -74,28 +92,217 @@ def app():
 
     # se button pigiato, allora esegui...
     if flag == 1:
-        dfout1, dfout2 = get_data(uploaded_files)
-
-        if not dfout1.empty and not dfout2.empty:
-
-            #dffinal1, dffinal2 = check_data2(dfout1, dfout2, checks)
-
-            st.write(dfout1)
-            st.write(dfout2)
+        dfout = get_data(uploaded_files)
+        # dfout1, dfout2 = get_data(uploaded_files)
+        # if not dfout['sheet0'].empty and not dfout['sheet1'].empty:
+        dffinal = check_data2(dfout, checks)
+        st.write("final 1")
+        st.write(dffinal["sheet0"])
+        st.write("final 2")
+        st.write(dffinal["sheet1"])
 
 
 #################################
 ## INIZIO CHECKS
 #################################
 
-def errMicrostruttura(df):
-    pass
+
+def errTipoKitas(df):
+    for a in (0, 1):
+        sheet = "sheet" + str(a)
+        condizione1 = df[sheet]["utente"] != "comunale"
+        condizione2 = df[sheet]["utente"] != "aziendale"
+        condizione = condizione1 & condizione2
+        if not df[sheet][condizione].empty:
+            expndr = st.expander(
+                f"Trovati errori nella descrizione tipo Kitas nel sheet {a}"
+            )
+            with expndr:
+                st.info("Errori riscontrati nella descrizione della tipologia Kitas")
+                make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
+
+                # settiamo flag bool
+                df[sheet].loc[condizione, "errTipoKitas"] = True
+                # x = dwnld(
+                #    df[condizione].sort_values(by=["Cognome"]),
+                #    "Scaricare tabella con errori tipologia Kitas",
+                #    "errTipoKitas",
+                # )
+    return df
+
+
+def errDataInizioFine(df):
+    for a in (0, 1):
+        sheet = "sheet" + str(a)
+        condizione = df[sheet]["DataInizio"] > df[sheet]["DataFine"]
+        if not df[sheet][condizione].empty:
+            expndr = st.expander(
+                f"Trovati errori data inizio maggiore di data fine nel sheet {a}"
+            )
+            with expndr:
+                st.info("Errori riscontrati; data inizio_maggiore data_fine")
+                make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
+                # settiamo flag bool
+                df[sheet].loc[condizione, "errDataInizioFine"] = True
+                # x = dwnld(
+                #    df[condizione].sort_values(by=["Cognome"]),
+                #    "Scaricare tabella con errori data inizio maggiore di data fine",
+                #    "errDataInizioFine",
+                # )
+    return df
+
+
+def errNome(df):
+    for a in (0, 1):
+        sheet = "sheet" + str(a)
+        condizione1 = pd.isnull(df[sheet]["Nome"])
+        condizione2 = pd.isnull(df[sheet]["Cognome"])
+        condizione = condizione1 | condizione2
+        if not df[sheet][condizione].empty:
+            expndr = st.expander(
+                f"Trovati valori nulli per cognome o nome o entrambi nel sheet {a}"
+            )
+            with expndr:
+                st.info("Tabella con cognome o nome o entrambi assenti")
+                make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
+                # settiamo flag bool
+                df[sheet].loc[condizione, "errNome"] = True
+                # x = dwnld(
+                #    df[condizione].sort_values(by=["Cognome"]),
+                #    "Scaricare tabella con errori data inizio maggiore di data fine",
+                #    "errNome",
+                #
+    return df
+
+
+def errInizioAnnoRiferimento(df):
+    for a in (0, 1):
+        sheet = "sheet" + str(a)
+        condizione1 = df[sheet]["DataInizio"] > pd.to_datetime(
+            COSTANTI[ANNO_RIFERIMENTO]["datainiziomin"], format="%d.%m.%Y"
+        )
+        condizione2 = df[sheet]["DataInizio"] < pd.to_datetime(
+            COSTANTI[ANNO_RIFERIMENTO]["datainiziomax"], format="%d.%m.%Y"
+        )
+        condizione = condizione1 & condizione2
+        # invertiamo la condizione
+        if not df[sheet][~condizione].empty:
+            expndr = st.expander(
+                f"Trovati errori per data inizio in riferimento ad anno di riferimento {ANNO_RIFERIMENTO}"
+            )
+            with expndr:
+                st.info(
+                    "Tabella con errori riscontrati per data inizio in riferimento ad anno di riferimento"
+                )
+                make_grid(df[sheet][~condizione].sort_values(by=["Cognome"]))
+                # settiamo flag bool
+                df[sheet].loc[~condizione, "errInizioAnnoRiferimento"] = True
+                # x = dwnld(
+                #    df[sheet][~condizione].sort_values(by=["Cognome"]),
+                #    "Scaricare tabella con errori data inizio maggiore di data fine",
+                #    "errInizioAnnoRiferimento",
+                #
+    return df
+
+
+def errFineAnnoRiferimento(df):
+    for a in (0, 1):
+        sheet = "sheet" + str(a)
+        condizione = df[sheet]["DataFine"] < pd.to_datetime(
+            COSTANTI[ANNO_RIFERIMENTO]["datafine"], format="%d.%m.%Y"
+        )
+        # invertiamo la condizione
+        if not df[sheet][~condizione].empty:
+            expndr = st.expander(
+                f"Trovati errori per data fine in riferimento ad anno di riferimento {ANNO_RIFERIMENTO}"
+            )
+            with expndr:
+                st.info(
+                    "Tabella con errori riscontrati per data fine in riferimento ad anno di riferimento"
+                )
+                make_grid(df[sheet][~condizione].sort_values(by=["Cognome"]))
+                # settiamo flag bool
+                df[sheet].loc[~condizione, "errFineAnnoRiferimento"] = True
+                # x = dwnld(
+                #    df[sheet][~condizione].sort_values(by=["Cognome"]),
+                #    "Scaricare tabella con errori data inizio maggiore di data fine",
+                #    "errInizioAnnoRiferimento",
+
+    return df
+
+
+def errOre666(df):
+    sheet = "sheet1"
+    condizione = df[sheet]["delibera666"] > 0
+    if not df[sheet][~condizione].empty:
+        expndr = st.expander(f"Trovati errori per valori in Delibera 666")
+        with expndr:
+            st.info("Tabella con errori riscontrati per delibera 666")
+            make_grid(df[sheet][~condizione].sort_values(by=["Cognome"]))
+            # settiamo flag bool
+            df[sheet].loc[~condizione, "errOre666"] = True
+            # x = dwnld(
+            #    df[sheet][~condizione].sort_values(by=["Cognome"]),
+            #    "Scaricare tabella con errori data inizio maggiore di data fine",
+            #    "errOre666",
+
+    return df
+
+
+def errOre543DataInizio(df):
+    sheet = "sheet1"
+    condizione1 = df[sheet]["DataInizio"] > pd.to_datetime(
+        COSTANTI[ANNO_RIFERIMENTO]["datainizio543"], format="%d.%m.%Y"
+    )
+    condizione2 = df[sheet]["delibera543"] > 0
+    condizione = condizione1 & condizione2
+    if not df[sheet][condizione].empty:
+        expndr = st.expander("Trovati errori inserimento post Notbetreuung")
+        with expndr:
+            st.info("Tabella con errori inserimento post Notbetreuung")
+            make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
+            # settiamo flag bool
+            df[sheet].loc[condizione, "errOre543DataInizio"] = True
+            # x = dwnld(
+            #    df[sheet][condizione].sort_values(by=["Cognome"]),
+            #    "Scaricare tabella con errori data inizio maggiore di data fine",
+            #    "errOre543DataInizio",
+
+    return df
+
+
+def errOre543DataFine(df):
+    sheet = "sheet1"
+    condizione1 = df[sheet]["DataFine"] < pd.to_datetime(
+        COSTANTI[ANNO_RIFERIMENTO]["datafine543"], format="%d.%m.%Y"
+    )
+    condizione2 = df[sheet]["delibera543"] > 0
+    condizione = condizione1 & condizione2
+    if not df[sheet][condizione].empty:
+        expndr = st.expander("Trovati errori fine prima di lockdown")
+        with expndr:
+            st.info("Tabella con errori fine prima di lockdown")
+            make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
+            # settiamo flag bool
+            df[sheet].loc[condizione, "errOre543DataFine"] = True
+            # x = dwnld(
+            #    df[sheet][condizione].sort_values(by=["Cognome"]),
+            #    "Scaricare tabella con errori data inizio maggiore di data fine",
+            #    "errOre543DataFine",
+
+    return df   
+
+
+
 
 
 
 def get_data(uploaded_files):
-    dfout1 = None
-    dfout2 = None
+    df = {}
+    dfout = {}
+    dfout["sheet0"] = None
+    dfout["sheet1"] = None
+
     st.info("Sono stati caricati " + str(len(uploaded_files)) + " files")
     status = st.empty()
     for uploaded_file in uploaded_files:
@@ -103,6 +310,8 @@ def get_data(uploaded_files):
             status.info("[*] " + uploaded_file.name + " caricato")
             df1 = pd.read_excel(uploaded_file, 0)  # , usecols="A:F")
             df2 = pd.read_excel(uploaded_file, 1)
+            df["sheet0"] = df1
+            df["sheet1"] = df2
         except ValueError as errore_Riscontrato:
             st.error(
                 uploaded_file.name
@@ -114,109 +323,122 @@ def get_data(uploaded_files):
         # lasciamo prepare_data qui?
         try:
             status.info(f"[*] {uploaded_file.name} elaborato")
-            df1 = prepare_data(df1, uploaded_file.name, 0)
-            df2 = prepare_data(df2, uploaded_file.name, 1)
+            df = prepare_data(df, uploaded_file.name)
         except ValueError as errore_Riscontrato:
             st.error(
-                f"{uploaded_file.name} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione. Errore: "
-                + {errore_Riscontrato}
+                f"{str(uploaded_file.name)} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione. Errore: {str(errore_Riscontrato)}"
             )
             continue
+        # st.write('after prepare')
+        # st.write(df['sheet0'])
+        # st.write(df['sheet1'])
 
-        # se dfout1 non esiste lo creiamo
-        if dfout1 is None:
-            dfout1 = pd.DataFrame(columns=df1.columns)
-            dfout1 = df1.copy()
-            del df1
+        # se dfout non esiste lo creiamo
+        if dfout["sheet0"] is None:
+            dfout["sheet0"] = pd.DataFrame(columns=df["sheet0"].columns)
+            dfout["sheet0"] = df["sheet0"].copy()
+            del df["sheet0"]
         else:
             # inserire qui il controllo del nome ente, che deve essere lo stesso per i file caricati?
-            dfout1 = pd.concat([dfout1, df1])
-            del df1
+            dfout["sheet0"] = pd.concat([dfout["sheet0"], df["sheet0"]])
+            del df["sheet0"]
         # se dfout2 non esiste lo creiamo
-        if dfout2 is None:
-            dfout2 = pd.DataFrame(columns=df2.columns)
-            dfout2 = df2
-            del df2
+        if dfout["sheet1"] is None:
+            dfout["sheet1"] = pd.DataFrame(columns=df["sheet1"].columns)
+            dfout["sheet1"] = df["sheet1"].copy()
+            del df["sheet1"]
         else:
             # inserire qui il controllo del nome ente, che deve essere lo stesso per i file caricati?
-            dfout2 = pd.concat([dfout2, df2])
-            del df2
+            dfout["sheet1"] = pd.concat([dfout["sheet1"], df["sheet1"]])
+            del df["sheet1"]
 
     # ora sono tutti concatenati e possiamo restituire il dataframe
-    if not dfout1.empty and not dfout2.empty:
+
+    if not dfout["sheet0"].empty and not dfout["sheet1"].empty:
         status.success(
             "[*] Tutti i dati sono stati elaborati -  PER INIZIARE DA CAPO: RICARICARE LA PAGINA"
         )
 
-    return dfout1, dfout2
+    return dfout
 
 
-def prepare_data(df, fn, foglio):
-    if foglio == 0:
-        df = df.drop(["Unnamed: 6", "Unnamed: 7"], axis=1)
-        df.columns = [
-            "Cognome",
-            "Nome",
-            "utente",
-            "ComuneProvenienza",
-            "DataInizio",
-            "DataFine",
-        ]
-    elif foglio == 1:
-        df.columns = [
-            "Cognome",
-            "Nome",
-            "utente",
-            "ComuneProvenienza",
-            "DataInizio",
-            "DataFine",
-            "delibera666",
-            "delibera543",
-            "delibera733",
-            "Entrate",
-        ]
+def prepare_data(df, fn):
 
-    microstruttura = df.iloc[1]
-    microstruttura = microstruttura[1]
-    #st.write(f"microstruttura {microstruttura}")
-    res = isinstance(microstruttura, str)
-    if not res:
-        st.error(f"Manca informazione MICROSTRUTTURA nel foglio {foglio} nel file --> {fn}")
-    ente = df.iloc[2]
-    ente = ente[1]
-    res = isinstance(ente, str)
-    if not res:
-        st.error(f"Manca informazione GESTORE nel foglio {foglio} nel file --> {fn}")
+    df["sheet0"] = df["sheet0"].drop(["Unnamed: 6", "Unnamed: 7"], axis=1)
+    df["sheet0"].columns = [
+        "Cognome",
+        "Nome",
+        "utente",
+        "ComuneProvenienza",
+        "DataInizio",
+        "DataFine",
+    ]
 
+    df["sheet1"].columns = [
+        "Cognome",
+        "Nome",
+        "utente",
+        "ComuneProvenienza",
+        "DataInizio",
+        "DataFine",
+        "delibera666",
+        "delibera543",
+        "delibera733",
+        "Entrate",
+    ]
 
-    df.insert(0, "Microstruttura", microstruttura)
-    df.insert(0, "Ente", ente)
-    # scriviamo anche il nome del file perché non si sa mai che non possa servire
-    df.insert(0, "filename", fn)
-    df = df.drop(labels=range(0, 6), axis=0)
-    validi = df["Cognome"].notna()
-    df = df[validi]
-    # st.write(df)
     df = make_bool_columns(df)
 
-    conditionInizio = pd.to_datetime(df["DataInizio"], errors="coerce").isnull()
-    conditionFine = pd.to_datetime(df["DataFine"], errors="coerce").isnull()
-    condition = conditionInizio | conditionFine
+    for a in (0, 1):
+        sheet = "sheet" + str(a)
+        # st.write("working on sheet = "+sheet)
+        microstruttura = df[sheet].iloc[1]
+        microstruttura = microstruttura[1]
+        # st.write(f"microstruttura {microstruttura}")
+        res = isinstance(microstruttura, str)
+        if not res:
+            st.error(
+                f"Manca informazione MICROSTRUTTURA nel foglio {a} nel file --> {fn}"
+            )
+            microstruttura = "assente"
+            # settiamo flag bool
+            df[sheet]["dataErrMicrostruttura"] = True
+        ente = df[sheet].iloc[2]
+        ente = ente[1]
+        res = isinstance(ente, str)
+        if not res:
+            st.error(f"Manca informazione GESTORE nel foglio {a} nel file --> {fn}")
+            ente = "assente"
+            # settiamo flag bool
+            df[sheet]["dataErrGestore"] = True
+        df[sheet].insert(0, "Microstruttura", microstruttura)
+        df[sheet].insert(0, "Ente", ente)
+        # scriviamo anche il nome del file perché non si sa mai che non possa servire
+        df[sheet].insert(0, "filename", fn)
+        df[sheet] = df[sheet].drop(labels=range(0, 6), axis=0)
+        validi = df[sheet]["Cognome"].notna()
+        df[sheet] = df[sheet][validi]
 
-    if not df[condition].empty:
-        expndr = st.expander(
-            f"Trovati {len(df[condition])} errori formato data in foglio {foglio}"
-        )
-        with expndr:
-            st.info("Errori nel formato della data inizio o data fine")
-            make_grid(df[condition].sort_values(by=["Cognome"]))
-            # settiamo la colonna bool
-            df.loc[condition, "errData"] = True
+        conditionInizio = pd.to_datetime(
+            df[sheet]["DataInizio"], errors="coerce"
+        ).isnull()
+        conditionFine = pd.to_datetime(df[sheet]["DataFine"], errors="coerce").isnull()
+        condition = conditionInizio | conditionFine
 
-    # SOLUZIONE TEMPORANEA (?)
-    # se restituiamo con la data invalida crea problemi in seguito
-    df = df[~condition]
+        if not df[sheet][condition].empty:
+            expndr = st.expander(
+                f"Trovati {len(df[sheet][condition])} errori formato data in foglio {a}"
+            )
+            with expndr:
+                st.info("Errori nel formato della data inizio o data fine")
+                make_grid(df[sheet][condition].sort_values(by=["Cognome"]))
+                # settiamo la colonna bool
+                df[sheet].loc[condition, "errData"] = True
 
+        # SOLUZIONE TEMPORANEA (?)
+        # se restituiamo con la data invalida crea problemi in seguito
+        df[sheet] = df[sheet][~condition]
+        # st.write(df[sheet])
     return df
 
 
@@ -268,7 +490,9 @@ def check_data2(df, checks):
 
 
 def make_grid(dff):
+    # st.write("make grid")
     # togliamo le colonne bool
+    # st.write(dff)
     dff = drop_columns(dff)
     gridOptions = buildGrid(dff)
     AgGrid(dff, gridOptions=gridOptions, enable_enterprise_modules=True)
@@ -287,17 +511,19 @@ def buildGrid(data):
 
 
 def make_bool_columns(df):
-# aggiungiamo le colonne bool per ogni errore che abbiamo definito in ERRORDICT
-# ci serve per creare la tabella finale e per avere uno storico
-    for e in ERRORDICT.keys():
-        df[e] = np.nan
-        df[e] = df[e].astype("boolean")
+    # aggiungiamo le colonne bool per ogni errore che abbiamo definito in ERRORDICT
+    # ci serve per creare la tabella finale e per avere uno storico
+    for a in (0, 1):
+        sheet = "sheet" + str(a)
+        for e in ERRORDICT.keys():
+            df[sheet][e] = np.nan
+            df[sheet][e] = df[sheet][e].astype("boolean")
 
     return df
 
 
 def drop_columns(df):
-
+    # st.write(df)
     for k in ERRORDICT:
         df = df.drop([k], axis=1)
     return df
