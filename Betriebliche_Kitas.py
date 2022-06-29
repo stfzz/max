@@ -104,7 +104,7 @@ def app():
             make_grid(dffinal["sheet0"].sort_values(by=["DataInizio"]))
 
         expndr = st.expander("TABELLA RIASSUNTIVA ELENCO UTENTI (SHEET 1)")
-        with expndr:    
+        with expndr:
             st.info("Tabella riassuntiva elenco utenti")
             make_grid(dffinal["sheet1"].sort_values(by=["DataInizio"]))
 
@@ -297,7 +297,7 @@ def errOre543DataFine(df):
             #    "Scaricare tabella con errori data inizio maggiore di data fine",
             #    "errOre543DataFine",
 
-    return df   
+    return df
 
 
 def errComuneProvenienza(df):
@@ -306,9 +306,13 @@ def errComuneProvenienza(df):
     condizione2 = pd.isnull(df[sheet]["ComuneProvenienza"])
     condizione = condizione1 & condizione2
     if not df[sheet][condizione].empty:
-        expndr = st.expander("Trovati errori inserimento comune provenienza per utente comunale")
+        expndr = st.expander(
+            "Trovati errori inserimento comune provenienza per utente comunale"
+        )
         with expndr:
-            st.info("Tabella con valori mancanti per comune di proivenienza per utente comunale")    
+            st.info(
+                "Tabella con valori mancanti per comune di proivenienza per utente comunale"
+            )
             make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
             # settiamo flag bool
             df[sheet].loc[condizione, "errComuneProvenienza"] = True
@@ -317,18 +321,20 @@ def errComuneProvenienza(df):
             #    "Scaricare tabella con errori data inizio maggiore di data fine",
             #    "errComuneProvenienza",
 
-    return df               
+    return df
 
 
 def errCompilazione666(df):
     sheet = "sheet1"
     condizione1 = df[sheet]["utente"] == "comunale"
-    condizione2 =  pd.isnull(df[sheet]["delibera666"])      
+    condizione2 = pd.isnull(df[sheet]["delibera666"])
     condizione = condizione1 & condizione2
     if not df[sheet][condizione].empty:
-        expndr = st.expander("Trovati errori inserimento delibera 666 per utente comunale")
+        expndr = st.expander(
+            "Trovati errori inserimento delibera 666 per utente comunale"
+        )
         with expndr:
-            st.info("Tabella con valori mancanti per delibera 666 per utente comunale")    
+            st.info("Tabella con valori mancanti per delibera 666 per utente comunale")
             make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
             # settiamo flag bool
             df[sheet].loc[condizione, "errCompilazione666"] = True
@@ -337,18 +343,20 @@ def errCompilazione666(df):
             #    "Scaricare tabella con errori data inizio maggiore di data fine",
             #    "errCompilazione666",
 
-    return df 
+    return df
 
 
 def errCompilazione543(df):
     sheet = "sheet1"
     condizione1 = df[sheet]["utente"] == "comunale"
-    condizione2 =  pd.isnull(df[sheet]["delibera543"])      
+    condizione2 = pd.isnull(df[sheet]["delibera543"])
     condizione = condizione1 & condizione2
     if not df[sheet][condizione].empty:
-        expndr = st.expander("Trovati errori inserimento delibera 543 per utente comunale")
+        expndr = st.expander(
+            "Trovati errori inserimento delibera 543 per utente comunale"
+        )
         with expndr:
-            st.info("Tabella con valori mancanti per delibera 543 per utente comunale")    
+            st.info("Tabella con valori mancanti per delibera 543 per utente comunale")
             make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
             # settiamo flag bool
             df[sheet].loc[condizione, "errCompilazione543"] = True
@@ -357,18 +365,18 @@ def errCompilazione543(df):
             #    "Scaricare tabella con errori data inizio maggiore di data fine",
             #    "errCompilazione543",
 
-    return df     
+    return df
 
 
 def errCompilazioneEntrate(df):
     sheet = "sheet1"
     condizione1 = df[sheet]["utente"] == "comunale"
-    condizione2 =  pd.isnull(df[sheet]["Entrate"])      
+    condizione2 = pd.isnull(df[sheet]["Entrate"])
     condizione = condizione1 & condizione2
     if not df[sheet][condizione].empty:
         expndr = st.expander("Trovati errori inserimento entrate per utente comunale")
         with expndr:
-            st.info("Tabella con valori mancanti per entrate per utente comunale")    
+            st.info("Tabella con valori mancanti per entrate per utente comunale")
             make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
             # settiamo flag bool
             df[sheet].loc[condizione, "errCompilazioneEntrate"] = True
@@ -377,17 +385,21 @@ def errCompilazioneEntrate(df):
             #    "Scaricare tabella con errori data inizio maggiore di data fine",
             #    "errCompilazioneEntrate",
 
-    return df      
+    return df
 
 
 def errDataInizioAnnoRiferimento(df):
     sheet = "sheet0"
-    condizione =  df[sheet]["DataInizio"].dt.year >= int(ANNO_RIFERIMENTO)
+    condizione = df[sheet]["DataInizio"].dt.year >= int(ANNO_RIFERIMENTO)
 
     if not df[sheet][condizione].empty:
-        expndr = st.expander(f"Trovati errori anno inizio utenti precedenti (foglio 0) maggiore di anno riferimento {ANNO_RIFERIMENTO}")
+        expndr = st.expander(
+            f"Trovati errori anno inizio utenti precedenti (foglio 0) maggiore di anno riferimento {ANNO_RIFERIMENTO}"
+        )
         with expndr:
-            st.info(f"Tabella con valori erratti per anno inizio utenti precedenti (foglio 0) maggiore di anno riferimento {ANNO_RIFERIMENTO}")    
+            st.info(
+                f"Tabella con valori erratti per anno inizio utenti precedenti (foglio 0) maggiore di anno riferimento {ANNO_RIFERIMENTO}"
+            )
             make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
             # settiamo flag bool
             df[sheet].loc[condizione, "errDataInizioAnnoRiferimento"] = True
@@ -397,18 +409,22 @@ def errDataInizioAnnoRiferimento(df):
 
             #    "errDataInizioAnnoRiferimento",
 
-    return df       
+    return df
 
 
 def errOccorrenzeBambino(df):
     sheet = "sheet0"
-    condizione1 = df[sheet].groupby("Cognome")["DataInizio"].transform("nunique") == 1 
+    condizione1 = df[sheet].groupby("Cognome")["DataInizio"].transform("nunique") == 1
     condizione2 = df[sheet].groupby("Cognome")["Ente"].transform("nunique") > 1
     condizione = condizione1 & condizione2
     if not df[sheet][condizione].empty:
-        expndr= st.expander("Trovati errori occorrenze bambino in diverse strutture per stessa data inizio")
+        expndr = st.expander(
+            "Trovati errori occorrenze bambino in diverse strutture per stessa data inizio"
+        )
         with expndr:
-            st.info("Tabella con errori occorrenze bambino in diverse strutture per stessa data inizio")
+            st.info(
+                "Tabella con errori occorrenze bambino in diverse strutture per stessa data inizio"
+            )
             make_grid(df[sheet][condizione].sort_values(by=["Cognome"]))
             # settiamo flag bool
             df[sheet].loc[condizione, "errOccorrenzeBambino"] = True
@@ -418,8 +434,7 @@ def errOccorrenzeBambino(df):
 
             #    "errOccorrenzeBambino")
 
-    return df              
-
+    return df
 
 
 ################################# FINE CHECKS
