@@ -555,7 +555,7 @@ def prepare_data(df, fn):
 
         if not df[sheet][condition].empty:
             expndr = st.expander(
-                f"Trovati {len(df[sheet][condition])} errori formato data in foglio {a}"
+                f"Trovati {len(df[sheet][condition])} errori formato data in foglio {a} del file --> {fn}"
             )
             with expndr:
                 st.info("Errori nel formato della data inizio o data fine")
@@ -566,6 +566,7 @@ def prepare_data(df, fn):
         # SOLUZIONE TEMPORANEA (?)
         # se restituiamo con la data invalida crea problemi in seguito
         df[sheet] = df[sheet][~condition]
+        # infine definiamo le colonne data come data
         df[sheet]["DataInizio"] = df[sheet]["DataInizio"].astype("datetime64[ns]")
         df[sheet]["DataFine"] = df[sheet]["DataFine"].astype("datetime64[ns]")
         # st.write(df[sheet])
