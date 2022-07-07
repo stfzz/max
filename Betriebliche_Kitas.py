@@ -7,7 +7,8 @@ from os import path
 
 import numpy as np
 import pandas as pd
-import xlsxwriter
+
+# import xlsxwriter
 import streamlit as st
 from st_aggrid import AgGrid
 from st_aggrid.grid_options_builder import GridOptionsBuilder
@@ -455,11 +456,11 @@ def get_data(uploaded_files):
             df2 = pd.read_excel(uploaded_file, 1)
             df["sheet0"] = df1
             df["sheet1"] = df2
-        except ValueError as errore_Riscontrato:
+        except ValueError as errore_riscontrato:
             st.error(
                 uploaded_file.name
                 + " non è un file Excel. Errore riscontrato: "
-                + str(errore_Riscontrato)
+                + str(errore_riscontrato)
             )
             continue
 
@@ -467,14 +468,11 @@ def get_data(uploaded_files):
         try:
             status.info(f"[*] {uploaded_file.name} elaborato")
             df = prepare_data(df, uploaded_file.name)
-        except ValueError as errore_Riscontrato:
+        except ValueError as errore_riscontrato:
             st.error(
-                f"{str(uploaded_file.name)} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione. Errore: {str(errore_Riscontrato)}"
+                f"{str(uploaded_file.name)} --> ERRORE CONTROLLO GENERALE --> Il file non viene usato per l'elaborazione. Errore: {str(errore_riscontrato)}"
             )
             continue
-        # st.write('after prepare')
-        # st.write(df['sheet0'])
-        # st.write(df['sheet1'])
 
         # se dfout non esiste lo creiamo
         if dfout["sheet0"] is None:
