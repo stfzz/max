@@ -69,12 +69,13 @@ COSTANTI = {"2020": costanti_2020}
 
 def app():
     st.header("FAMILIENAGENTUR - AGENZIA PER LA FAMIGLIA")
-    st.subheader("Controllo errori BETRIEBLICHE KITAS (v. 0.0.1)")
+    st.subheader("Controllo errori BETRIEBLICHE KITAS (v. 0.0.2)")
     dfout = None
     # anno_riferimento = 2020
     uploaded_files = st.file_uploader(
         "SCEGLIERE FILE EXCEL DA CONTROLLARE", accept_multiple_files=True
     )
+    
     global ANNO_RIFERIMENTO
     ANNO_RIFERIMENTO = st.selectbox("ANNO RIFERIMENTO", ("2020", "2021", "2022"))
 
@@ -474,7 +475,7 @@ def get_data(uploaded_files):
             )
             continue
 
-        # se dfout non esiste lo creiamo
+        # se dfout-foglio-0 non esiste lo creiamo
         if dfout["sheet0"] is None:
             dfout["sheet0"] = pd.DataFrame(columns=df["sheet0"].columns)
             dfout["sheet0"] = df["sheet0"].copy()
@@ -483,7 +484,7 @@ def get_data(uploaded_files):
             # inserire qui il controllo del nome ente, che deve essere lo stesso per i file caricati?
             dfout["sheet0"] = pd.concat([dfout["sheet0"], df["sheet0"]])
             del df["sheet0"]
-        # se dfout2 non esiste lo creiamo
+        # se dfout-foglio-1 non esiste lo creiamo
         if dfout["sheet1"] is None:
             dfout["sheet1"] = pd.DataFrame(columns=df["sheet1"].columns)
             dfout["sheet1"] = df["sheet1"].copy()
@@ -504,7 +505,7 @@ def get_data(uploaded_files):
 
 
 def prepare_data(df, fn):
-
+    # togliamo le colonne inutili e definiamo nomi colonne
     df["sheet0"] = df["sheet0"].drop(["Unnamed: 6", "Unnamed: 7"], axis=1)
     df["sheet0"].columns = [
         "Cognome",
@@ -528,14 +529,16 @@ def prepare_data(df, fn):
         "Entrate",
     ]
 
+    # aggiungiamo le colonne bool
     df = make_bool_columns(df)
 
     for a in (0, 1):
+        # ciclo da foglio 0 a foglio 1
         sheet = "sheet" + str(a)
-        # st.write("working on sheet = "+sheet)
+        # estrazione nome microstruttura
         microstruttura = df[sheet].iloc[1]
         microstruttura = microstruttura[1]
-        # st.write(f"microstruttura {microstruttura}")
+        # controlliamo che si tratti di una stringa, altrimenti errore
         res = isinstance(microstruttura, str)
         if not res:
             st.error(
@@ -544,28 +547,41 @@ def prepare_data(df, fn):
             microstruttura = "assente"
             # settiamo flag bool
             df[sheet]["dataErrMicrostruttura"] = True
+        # estrazione nome ente
         ente = df[sheet].iloc[2]
         ente = ente[1]
+        # controlliamo che si tratti di una stringa, altrimenti errore
         res = isinstance(ente, str)
         if not res:
             st.error(f"Manca informazione GESTORE nel foglio {a} nel file --> {fn}")
             ente = "assente"
             # settiamo flag bool
             df[sheet]["dataErrGestore"] = True
+
+        # inseriamo microstruttura ed ente nel df per foglio elaborato
         df[sheet].insert(0, "Microstruttura", microstruttura)
         df[sheet].insert(0, "Ente", ente)
+
         # scriviamo anche il nome del file perché non si sa mai che non possa servire
         df[sheet].insert(0, "filename", fn)
+
+        # togliamo le prime 6 righe perché non servono più
         df[sheet] = df[sheet].drop(labels=range(0, 6), axis=0)
+
+        # selezioniamo soltanto record con un valore nel campo cognome
         validi = df[sheet]["Cognome"].notna()
         df[sheet] = df[sheet][validi]
 
+        # i dati possono contenere valori data invalidi
+        # siccome trattiamo i dati in un df e definiamo la colonna come *datetime64*
+        # dobbiamo intercettare le date invalide
         conditionInizio = pd.to_datetime(
             df[sheet]["DataInizio"], errors="coerce"
         ).isnull()
         conditionFine = pd.to_datetime(df[sheet]["DataFine"], errors="coerce").isnull()
         condition = conditionInizio | conditionFine
 
+        # controlliamo se ci sono date invalide in dataFine e dataInizio
         if not df[sheet][condition].empty:
             expndr = st.expander(
                 f"Trovati {len(df[sheet][condition])} errori formato data in foglio {a} del file --> {fn}"
@@ -578,11 +594,14 @@ def prepare_data(df, fn):
 
         # SOLUZIONE TEMPORANEA (?)
         # se restituiamo con la data invalida crea problemi in seguito
+        # quindi visto che abbiamo segnalato l'errore
+        # creiamo il df pulito
         df[sheet] = df[sheet][~condition]
+
         # infine definiamo le colonne data come data
         df[sheet]["DataInizio"] = df[sheet]["DataInizio"].astype("datetime64[ns]")
         df[sheet]["DataFine"] = df[sheet]["DataFine"].astype("datetime64[ns]")
-        # st.write(df[sheet])
+
     return df
 
 
@@ -590,8 +609,8 @@ def choose_checks2():
     checks = {}
     st.write("")
     a = 1
-    # creiamo le checkbox e i valori dinamicamente in base al dictionary che contiene
-    # la lista degli errori
+    # creiamo dinamicamente le checkbox e i valori in base al 
+    # dictionary che contiene la lista degli errori
     expndr = st.expander("SELEZIONE CONTROLLI DA ESEGUIRE", expanded=True)
     c1, c2, c3, c4 = expndr.columns(4)
     with expndr:
@@ -599,33 +618,33 @@ def choose_checks2():
         attivatutti = expndr.checkbox(
             "Selezionare/deselezionare tutti i controlli", value=True
         )
-        for e in ERRORDICT.keys():
+        for chiave_errore in ERRORDICT.items():
             # creiamo i nomi delle variabili in modo dinamico
-            locals()[f"{e}"] = locals()[f"c{a}"].checkbox(
-                ERRORDICT[e], value=attivatutti, key=e
+            # *chiave_errore* è la key che rappresenta l'errore in questione
+            # *a* è il contatore per avere 4 checkboxes per riga
+            locals()[f"{chiave_errore[0]}"] = locals()[f"c{a}"].checkbox(
+                ERRORDICT[chiave_errore[0]], value=attivatutti, key=chiave_errore[0]
             )
             if a == 4:
                 a = 1
             else:
                 a = a + 1
-            # scriviamo nel dict il nome del controllo e il valore bool della checkbox
-            checks[e] = locals()[f"{e}"]
+            # scriviamo nel dict dei controlli il nome del controllo 
+            # e il valore bool della checkbox (selezionato o no)
+            checks[chiave_errore[0]] = locals()[f"{chiave_errore[0]}"]
 
     return checks
 
 
 def check_data2(df, checks):
-    # definiamo come variabile globale la condizione logica per evitare i record con
-    # ore rendicontate 2020 = 0
-    # global NO_ZERO
-    # NO_ZERO = df["Ore totali rendicontate per il 2020"] > 0
-    for e in checks.keys():
-        # per ogni errore vediamo se è stato scelto come checkbox
+    # iteriamo i controlli 
+    for tipo_controllo in checks.keys():
+        # per ogni controllo vediamo se è stato scelto come checkbox
         # se è true, eseguiamo...
-        if checks[e]:
+        if checks[tipo_controllo]:
             # il nome della funzione da chiamare è contenuta nel dict
-            # ed è lo stesso nome dell'errore
-            funzione = globals()[e]
+            # ed è lo stesso nome del tipo controllo
+            funzione = globals()[tipo_controllo]
             # abbiamo creato il nome della funzione da chiamare e salvato in "funzione"
             # in questo modo vengono chiamate tutte le funzioni che hanno la
             # checkbox == True
@@ -634,9 +653,7 @@ def check_data2(df, checks):
 
 
 def make_grid(dff):
-    # st.write("make grid")
     # togliamo le colonne bool
-    # st.write(dff)
     dff = drop_columns(dff)
     gridOptions = buildGrid(dff)
     AgGrid(dff, gridOptions=gridOptions, enable_enterprise_modules=True)
@@ -644,7 +661,6 @@ def make_grid(dff):
 
 def buildGrid(data):
     gb = GridOptionsBuilder.from_dataframe(data)
-    # gb.configure_pagination()
     gb.configure_side_bar()
     gb.configure_selection(selection_mode="multiple", use_checkbox=True)
     gb.configure_default_column(
@@ -655,21 +671,21 @@ def buildGrid(data):
 
 
 def make_bool_columns(df):
-    # aggiungiamo le colonne bool per ogni errore che abbiamo definito in ERRORDICT
+    # aggiungiamo le colonne bool per ogni errore/controllo che abbiamo definito in ERRORDICT
     # ci serve per creare la tabella finale e per avere uno storico
     for a in (0, 1):
         sheet = "sheet" + str(a)
-        for e in ERRORDICT.keys():
-            df[sheet][e] = np.nan
-            df[sheet][e] = df[sheet][e].astype("boolean")
+        for chiave_errore in ERRORDICT.items():
+            df[sheet][chiave_errore[0]] = np.nan
+            df[sheet][chiave_errore[0]] = df[sheet][chiave_errore[0]].astype("boolean")
 
     return df
 
 
 def drop_columns(df):
-    # st.write(df)
-    for k in ERRORDICT:
-        df = df.drop([k], axis=1)
+    # toglie le colonne bool
+    for chiave_errore in ERRORDICT.items():
+        df = df.drop([chiave_errore[0]], axis=1)
     return df
 
 
