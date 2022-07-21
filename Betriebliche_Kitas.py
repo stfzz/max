@@ -63,8 +63,17 @@ costanti_2020 = {
     "datafine": "31.12.2023",
     "datainizio543": "23.11.2020",
     "datafine543": "24.02.2020",
+    "datafineassistenza_foglio1": "01.01.2020",
+    "datafineassistenza_foglio0": "01.01.2020",
+
 }
-COSTANTI = {"2020": costanti_2020}
+
+costanti_2019 = {
+    "datafineassistenza_foglio1": "01.01.2019",
+    "datafineassistenza_foglio0": "01.01.2019",    
+}
+
+COSTANTI = {"2020": costanti_2020, "2019": costanti_2019}
 
 
 def app():
